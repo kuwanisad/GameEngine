@@ -399,3 +399,11 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# ---- 서드파티 라이브러리 (FBX SDK, SDL, GLEW, SOIL 등) ----
+# 용량이 크고, 각자 받아서 채워야 하는 바이너리라 저장소에 커밋하지 않는다.
+External/
+
+# ---- FBX SDK 설치 프로그램 (실행 후 필요한 SDK만 External로 옮길 것) ----
+AutodeskFBX/
+*.exe
