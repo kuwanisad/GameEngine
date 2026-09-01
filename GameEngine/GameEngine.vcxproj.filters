@@ -28,10 +28,33 @@
     <Filter Include="소스 파일\Source\Private\Core">
       <UniqueIdentifier>{c39d6ffe-acc2-47d7-bbcb-6fc0dbf93c69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Private\Debugging">
+      <UniqueIdentifier>{f9b3f137-2646-400b-9b29-7bd76192e7f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Debugging">
+      <UniqueIdentifier>{a3284c2d-577e-404e-931e-46814ac126ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
       <Filter>소스 파일\Source\Private\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Private\Core\Engine.cpp">
+      <Filter>소스 파일\Source\Private\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Debugging\DebugManager.cpp">
+      <Filter>소스 파일\Source\Private\Debugging</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Public\Core\Engine.h">
+      <Filter>소스 파일\Source\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Core\CoreMinimal.h.h">
+      <Filter>소스 파일\Source\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Debugging\DebugManager.h">
+      <Filter>소스 파일\Source\Public\Debugging</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
