@@ -64,6 +64,12 @@
     <Filter Include="소스 파일\Source\Private\Collision">
       <UniqueIdentifier>{f1326a86-b823-4984-bce9-fd344cc95944}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Private\Physics">
+      <UniqueIdentifier>{04bce17d-45c1-41f9-91f2-b31c55a18958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Physics">
+      <UniqueIdentifier>{e72df7c6-de47-4d5c-8898-af36a4c21de5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -98,6 +104,15 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Tick\TickManager.cpp">
       <Filter>소스 파일\Source\Private\Tick</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\AttachmentTransformRules.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\SceneComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Physcis\PhysScene.cpp">
+      <Filter>소스 파일\Source\Private\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,7 +152,7 @@
     <ClInclude Include="Source\Public\Collision\Collision.h">
       <Filter>소스 파일\Source\Public\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Public\Component\UPrimitiveComponent.h">
+    <ClInclude Include="Source\Public\Component\PrimitiveComponent.h">
       <Filter>소스 파일\Source\Public\Component</Filter>
     </ClInclude>
     <ClInclude Include="Source\Public\Component\SceneComponent.h">
@@ -148,6 +163,15 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Tick\TickManager.h">
       <Filter>소스 파일\Source\Public\Tick</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\AttachmentTransformRules.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Physics\PhysScene.h">
+      <Filter>소스 파일\Source\Public\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\ShapeComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

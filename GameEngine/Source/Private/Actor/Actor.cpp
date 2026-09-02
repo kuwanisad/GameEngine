@@ -101,15 +101,15 @@ void AActor::RemoveComponent(UActorComponent* component)
 	}
 }
 
-TArray<Collision*> AActor::GetCollisions() const
+TArray<FCollision*> AActor::GetCollisions() const
 {
-	TArray<Collision*> result;
+	TArray<FCollision*> result;
 
 	for (auto comp : Components)
 	{
 		if (comp->GetComponentType() == EComponentType::Shape)
 		{
-			Collision* c = Cast<UShapeComponent*>->GetCollision();
+			FCollision* c = Cast<UShapeComponent*>->GetCollision();
 			if (c)
 			{
 				result.push_back(c);

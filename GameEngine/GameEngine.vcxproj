@@ -21,12 +21,15 @@
   <ItemGroup>
     <ClCompile Include="Source\Private\Actor\Actor.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
+    <ClCompile Include="Source\Private\Component\AttachmentTransformRules.cpp" />
+    <ClCompile Include="Source\Private\Component\SceneComponent.cpp" />
     <ClCompile Include="Source\Private\Component\UActorComponent.cpp" />
     <ClCompile Include="Source\Private\Core\Engine.cpp" />
     <ClCompile Include="Source\Private\Core\Main.cpp" />
     <ClCompile Include="Source\Private\Core\Math.cpp" />
     <ClCompile Include="Source\Private\Debugging\DebugManager.cpp" />
     <ClCompile Include="Source\Private\Object\Object.cpp" />
+    <ClCompile Include="Source\Private\Physcis\PhysScene.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\TickManager.cpp" />
@@ -36,13 +39,16 @@
     <ClInclude Include="Source\Public\Collision\Collision.h" />
     <ClInclude Include="Source\Public\Component\ActorComponent.h" />
     <ClInclude Include="Source\Public\Component\ComponentType.h" />
+    <ClInclude Include="Source\Public\Component\AttachmentTransformRules.h" />
     <ClInclude Include="Source\Public\Component\SceneComponent.h" />
-    <ClInclude Include="Source\Public\Component\UPrimitiveComponent.h" />
+    <ClInclude Include="Source\Public\Component\ShapeComponent.h" />
+    <ClInclude Include="Source\Public\Component\PrimitiveComponent.h" />
     <ClInclude Include="Source\Public\Core\CoreMinimal.h" />
     <ClInclude Include="Source\Public\Core\Engine.h" />
     <ClInclude Include="Source\Public\Core\Math.h" />
     <ClInclude Include="Source\Public\Debugging\DebugManager.h" />
     <ClInclude Include="Source\Public\Object\Object.h" />
+    <ClInclude Include="Source\Public\Physics\PhysScene.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />

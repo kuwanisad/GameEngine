@@ -3,7 +3,7 @@
 #include "../Tick/ActorTickFunction.h"
 
 class UActorComponent;
-class Collision;
+class FCollision;
 class UPrimitiveComponent;
 class USceneComponent;
 
@@ -42,7 +42,7 @@ public:
 	void AddComponent(UActorComponent* component);
 	void RemoveComponent(UActorComponent* component);
 
-	TArray<Collision*> GetCollisions() const;
+	TArray<FCollision*> GetCollisions() const;
 	std::vector<UPrimitiveComponent*> GetPrimitiveComponents() const;
 
 	FVector3 GetActorForwardVector() const;
