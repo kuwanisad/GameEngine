@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClCompile Include="Source\Private\Actor\Actor.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
+    <ClCompile Include="Source\Private\Component\ShapeComponent.cpp" />
     <ClCompile Include="Source\Private\Component\AttachmentTransformRules.cpp" />
+    <ClCompile Include="Source\Private\Component\PrimitiveComponent.cpp" />
     <ClCompile Include="Source\Private\Component\SceneComponent.cpp" />
-    <ClCompile Include="Source\Private\Component\UActorComponent.cpp" />
+    <ClCompile Include="Source\Private\Component\ActorComponent.cpp" />
     <ClCompile Include="Source\Private\Core\Engine.cpp" />
     <ClCompile Include="Source\Private\Core\Main.cpp" />
     <ClCompile Include="Source\Private\Core\Math.cpp" />
@@ -37,6 +39,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Public\Actor\Actor.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
+    <ClInclude Include="Source\Public\Collision\HitResult.h" />
     <ClInclude Include="Source\Public\Component\ActorComponent.h" />
     <ClInclude Include="Source\Public\Component\ComponentType.h" />
     <ClInclude Include="Source\Public\Component\AttachmentTransformRules.h" />
@@ -48,6 +51,7 @@
     <ClInclude Include="Source\Public\Core\Math.h" />
     <ClInclude Include="Source\Public\Debugging\DebugManager.h" />
     <ClInclude Include="Source\Public\Object\Object.h" />
+    <ClInclude Include="Source\Public\Physics\BodyInstance.h" />
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />

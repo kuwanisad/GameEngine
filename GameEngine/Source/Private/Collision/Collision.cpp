@@ -1,5 +1,11 @@
 #include "../../Public/Collision/Collision.h"
 
+FLineSegment::FLineSegment(const FVector3& _Start, const FVector3 _End) :
+	Start(_Start),
+	End(_End)
+{
+}
+
 FVector3 FLineSegment::PointOnSegment(float t) const
 {
     return Start + (End - Start) * t;
@@ -51,11 +57,7 @@ float FLineSegment::MinDistSq(const FLineSegment& S1, const FLineSegment& S2)
     return MinDistSq(S1, S2, p1, p2);
 }
 
-float FLineSegment::MinDistSq(
-	const FLineSegment& S1,
-	const FLineSegment& S2,
-	FVector3& outPointOnS1,
-	FVector3& outPointOnS2)
+float FLineSegment::MinDistSq(const FLineSegment& S1, const FLineSegment& S2, FVector3& outPointOnS1, FVector3& outPointOnS2)
 {
 	/*
 	두 선분을 다음과 같은 매개변수 방정식으로 표현
@@ -439,7 +441,6 @@ float FLineSegment::MinDistSq(
 
 	return result.LengthSq();
 }
-
 
 FAABB FLineSegment::GetBoundingBox() const
 {
