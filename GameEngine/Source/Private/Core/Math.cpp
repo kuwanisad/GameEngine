@@ -37,7 +37,7 @@ static float m4Ident[4][4] =
 
 const FMatrix4x4 FMatrix4x4::Identity(m4Ident);
 
-const Quaternion Quaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
+const FQuaternion FQuaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
 const FTransform FTransform::Identity;
 
 FVector2 FVector2::Transform(const FVector2& vec, const FMatrix3x3& mat, float w = 1.0f)
@@ -73,7 +73,7 @@ FVector3 FVector3::TransformWithPerspDiv(const FVector3& vec, const FMatrix4x4& 
 	return retVal;
 }
 
-FVector3 FVector3::Transform(const FVector3& v, const Quaternion& q)
+FVector3 FVector3::Transform(const FVector3& v, const FQuaternion& q)
 {
 	//Rodrigues' Formula
 	// v + 2.0*cross(q.xyz, cross(q.xyz,v) + q.w*v);
@@ -198,7 +198,7 @@ void FMatrix4x4::Invert()
 	}
 }
 
-FMatrix4x4 FMatrix4x4::CreateFromQuaternion(const class Quaternion& q)
+FMatrix4x4 FMatrix4x4::TransformQuaternionToMatrix(const class FQuaternion& q)
 {
 	float mat[4][4];
 
@@ -228,16 +228,15 @@ FMatrix4x4 FMatrix4x4::CreateFromQuaternion(const class Quaternion& q)
 FMatrix4x4 FTransform::ToMatrix() const
 {
 	//return: vec * scale * rotation * translation
-	return FMatrix4x4::TransformScaleToMatrix(Scale3D) * FMatrix4x4::CreateFromQuaternion(Rotation) * FMatrix4x4::CreateTranslation(Translation);
+	return FMatrix4x4::TransformScaleToMatrix(Scale3D) * FMatrix4x4::TransformQuaternionToMatrix(Rotation) * FMatrix4x4::TransformTranslationToMatrix(Translation);
 }
 
 FTransform FTransform::Multiply(const FTransform& A, const FTransform& B)
 {
 	FTransform Out;
 	Out.Scale3D = FVector3(A.Scale3D.x * B.Scale3D.x, A.Scale3D.y * B.Scale3D.y, A.Scale3D.z * B.Scale3D.z);
-	Out.Rotation = Quaternion::Concatenate(A.Rotation, B.Rotation);
+	Out.Rotation = FQuaternion::Concatenate(A.Rotation, B.Rotation);
 
-	//vec * Rot * Trans
 	Out.Translation = FVector3::Transform(
 			FVector3(
 				A.Translation.x * B.Scale3D.x,

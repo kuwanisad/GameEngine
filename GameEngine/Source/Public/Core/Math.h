@@ -380,7 +380,7 @@ public:
 
 	static FVector3 TransformWithPerspDiv(const FVector3& vec, const class FMatrix4x4& mat, float w = 1.0f);
 
-	static FVector3 Transform(const FVector3& v, const class Quaternion& q);
+	static FVector3 Transform(const FVector3& v, const class FQuaternion& q);
 
 	static const FVector3 Zero;
 	static const FVector3 One;
@@ -737,9 +737,9 @@ public:
 		return FMatrix4x4(temp);
 	}
 
-	static FMatrix4x4 CreateFromQuaternion(const class Quaternion& q);
+	static FMatrix4x4 TransformQuaternionToMatrix(const class FQuaternion& q);
 
-	static FMatrix4x4 CreateTranslation(const FVector3& trans)
+	static FMatrix4x4 TransformTranslationToMatrix(const FVector3& trans)
 	{
 		float temp[4][4] =
 		{
@@ -807,7 +807,7 @@ u = (u_x, u_y, u_z)
 q = (cos(θ/2), u_x * sin(θ/2), u_y * sin(θ/2), u_z * sin(θ/2))
 q = (w, x, y, z)
 */
-struct Quaternion
+struct FQuaternion
 {
 public:
 	float x;
@@ -815,19 +815,19 @@ public:
 	float z;
 	float w;
 
-	Quaternion()
+	FQuaternion()
 	{
-		*this = Quaternion::Identity;
+		*this = FQuaternion::Identity;
 	}
 
 	// This directly sets the quaternion components --
 	// don't use for axis/angle
-	explicit Quaternion(float inX, float inY, float inZ, float inW)
+	explicit FQuaternion(float inX, float inY, float inZ, float inW)
 	{
 		Set(inX, inY, inZ, inW);
 	}
 
-	explicit Quaternion(const FVector3& axis, float angle)
+	explicit FQuaternion(const FVector3& axis, float angle)
 	{
 		/*
 		axis_norm = axis.normalize();
@@ -875,17 +875,17 @@ public:
 	}
 
 	// Normalize the provided quaternion
-	static Quaternion Normalize(const Quaternion& q)
+	static FQuaternion Normalize(const FQuaternion& q)
 	{
-		Quaternion retVal = q;
+		FQuaternion retVal = q;
 		retVal.Normalize();
 		return retVal;
 	}
 
 	// Linear interpolation
-	static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float f)
+	static FQuaternion Lerp(const FQuaternion& a, const FQuaternion& b, float f)
 	{
-		Quaternion retVal;
+		FQuaternion retVal;
 		retVal.x = Math::Lerp(a.x, b.x, f);
 		retVal.y = Math::Lerp(a.y, b.y, f);
 		retVal.z = Math::Lerp(a.z, b.z, f);
@@ -894,7 +894,7 @@ public:
 		return retVal;
 	}
 
-	static float Dot(const Quaternion& a, const Quaternion& b)
+	static float Dot(const FQuaternion& a, const FQuaternion& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 	}
@@ -904,10 +904,10 @@ public:
     sin((1-f)ω) / sin(ω) × a
 	+ sin(fω) / sin(ω) × b
 	*/
-	static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float f)
+	static FQuaternion Slerp(const FQuaternion& a, const FQuaternion& b, float f)
 	{
 		//Angle between a and b
-		float tempCosAngle = Quaternion::Dot(a, b);
+		float tempCosAngle = FQuaternion::Dot(a, b);
 
 		float cosAngle = tempCosAngle >0 ? tempCosAngle  : -tempCosAngle;
 
@@ -932,7 +932,7 @@ public:
 			scale1 = -scale1;
 		}
 
-		Quaternion retVal;
+		FQuaternion retVal;
 		retVal.x = scale0 * a.x + scale1 * b.x;
 		retVal.y = scale0 * a.y + scale1 * b.y;
 		retVal.z = scale0 * a.z + scale1 * b.z;
@@ -942,9 +942,9 @@ public:
 	}
 
 	/*Quaternion x Quaternion*/
-	static Quaternion Concatenate(const Quaternion& q, const Quaternion& p)
+	static FQuaternion Concatenate(const FQuaternion& q, const FQuaternion& p)
 	{
-		Quaternion retVal;
+		FQuaternion retVal;
 
 		FVector3 qv(q.x, q.y, q.z);
 		FVector3 pv(p.x, p.y, p.z);
@@ -958,25 +958,25 @@ public:
 		return retVal;
 	}
 
-	static const Quaternion Identity;
+	static const FQuaternion Identity;
 };
 
 // UE FTransform
 struct FTransform
 {
 public:
-	Quaternion Rotation;
+	FQuaternion Rotation;
 	FVector3 Translation;
 	FVector3 Scale3D;
 
 	FTransform()
-		: Rotation(Quaternion::Identity)
+		: Rotation(FQuaternion::Identity)
 		, Translation(FVector3::Zero)
 		, Scale3D(FVector3(1.0f, 1.0f, 1.0f))
 	{
 	}
 
-	FTransform(const Quaternion& InRotation, const FVector3& InTranslation, const FVector3& InScale3D = FVector3(1.0f, 1.0f, 1.0f))
+	FTransform(const FQuaternion& InRotation, const FVector3& InTranslation, const FVector3& InScale3D = FVector3(1.0f, 1.0f, 1.0f))
 		: Rotation(InRotation)
 		, Translation(InTranslation)
 		, Scale3D(InScale3D)

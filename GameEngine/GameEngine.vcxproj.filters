@@ -34,6 +34,36 @@
     <Filter Include="소스 파일\Source\Public\Debugging">
       <UniqueIdentifier>{a3284c2d-577e-404e-931e-46814ac126ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Tick">
+      <UniqueIdentifier>{407a875d-8889-438d-8184-48e14e95b76f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Tick">
+      <UniqueIdentifier>{c86717cc-bdc0-4c6f-a2e7-6a01ffe6727f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Actor">
+      <UniqueIdentifier>{cf289d8d-5630-477d-a932-a0607b5263f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Actor">
+      <UniqueIdentifier>{085c3955-7886-491e-92b8-eef789b667d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Object">
+      <UniqueIdentifier>{05ba0ca8-0886-43cf-808e-9c8db163f572}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Object">
+      <UniqueIdentifier>{b05d26b8-a2db-4117-99d3-612abad299f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Component">
+      <UniqueIdentifier>{cdb93544-1bb5-47c9-ad34-ec8cd5ec593b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Component">
+      <UniqueIdentifier>{18426508-52d8-492c-8e4b-978122724dcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Collision">
+      <UniqueIdentifier>{33c3d304-9d42-473c-979b-7717825531c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Collision">
+      <UniqueIdentifier>{f1326a86-b823-4984-bce9-fd344cc95944}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -45,16 +75,79 @@
     <ClCompile Include="Source\Private\Debugging\DebugManager.cpp">
       <Filter>소스 파일\Source\Private\Debugging</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Private\Core\Math.cpp">
+      <Filter>소스 파일\Source\Private\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Tick\ActorTickFunction.cpp">
+      <Filter>소스 파일\Source\Private\Tick</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Actor\Actor.cpp">
+      <Filter>소스 파일\Source\Private\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Object\Object.cpp">
+      <Filter>소스 파일\Source\Private\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp">
+      <Filter>소스 파일\Source\Private\Tick</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Collision\Collision.cpp">
+      <Filter>소스 파일\Source\Private\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\UActorComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Tick\TickManager.cpp">
+      <Filter>소스 파일\Source\Private\Tick</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Public\Core\Engine.h">
       <Filter>소스 파일\Source\Public\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Public\Core\CoreMinimal.h.h">
+    <ClInclude Include="Source\Public\Core\CoreMinimal.h">
       <Filter>소스 파일\Source\Public\Core</Filter>
     </ClInclude>
     <ClInclude Include="Source\Public\Debugging\DebugManager.h">
       <Filter>소스 파일\Source\Public\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Core\Math.h">
+      <Filter>소스 파일\Source\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Tick\TickFunction.h">
+      <Filter>소스 파일\Source\Public\Tick</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Tick\TickGroup.h">
+      <Filter>소스 파일\Source\Public\Tick</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Tick\ActorTickFunction.h">
+      <Filter>소스 파일\Source\Public\Tick</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Actor\Actor.h">
+      <Filter>소스 파일\Source\Public\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Object\Object.h">
+      <Filter>소스 파일\Source\Public\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\ActorComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h">
+      <Filter>소스 파일\Source\Public\Tick</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Collision\Collision.h">
+      <Filter>소스 파일\Source\Public\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\UPrimitiveComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\SceneComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\ComponentType.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Tick\TickManager.h">
+      <Filter>소스 파일\Source\Public\Tick</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
