@@ -469,3 +469,202 @@ FVector3 FLineSegment::GetEnd() const
 {
 	return End;
 }
+
+Plane::Plane(const FVector3& _Normal, float _D) :
+	Normal(_Normal),
+	D(_D)
+{
+}
+
+Plane::Plane(const FVector3& a, const FVector3& b, const FVector3& c)
+{
+	FVector3 ab = b - a;
+	FVector3 ac = c - a;
+	Normal = FVector3::Cross(ab, ac);
+	Normal.Normalize();
+	D = -FVector3::Dot(a, Normal);
+}
+
+float Plane::SignedDist(const FVector3& point) const
+{
+	/*
+	평면 위 점 P, 평면에서 떨진 점 X가 있을 때
+	P = X - tn
+	
+	P는 평면 위에 있으므로
+	n*P + D = 0
+
+	n*(X - tn) + D = 0
+	n*X - t + D = 0 <--n은 노멀
+	t = n*X + D
+	*/
+
+	float dist = FVector3::Dot(GetNormal(), point) + D;
+
+	return dist;
+}
+
+FVector3 Plane::GetNormal() const
+{
+	return Normal;
+}
+
+FSphere::FSphere(const FVector3& _center, float _radius) :
+	Center(_center),
+	Radius(_radius)
+{
+	Type = ECollisionType::Sphere;
+}
+
+bool FSphere::Contains(const FVector3& _point) const
+{
+	float dist = (GetCenter() - _point).LengthSq();
+
+
+	return dist <= Radius * Radius;
+}
+
+FAABB FSphere::GetBoundingBox() const
+{
+	FVector3 r(GetRadius(), GetRadius(), GetRadius());
+	return FAABB(GetCenter() - r, GetCenter() + r);
+}
+
+FVector3 FSphere::GetCenter() const
+{
+	return Center;
+}
+
+FVector3 FSphere::Support(const FVector3& Direction) const
+{
+	FVector3 Tmp_Direction = Direction;
+	Tmp_Direction.Normalize();
+
+	return GetCenter() + Tmp_Direction * GetRadius();
+}
+
+float FSphere::GetRadius() const
+{
+	return Radius;
+}
+
+FAABB::FAABB() :
+	Center(FVector3::Zero),
+	Extent(FVector3::Zero)
+{
+}
+
+FAABB::FAABB(const FVector3& _Min, const FVector3& _Max)
+{
+	Center = (_Min + _Max) * 0.5f;
+	Extent = (_Min - _Max) * 0.5f;
+}
+
+void FAABB::UpdateMinMax(const FVector3& _point)
+{
+	FVector3 min = GetMin();
+	FVector3 max = GetMax();
+
+	min.x = Math::Min(_point.x, min.x);
+	min.y = Math::Min(_point.y, min.y);
+	min.z = Math::Min(_point.z, min.z);
+
+	max.x = Math::Max(_point.x, max.x);
+	max.y = Math::Max(_point.y, max.y);
+	max.z = Math::Max(_point.z, max.z);
+
+	Center = (min + max) * 0.5f;
+	Extent = (max - min) * 0.5f;
+}
+
+void FAABB::Rotate(const FQuaternion& q)
+{
+	FVector3 axisX = FVector3::Transform(FVector3::UnitX, q);
+	FVector3 axisY = FVector3::Transform(FVector3::UnitY, q);
+	FVector3 axisZ = FVector3::Transform(FVector3::UnitZ, q);
+
+	//Extent must not negative.
+	axisX.x = Math::Abs(axisX.x);
+	axisX.y = Math::Abs(axisX.y);
+	axisX.z = Math::Abs(axisX.z);
+
+	axisY.x = Math::Abs(axisY.x);
+	axisY.y = Math::Abs(axisY.y);
+	axisY.z = Math::Abs(axisY.z);
+
+	axisZ.x = Math::Abs(axisZ.x);
+	axisZ.y = Math::Abs(axisZ.y);
+	axisZ.z = Math::Abs(axisZ.z);
+
+	FVector3 newExtent;
+
+	//E' = |R| * E
+	newExtent.x = FVector3::Dot(FVector3(axisX.x, axisY.x, axisZ.x), Extent);
+	newExtent.y = FVector3::Dot(FVector3(axisX.y, axisY.y, axisZ.y), Extent);
+	newExtent.z = FVector3::Dot(FVector3(axisX.z, axisY.z, axisZ.z), Extent);
+
+}
+
+bool FAABB::Contains(const FVector3& _point) const
+{
+	FVector3 diff = _point - Extent;
+
+	return Math::Abs(diff.x) <= Extent.x &&
+		Math::Abs(diff.y) <= Extent.y &&
+		Math::Abs(diff.z) <= Extent.z;
+}
+
+float FAABB::MinDistSq(const FVector3& point) const
+{
+	FVector3 diff = point - Extent;
+
+	//The expansion is equal on both sides of the center.
+	float x = Math::Max(Math::Abs(diff.x - Extent.x), 0.f);
+	float y = Math::Max(Math::Abs(diff.y - Extent.y), 0.f);
+	float z = Math::Max(Math::Abs(diff.z - Extent.z), 0.f);
+
+	return x * x + y * y + z * z;
+}
+
+FVector3 FAABB::GetMin() const
+{
+	return Center - Extent;
+}
+
+FVector3 FAABB::GetMax() const
+{
+	return Center + Extent;
+}
+
+void FAABB::SetMin(const FVector3& Value)
+{
+	FVector3 max = GetMax();
+	Center = (Value + max) * 0.5f;
+	Extent = (max - Value) * 0.5f;
+}
+
+void FAABB::SetMax(const FVector3& Value)
+{
+	FVector3 min = GetMin();
+	Center = (min + Value) * 0.5f;
+	Extent = (Value - min) * 0.5f;
+}
+
+FVector3 FAABB::GetCenter() const
+{
+	return Center;
+}
+
+FVector3 FAABB::GetExtent() const
+{
+	return Extent;
+}
+
+float FAABB::GetSurfaceArea() const
+{
+	//Extent is half
+	FVector3 e = Extent * 2.0f;
+
+	return 2.0f * //Because of hexahedron
+		(e.x * e.y + e.y * e.z + e.z * e.x);
+}
