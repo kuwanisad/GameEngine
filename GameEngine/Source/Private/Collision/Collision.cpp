@@ -668,3 +668,294 @@ float FAABB::GetSurfaceArea() const
 	return 2.0f * //Because of hexahedron
 		(e.x * e.y + e.y * e.z + e.z * e.x);
 }
+
+FCollision::FCollision() :
+	Type(ECollisionType::None)
+{
+}
+
+FCollision::~FCollision()
+{
+}
+
+FCapsule::FCapsule(const FVector3& _Start, const FVector3& _End, float _Radius) :
+	Segment(_Start, _End),
+	Radius(_Radius)
+{
+	Type = ECollisionType::Capsule;
+}
+
+FCapsule::~FCapsule()
+{
+}
+
+FVector3 FCapsule::PointOnSegment(float t)
+{
+	return Segment.PointOnSegment(t);
+}
+
+bool FCapsule::Contains(const FVector3& point)
+{
+	float dist = Segment.MinDistSq(point);
+
+	return dist * dist <= Radius * Radius;
+}
+
+FLineSegment FCapsule::GetSegment() const
+{
+	return Segment;
+}
+
+float FCapsule::GetRadius()
+{
+	return Radius;
+}
+
+FAABB FCapsule::GetBoundingBox() const
+{
+	FVector3 r(Radius, Radius, Radius);
+	FVector3 tmp_start = Segment.GetStart();
+	FVector3 tmp_end = Segment.GetEnd();
+
+	FVector3 min_vec(Math::Min(tmp_start.x, tmp_end.x), Math::Min(tmp_start.y, tmp_end.y), Math::Min(tmp_start.y, tmp_end.y));
+	FVector3 max_vec(Math::Max(tmp_start.x, tmp_end.x), Math::Max(tmp_start.y, tmp_end.y), Math::Max(tmp_start.y, tmp_end.y));
+
+	return FAABB(min_vec - r, max_vec + r);
+}
+
+FVector3 FCapsule::GetCenter() const
+{
+	return Segment.GetCenter();
+}
+
+FVector3 FCapsule::Support(const FVector3& Direction) const
+{
+	FVector3 start = Segment.GetStart();
+	start.Normalize();
+	FVector3 end = Segment.GetEnd();
+	end.Normalize();
+
+	FVector3 offset;
+
+	if (FVector3::Dot(start, Direction) <= FVector3::Dot(end, Direction))
+	{
+		offset = end;
+	}
+	else
+	{
+		offset = start;
+	}
+
+	return offset + Direction * Radius;
+}
+
+FOBB::FOBB(const FVector3& _Center, const FQuaternion& _Rotation, const FVector3& _Extents) :
+	Center(_Center),
+	Rotation(_Rotation),
+	Extents(_Extents)
+{
+	Type == ECollisionType::OBB;
+}
+
+FOBB::~FOBB()
+{
+}
+
+FAABB FOBB::GetBoundingBox() const
+{
+	FVector3 world_axisX = FVector3::Transform(FVector3::UnitX, Rotation);
+	FVector3 world_axisY = FVector3::Transform(FVector3::UnitY, Rotation);
+	FVector3 world_axisZ = FVector3::Transform(FVector3::UnitZ, Rotation);
+
+	world_axisX.x = Math::Abs(world_axisX.x);
+	world_axisX.y = Math::Abs(world_axisX.y);
+	world_axisX.z = Math::Abs(world_axisX.z);
+
+	world_axisY.x = Math::Abs(world_axisY.x);
+	world_axisY.y = Math::Abs(world_axisY.y);
+	world_axisY.z = Math::Abs(world_axisY.z);
+
+	world_axisZ.x = Math::Abs(world_axisZ.x);
+	world_axisZ.y = Math::Abs(world_axisZ.y);
+	world_axisZ.z = Math::Abs(world_axisZ.z);
+
+	//E' = |R| * E
+	FVector3 world_extents;
+	world_extents.x = world_axisX.x * Extents.x + world_axisY.x * Extents.y + world_axisZ.x * Extents.z;
+	world_extents.y = world_axisX.y * Extents.x + world_axisY.y * Extents.y + world_axisZ.y * Extents.z;
+	world_extents.z = world_axisX.z * Extents.x + world_axisY.z * Extents.y + world_axisZ.z * Extents.z;
+
+	return FAABB(Center - world_extents, Center + world_extents);
+}
+
+FVector3 FOBB::GetCenter() const
+{
+	return Center;
+}
+
+FQuaternion FOBB::GetRotation() const
+{
+	return Rotation;
+}
+
+void FOBB::Rotate(const FQuaternion& InRotation)
+{
+	Rotation = FQuaternion::Concatenate(Rotation, InRotation);
+}
+
+FVector3 FOBB::GetExtent() const
+{
+	return Extents;
+}
+
+FVector3 FOBB::Support(const FVector3& Direction) const
+{
+	FVector3 axisX = FVector3::Transform(FVector3::UnitX, Rotation);
+	FVector3 axisY = FVector3::Transform(FVector3::UnitY, Rotation);
+	FVector3 axisZ = FVector3::Transform(FVector3::UnitZ, Rotation);
+
+	FVector3 point = Center;
+	point += axisX * (Extents.x * ((FVector3::Dot(Direction, axisX) >= 0) ? 1.f : -1.f));
+	point += axisY * (Extents.x * ((FVector3::Dot(Direction, axisY) >= 0) ? 1.f : -1.f));
+	point += axisZ * (Extents.x * ((FVector3::Dot(Direction, axisZ) >= 0) ? 1.f : -1.f));
+
+	return point;
+}
+
+void FOBB::SetCenter(const FVector3& InCenter)
+{
+	Center = InCenter;
+}
+
+void FOBB::SetExtent(const FVector3& InExtent)
+{
+	Extents = InExtent;
+}
+
+void FOBB::SetRotation(const FQuaternion& InRotation)
+{
+	Rotation = InRotation;
+}
+
+bool CollisionStatics::Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult)
+{
+	OutResult.BlockingHit = false;
+
+	FVector3 a_min = a.GetMin();
+	FVector3 a_max = a.GetMax();
+
+	FVector3 b_min = b.GetMin();
+	FVector3 b_max = b.GetMax();
+
+	bool isSeparated =
+		a_max.x < b_min.x ||
+		a_max.y < b_min.y ||
+		a_max.z < b_min.z ||
+
+		b_max.x < a_min.x ||
+		b_max.y < a_min.y ||
+		b_max.z < a_min.z;
+
+	if (isSeparated)
+	{
+		return false;
+	}
+
+	FVector3 overlapMin = Math::Max(a_min, b_min);
+	FVector3 overlapMax = Math::Min(a_max, b_max);
+	FVector3 overlap = overlapMax - overlapMin;
+
+	//The 'a' is caller.
+	//'a' has collided with 'b'.
+	FVector3 dir = a.GetCenter() - b.GetCenter();
+
+	float depth = 0;
+
+	OutResult.Normal = FVector3();
+
+	if (overlap.x <= overlap.y && overlap.x <= overlap.z)
+	{
+		OutResult.Normal.x = (dir.x >= 0.f) ? 1.f : -1.f;
+		depth = overlap.x;
+	}
+	else if (overlap.y <= overlap.x && overlap.y <= overlap.z)
+	{
+		OutResult.Normal.y = (dir.y >= 0.f) ? 1.f : -1.f;
+		depth = overlap.y;
+	}
+	else
+	{
+		OutResult.Normal.z = (dir.z >= 0.f) ? 1.f : -1.f;
+		depth = overlap.z;
+	}
+
+	OutResult.ImpactPoint = (overlapMax + overlapMin) * 0.5f;
+	OutResult.PenetrationDepth = depth;
+
+	return true;
+}
+
+bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FLineSegment& l, const FSphere& s, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FLineSegment& l, const Plane& p, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FLineSegment& l, const FAABB& b, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FLineSegment& l, const FCapsule& C, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::Intersect(const FLineSegment& l, const FOBB& O, FHitResult& OutResult)
+{
+	return false;
+}
+
+bool CollisionStatics::TestSidePlane(float start, float end, float d, const FVector3& norm, std::vector<std::pair<float, FVector3>>& out)
+{
+	return false;
+}
