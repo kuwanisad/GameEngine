@@ -120,6 +120,9 @@
     <ClCompile Include="Source\Private\Component\ShapeComponent.cpp">
       <Filter>소스 파일\Source\Private\Component</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Private\Physics\BVH.cpp">
+      <Filter>소스 파일\Source\Private\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Public\Core\Engine.h">
@@ -184,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Collision\HitResult.h">
       <Filter>소스 파일\Source\Public\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Physics\BVH.h">
+      <Filter>소스 파일\Source\Public\Physics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
