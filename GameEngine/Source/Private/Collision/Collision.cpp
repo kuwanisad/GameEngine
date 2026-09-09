@@ -706,7 +706,7 @@ FLineSegment FCapsule::GetSegment() const
 	return Segment;
 }
 
-float FCapsule::GetRadius()
+float FCapsule::GetRadius() const
 {
 	return Radius;
 }
@@ -865,9 +865,7 @@ bool CollisionStatics::Intersect(const FAABB& a, const FAABB& b, FHitResult& Out
 	FVector3 overlapMax = Math::Min(a_max, b_max);
 	FVector3 overlap = overlapMax - overlapMin;
 
-	//The 'a' is caller.
-	//'a' has collided with 'b'.
-	FVector3 dir = a.GetCenter() - b.GetCenter();
+	FVector3 dir = GetNormalDirection(a.GetCenter(), b.GetCenter());
 
 	float depth = 0;
 
@@ -897,17 +895,254 @@ bool CollisionStatics::Intersect(const FAABB& a, const FAABB& b, FHitResult& Out
 
 bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	//SAT(Separating Axis Theorem)
+
+	FVector3 O1_world_axis[3]{
+		FVector3::Transform(FVector3::UnitX, O1.GetRotation()),
+		FVector3::Transform(FVector3::UnitY, O1.GetRotation()),
+		FVector3::Transform(FVector3::UnitZ, O1.GetRotation()),
+	};
+
+	FVector3 O2_world_axis[3]{
+		FVector3::Transform(FVector3::UnitX, O2.GetRotation()),
+		FVector3::Transform(FVector3::UnitY, O2.GetRotation()),
+		FVector3::Transform(FVector3::UnitZ, O2.GetRotation()),
+	};
+
+	FVector3 O1_Extents = O1.GetExtent();
+	FVector3 O2_Extents = O2.GetExtent();
+
+	FVector3 center_diff = GetNormalDirection(O1.GetCenter(), O2.GetCenter());
+
+	float overlap_min = Math::Infinity;
+	FVector3 axis_min = FVector3::Zero;
+
+	auto TestAxis = [&](const FVector3& axis) -> bool
+		{
+			float axis_length = axis.LengthSq();
+
+			if (Math::NearZero(axis_length))
+			{
+				return true;
+			}
+
+			const FVector3 axis_norm = axis / Math::Sqrt(axis_length);
+
+			float O1_radius = O1_Extents[0] * Math::Abs(FVector3::Dot(axis_norm, O1_world_axis[0]))
+							+ O1_Extents[1] * Math::Abs(FVector3::Dot(axis_norm, O1_world_axis[1]))
+							+ O1_Extents[2] * Math::Abs(FVector3::Dot(axis_norm, O1_world_axis[2]));
+
+			float O2_radius = O2_Extents[0] * Math::Abs(FVector3::Dot(axis_norm, O2_world_axis[0]))
+							+ O2_Extents[1] * Math::Abs(FVector3::Dot(axis_norm, O2_world_axis[1]))
+							+ O2_Extents[2] * Math::Abs(FVector3::Dot(axis_norm, O2_world_axis[2]));
+
+			float center_dist = FVector3::Dot(axis_norm, center_diff);
+			float overlap_dist = (O1_radius + O2_radius) - Math::Abs(center_dist);
+
+			if (overlap_dist < 0)
+			{
+				return false;
+			}
+
+			if (overlap_dist < overlap_min)
+			{
+				overlap_min = overlap_dist;
+				axis_min = (center_dist >= 0) ? axis_norm : axis_norm * -1.f;
+			}
+
+			return true;
+		};
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		if (TestAxis(O1_world_axis[i]) == false)
+		{
+			return false;
+		}
+
+		if (TestAxis(O2_world_axis[i]) == false)
+		{
+			return false;
+		}
+	}
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		for (int32 j = 0; j < 3; ++j)
+		{
+			if (TestAxis(FVector3::Cross(O1_world_axis[i], O2_world_axis[j])) == false)
+			{
+				return false;
+			}
+		}
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.Normal = axis_min;
+
+	float O1_radius_last = O1_Extents[0] * Math::Abs(FVector3::Dot(axis_min, O1_world_axis[0]))
+						 + O1_Extents[1] * Math::Abs(FVector3::Dot(axis_min, O1_world_axis[1]))
+						 + O1_Extents[2] * Math::Abs(FVector3::Dot(axis_min, O1_world_axis[2]));
+
+	float O2_radius_last = O2_Extents[0] * Math::Abs(FVector3::Dot(axis_min, O2_world_axis[0]))
+						 + O2_Extents[1] * Math::Abs(FVector3::Dot(axis_min, O2_world_axis[1]))
+						 + O2_Extents[2] * Math::Abs(FVector3::Dot(axis_min, O2_world_axis[2]));
+
+	//second - first
+	FVector3 SurfaceOnO1 = O1.GetCenter() - O1_radius_last * axis_min;
+	FVector3 SurfaceOnO2 = O2.GetCenter() + O2_radius_last * axis_min;
+
+	//This choice was inevitable...
+	//TODO: must use more precise solution.
+	OutResult.ImpactPoint = (SurfaceOnO1 + SurfaceOnO2) * 0.5f;
+
+	OutResult.PenetrationDepth = overlap_min;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FVector3 PointOnA;
+	FVector3 PointOnB;
+	float distSq = FLineSegment::MinDistSq(a.GetSegment(), b.GetSegment(), PointOnA, PointOnB);
+	float radius = a.GetRadius();
+
+	if (radius * radius < distSq)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+
+	float dist = Math::Sqrt(distSq);
+	FVector3 normal_primary = GetNormalDirection(PointOnA, PointOnB);
+	FVector3 normal = Math::NearZero(dist) ? FVector3::Zero : normal_primary / dist;
+
+	OutResult.Normal = normal;
+	OutResult.ImpactPoint = PointOnB - normal * a.GetRadius();
+	OutResult.PenetrationDepth = radius - dist;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	//capsule --> OBB local space;
+	FQuaternion invRot = o.GetRotation();
+	invRot.Conjugate();
+
+	FVector3 o_center = o.GetCenter();
+	FVector3 o_extent = o.GetExtent();
+
+	FLineSegment seg = c.GetSegment();
+
+	/*
+	target * R + translation = p'
+	target * R = p' - translation
+	target = (p' - translation) * R^-1
+	*/
+	FVector3 seg_local_start = FVector3::Transform(seg.GetStart() - o_center, invRot);
+	FVector3 seg_local_end = FVector3::Transform(seg.GetEnd() - o_center, invRot);
+
+	FVector3 seg_direction = seg_local_end - seg_local_start;
+	float seg_direction_lenSq = seg_direction.LengthSq();
+
+	// =========================================================
+	// this commend was aidded by Claude
+	// 
+	// Find the actual closest-point pair (p, q) between the capsule centerline and the box
+	//
+	// Since both the line segment and the box are convex shapes, repeatedly
+	// projecting onto the other shape (alternating projection) is guaranteed
+	// to converge to the true closest-point pair (the pair that minimizes the
+	// global distance). The distance never increases during each iteration.
+	//   - p: current candidate point on the line segment
+	//   - q: point obtained by clamping p to the box surface
+	// =========================================================
+	FVector3 p = seg_local_start; //Start point
+	FVector3 q = FVector3::Zero;
+
+	const int32 IterationCount = 8;
+
+	for (int32 i = 0; i < IterationCount; ++i)
+	{
+		q.x = Math::Clamp(p.x, -o_extent.x, o_extent.x);
+		q.y = Math::Clamp(p.y, -o_extent.y, o_extent.y);
+		q.z = Math::Clamp(p.z, -o_extent.z, o_extent.z);
+
+		if (Math::NearZero(seg_direction_lenSq))
+		{
+			// The capsule degenerates to a sphere.
+			break;
+		}
+
+		/*
+		this p is a point. not local variable p.
+		p, proj
+		(p - proj) * d = 0
+		(p - (a + dt)) * d = 0
+		pd - ad - d^2 * t = 0
+		d^2 * t = pd - ad
+		t = (pd - ad) / d^2
+		*/
+		float t = Math::Clamp(FVector3::Dot(q - seg_local_start, seg_direction) / seg_direction_lenSq, 0.f, 1.f);
+		p = seg_local_start + t * seg_direction;
+	}
+
+
+	FVector3 diff_p_q = GetNormalDirection(p, q);
+	float dist_p_q = diff_p_q.LengthSq();
+
+	float c_radius = c.GetRadius();
+
+	if (dist_p_q > c_radius * c_radius)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = FVector3::Transform(q, o.GetRotation()) + o_center;
+
+	FVector3 normal_local;
+
+
+	//inside
+	if (Math::NearZero(dist_p_q))
+	{
+		FVector3 p_abs(Math::Abs(p.x), Math::Abs(p.y), Math::Abs(p.z));
+		float dx = o_extent.x - p_abs.x;
+		float dy = o_extent.y - p_abs.y;
+		float dz = o_extent.z - p_abs.z;
+
+		if (dx < dy && dx < dz)
+		{
+			normal_local = FVector3(((p.x > 0) ? 1.f : -1.f), 0, 0);
+		}
+		else if (dy < dz)
+		{
+			normal_local = FVector3(0, ((p.y > 0) ? 1.f : -1.f), 0);
+		}
+		else
+		{
+			normal_local = FVector3(0, 0, ((p.z > 0) ? 1.f : -1.f));
+		}
+	}
+	else
+	{
+		normal_local = diff_p_q / Math::Sqrt(dist_p_q);
+	}
+
+	OutResult.Normal = FVector3::Transform(normal_local, o.GetRotation());
+	OutResult.PenetrationDepth = c_radius - Math::Sqrt(dist_p_q);
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult)
@@ -958,4 +1193,10 @@ bool CollisionStatics::Intersect(const FLineSegment& l, const FOBB& O, FHitResul
 bool CollisionStatics::TestSidePlane(float start, float end, float d, const FVector3& norm, std::vector<std::pair<float, FVector3>>& out)
 {
 	return false;
+}
+
+FVector3 CollisionStatics::GetNormalDirection(const FVector3& Caller, const FVector3& Target)
+{
+
+	return Caller - Target;
 }

@@ -128,7 +128,7 @@ public:
 	FVector3 PointOnSegment(float t);
 	bool Contains(const FVector3& point);
 	FLineSegment GetSegment() const;
-	float GetRadius();
+	float GetRadius() const;
 	FAABB GetBoundingBox() const override;
 	FVector3 GetCenter() const override;
 	FVector3 Support(const FVector3& Direction) const override;
@@ -159,6 +159,11 @@ public:
 
 struct CollisionStatics
 {
+	//NOTE!!!
+	//The first parameter is the caller!
+	//Every normal lies on the second parameter's surface and is oriented toward the first parameter!
+	//Do not "normal = second - first", use GetNormalDirection.
+
 	static bool Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult);
 
 	static bool Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult);
@@ -178,4 +183,6 @@ struct CollisionStatics
 	static bool Intersect(const FLineSegment& l, const FOBB& O, FHitResult& OutResult);
 
 	static bool TestSidePlane(float start, float end, float d, const FVector3& norm, std::vector<std::pair<float, FVector3>>& out);
+
+	static FVector3 GetNormalDirection(const FVector3& Caller, const FVector3& Target);
 };
