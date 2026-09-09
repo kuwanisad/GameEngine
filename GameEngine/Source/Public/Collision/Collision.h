@@ -159,6 +159,10 @@ public:
 
 struct CollisionStatics
 {
+private:
+	static const int32 IterationCount;
+
+public:
 	//NOTE!!!
 	//The first parameter is the caller!
 	//Every normal lies on the second parameter's surface and is oriented toward the first parameter!

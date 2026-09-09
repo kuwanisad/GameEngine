@@ -1,5 +1,7 @@
 #include "../../Public/Collision/Collision.h"
 
+const int32 CollisionStatics::IterationCount = 8;
+
 FLineSegment::FLineSegment(const FVector3& _Start, const FVector3 _End) :
 	Start(_Start),
 	End(_End)
@@ -1069,8 +1071,6 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& O
 	FVector3 p = seg_local_start; //Start point
 	FVector3 q = FVector3::Zero;
 
-	const int32 IterationCount = 8;
-
 	for (int32 i = 0; i < IterationCount; ++i)
 	{
 		q.x = Math::Clamp(p.x, -o_extent.x, o_extent.x);
@@ -1147,17 +1147,181 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& O
 
 bool CollisionStatics::Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	//It is equal to FCapsule vs FOBB.
+
+	FVector3 center = box.GetCenter();
+	FVector3 extent = box.GetExtent();
+
+	FLineSegment seg = c.GetSegment();
+
+	FVector3 c_start = seg.GetStart() - center;
+	FVector3 c_end = seg.GetEnd() - center;
+
+	FVector3 direction = c_end - c_start;
+	float directionSq = direction.LengthSq();
+
+	FVector3 p = c_start;
+	FVector3 q = FVector3::Zero;
+
+	for (int32 i = 0; i < IterationCount; ++i)
+	{
+		q.x = Math::Clamp(p.x, -extent.x, extent.x);
+		q.y = Math::Clamp(p.y, -extent.y, extent.y);
+		q.z = Math::Clamp(p.z, -extent.z, extent.z);
+
+		if (Math::NearZero(directionSq))
+		{
+			break;
+		}
+
+		float t = Math::Clamp(FVector3::Dot(q - c_start, direction) / directionSq, 0.f, 1.f);
+		p = c_start + t * direction;
+	}
+
+	FVector3 diff = GetNormalDirection(p, q);
+	float distSq = diff.LengthSq();
+	float c_r = c.GetRadius();
+
+	if (c_r * c_r < distSq)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = q + center;
+
+	FVector3 normal;
+
+	if (Math::NearZero(distSq))
+	{
+		FVector3 p_abs(Math::Abs(p.x), Math::Abs(p.y), Math::Abs(p.z));
+
+		float dx = extent.x - p_abs.x;
+		float dy = extent.y - p_abs.y;
+		float dz = extent.z - p_abs.z;
+
+		if (dx < dy && dx < dz)
+		{
+			normal.x = p.x > 0 ? 1.f : -1.f;
+		}
+		else if (dy < dz)
+		{
+			normal.y = p.y > 0 ? 1.f : -1.f;
+		}
+		else
+		{
+			normal.z = p.z > 0 ? 1.f : -1.f;
+		}
+	}
+	else
+	{
+		normal = diff / Math::Sqrt(distSq);
+	}
+
+	OutResult.Normal = normal;
+	OutResult.PenetrationDepth = c_r - Math::Sqrt(distSq);
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FVector3 box_min = box.GetMin();
+	FVector3 box_max = box.GetMax();
+
+	FVector3 center = s.GetCenter();
+	FVector3 closest;
+
+	float s_r = s.GetRadius();
+
+	closest.x = Math::Clamp(center.x, box_min.x, box_max.x);
+	closest.y = Math::Clamp(center.y, box_min.y, box_max.y);
+	closest.z = Math::Clamp(center.z, box_min.z, box_max.z);
+
+	FVector3 diff = GetNormalDirection(center, closest);
+	float distSq = diff.LengthSq();
+
+	if (distSq > s_r * s_r)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = closest;
+
+	FVector3 normal;
+
+	if (Math::NearZero(distSq))
+	{
+		float surfaceDist[6] = 
+		{
+			center.x - box_min.x, box_max.x - center.x,
+			center.y - box_min.y, box_max.y - center.y,
+			center.z - box_min.z, box_max.z - center.z,
+		};
+		FVector3 surfaceNormal[6] =
+		{
+			FVector3::NegUnitX, FVector3::UnitX,
+			FVector3::NegUnitY, FVector3::UnitY,
+			FVector3::NegUnitZ, FVector3::UnitZ,
+		};
+
+		int32 bestIndex = 0;
+		float minDist = surfaceDist[0];
+
+		for (int32 i = 0; i < 6; ++i)
+		{
+			if (surfaceDist[i] < minDist)
+			{
+				minDist = surfaceDist[i];
+				bestIndex = i;
+			}
+		}
+
+		normal = surfaceNormal[bestIndex];
+	}
+	else
+	{
+		normal = diff / Math::Sqrt(distSq);
+	}
+
+	OutResult.Normal = normal;
+	OutResult.PenetrationDepth = s.GetRadius() - Math::Sqrt(distSq);
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FVector3 a_center = a.GetCenter();
+	FVector3 b_center = b.GetCenter();
+
+	FVector3 diff = GetNormalDirection(a_center, b_center);
+	float distSq = diff.LengthSq();
+	float r = a.GetRadius() + b.GetRadius();
+
+	if (distSq > r * r)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+
+	float dist = Math::Sqrt(distSq);
+	// When the two centers completely overlap, the direction cannot be determined, so an arbitrary axis is used.
+	FVector3 normal = Math::NearZero(dist) ? FVector3::Zero : diff / dist;
+
+	OutResult.Normal = normal;
+	OutResult.ImpactPoint = a_center - normal * b_center;
+	OutResult.PenetrationDepth = r - dist;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult)
