@@ -472,13 +472,13 @@ FVector3 FLineSegment::GetEnd() const
 	return End;
 }
 
-Plane::Plane(const FVector3& _Normal, float _D) :
+FPlane::FPlane(const FVector3& _Normal, float _D) :
 	Normal(_Normal),
 	D(_D)
 {
 }
 
-Plane::Plane(const FVector3& a, const FVector3& b, const FVector3& c)
+FPlane::FPlane(const FVector3& a, const FVector3& b, const FVector3& c)
 {
 	FVector3 ab = b - a;
 	FVector3 ac = c - a;
@@ -487,7 +487,7 @@ Plane::Plane(const FVector3& a, const FVector3& b, const FVector3& c)
 	D = -FVector3::Dot(a, Normal);
 }
 
-float Plane::SignedDist(const FVector3& point) const
+float FPlane::SignedDist(const FVector3& point) const
 {
 	/*
 	평면 위 점 P, 평면에서 떨진 점 X가 있을 때
@@ -506,9 +506,14 @@ float Plane::SignedDist(const FVector3& point) const
 	return dist;
 }
 
-FVector3 Plane::GetNormal() const
+FVector3 FPlane::GetNormal() const
 {
 	return Normal;
+}
+
+float FPlane::GetD() const
+{
+	return D;
 }
 
 FSphere::FSphere(const FVector3& _center, float _radius) :
@@ -1326,17 +1331,199 @@ bool CollisionStatics::Intersect(const FSphere& a, const FSphere& b, FHitResult&
 
 bool CollisionStatics::Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FQuaternion invRot = o.GetRotation();
+	invRot.Conjugate();
+
+	FVector3 s_local_center = FVector3::Transform(s.GetCenter() - o.GetCenter(), invRot);
+	FVector3 o_extent = o.GetExtent();
+
+	float s_radius = s.GetRadius();
+
+	FVector3 closest;
+	closest.x = Math::Clamp(s_local_center.x, -o_extent.x, o_extent.x);
+	closest.y = Math::Clamp(s_local_center.y, -o_extent.y, o_extent.y);
+	closest.z = Math::Clamp(s_local_center.z, -o_extent.z, o_extent.z);
+
+	FVector3 diff = GetNormalDirection(s_local_center, closest);
+	float distSq = diff.LengthSq();
+
+	if (distSq > s_radius * s_radius)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = FVector3::Transform(closest, o.GetRotation()) + o.GetCenter();
+
+	FVector3 local_normal = FVector3::Zero;
+
+	if (Math::NearZero(distSq))
+	{
+		float min_dist = Math::Infinity;
+
+		for (int32 i = 0; i < 3; ++i)
+		{
+			float center_to_max = o_extent[i] - s_local_center[i];
+			float min_to_center = s_local_center[i] - (-o_extent[i]);
+
+			if (center_to_max < min_dist)
+			{
+				min_dist = center_to_max;
+				local_normal = FVector3::Zero;
+				local_normal[i] = 1.f;
+			}
+			if (min_to_center < min_dist)
+			{
+				min_dist = min_to_center;
+				local_normal = FVector3::Zero;
+				local_normal[i] = -1.f;
+			}
+		}
+	}
+	else
+	{
+		FVector3 diff_abs = FVector3(Math::Abs(diff.x), Math::Abs(diff.y), Math::Abs(diff.z));
+
+		int32 normal_index = 0;
+
+		if (diff_abs.x > diff_abs.y && diff_abs.x > diff_abs.z)
+		{
+			normal_index = 0;
+		}
+		else if (diff_abs.y > diff_abs.z)
+		{
+			normal_index = 1;
+		}
+		else
+		{
+			normal_index = 2;
+		}
+
+		local_normal[normal_index] = diff[normal_index] > 0 ? 1.f : -1.f;
+	}
+
+	OutResult.Normal = FVector3::Transform(local_normal, o.GetRotation());
+	OutResult.PenetrationDepth = s.GetRadius() - Math::Sqrt(distSq);
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FLineSegment& l, const FSphere& s, FHitResult& OutResult)
 {
-	return false;
+	/*
+	segment
+	P(t) = start + (end - start)t
+
+	sphere
+	|P - center|^2 = r^2
+
+	|start + (end - start)t - center|^2 = r^2
+
+	A = start - center
+	B = end - start
+
+	|A + Bt|^2 = r^2
+	A*A + 2(A*B)t + B*Bt^2 = r^2
+
+	a = B*B
+	b = A*B
+	c = A*A
+
+	at^2 + 2bt + c = r^2
+	at^2 + 2bt + (c - r^2) = 0
+
+	Panbyeolsik = b^2 - a(c - r^2)
+	*/
+
+	OutResult.BlockingHit = false;
+
+	FVector3 A = l.GetStart() - s.GetCenter();
+	FVector3 B = l.GetEnd() - l.GetStart();
+	float a = FVector3::Dot(B, B);
+	float b = FVector3::Dot(A, B);
+	float c_rr = FVector3::Dot(A, A) - (s.GetRadius() * s.GetRadius());
+
+	if (Math::NearZero(a))
+	{
+		return false;
+	}
+
+	float Panbyeolsik = b * b - a * c_rr;
+
+	if (Panbyeolsik < 0)
+	{
+		return false;
+	}
+
+	Panbyeolsik = Math::Sqrt(Panbyeolsik);
+
+	float inv_a = 1 / a;
+
+	float enter = (-b - Panbyeolsik) * inv_a;
+	float exit = (-b + Panbyeolsik) * inv_a;
+
+	float t;
+
+	if (enter >= 0 && enter <= 1)
+	{
+		t = enter;
+	}
+	else if (exit >= 0 && exit <= 1)
+	{
+		t = exit;
+	}
+	else
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = l.PointOnSegment(t);
+	OutResult.Normal = (GetNormalDirection(OutResult.ImpactPoint, s.GetCenter())) / s.GetRadius();
+
+	return true;
 }
 
-bool CollisionStatics::Intersect(const FLineSegment& l, const Plane& p, FHitResult& OutResult)
+bool CollisionStatics::Intersect(const FLineSegment& l, const FPlane& p, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	float l_d_p_n_dot = FVector3::Dot(l.GetEnd() - l.GetStart(), p.GetNormal());
+
+	if (Math::NearZero(l_d_p_n_dot))
+	{
+		if (Math::NearZero(FVector3::Dot(l.GetStart(), p.GetNormal()) + p.GetD()) == false)
+		{
+			return false;
+		}
+
+		OutResult.BlockingHit = true;
+		OutResult.ImpactPoint = l.GetStart();
+		OutResult.Normal = p.GetNormal();
+	}
+
+	/*
+	p*n + d = 0
+	l(t) = start + (end - start)t
+
+	(start + (end - start)t)*n + d = 0
+	start*n - n*(end - start)t + d = 0
+	t = -d - start*n / n*(end - start)
+	*/
+	float t = (-p.GetD() - FVector3::Dot(l.GetStart(), p.GetNormal())) / l_d_p_n_dot;
+
+	if (t < 0.f || t > 1.f)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = l.PointOnSegment(t);
+	OutResult.Normal = (l_d_p_n_dot < 0.f) ? p.GetNormal() : p.GetNormal() * -1.0f;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FLineSegment& l, const FAABB& b, FHitResult& OutResult)

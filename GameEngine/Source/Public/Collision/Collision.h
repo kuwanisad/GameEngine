@@ -87,18 +87,19 @@ public:
 	FVector3 GetEnd() const;
 };
 
-struct Plane
+struct FPlane
 {
 protected:
 	FVector3 Normal;
 	float D;
 
 public:
-	Plane(const FVector3& _Normal, float _D);
-	Plane(const FVector3& a, const FVector3& b, const FVector3& c);
+	FPlane(const FVector3& _Normal, float _D);
+	FPlane(const FVector3& a, const FVector3& b, const FVector3& c);
 	float SignedDist(const FVector3& point) const;
 
 	FVector3 GetNormal() const;
+	float GetD() const;
 };
 
 struct FSphere : public FCollision
@@ -181,7 +182,7 @@ public:
 	static bool Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult);
 
 	static bool Intersect(const FLineSegment& l, const FSphere& s, FHitResult& OutResult);
-	static bool Intersect(const FLineSegment& l, const Plane& p, FHitResult& OutResult);
+	static bool Intersect(const FLineSegment& l, const FPlane& p, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FAABB& b, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FCapsule& C, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FOBB& O, FHitResult& OutResult);
