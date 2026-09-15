@@ -1,5 +1,5 @@
 #pragma once
-#include "../Core/CoreMinimal.h.h"
+#include "../Core/CoreMinimal.h"
 
 // 디버그 로그를 매번 SDL_Log로 손수 넣었다 뺐다 하는 대신, "누구를 지켜볼지"만 여기
 // 등록해두고, 로그 찍는 쪽(Log/LogPair)은 그 대상이 관련된 경우에만 실제로 출력하게 함 -

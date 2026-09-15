@@ -213,7 +213,7 @@ public:
 	}
 
 	// return: vec * mat
-	static FVector2 Transform(const FVector2& vec, const class FMatrix3x3& mat, float w = 1.0f);
+	static FVector2 Transform(const FVector2& vec, const struct FMatrix3x3& mat, float w = 1.0f);
 
 	static const FVector2 Zero;
 	static const FVector2 UnitX;
@@ -376,11 +376,11 @@ public:
 	}
 
 	//return: vec * mat
-	static FVector3 Transform(const FVector3& vec, const class FMatrix4x4& mat, float w = 1.0f);
+	static FVector3 Transform(const FVector3& vec, const struct FMatrix4x4& mat, float w = 1.0f);
 
-	static FVector3 TransformWithPerspDiv(const FVector3& vec, const class FMatrix4x4& mat, float w = 1.0f);
+	static FVector3 TransformWithPerspDiv(const FVector3& vec, const struct FMatrix4x4& mat, float w = 1.0f);
 
-	static FVector3 Transform(const FVector3& v, const class FQuaternion& q);
+	static FVector3 Transform(const FVector3& v, const struct FQuaternion& q);
 
 	static const FVector3 Zero;
 	static const FVector3 One;
@@ -511,7 +511,7 @@ public:
 	static const FMatrix3x3 Identity;
 };
 
-class FMatrix4x4
+struct FMatrix4x4
 {
 public:
 	float mat[4][4];
@@ -737,7 +737,7 @@ public:
 		return FMatrix4x4(temp);
 	}
 
-	static FMatrix4x4 TransformQuaternionToMatrix(const class FQuaternion& q);
+	static FMatrix4x4 TransformQuaternionToMatrix(const struct FQuaternion& q);
 
 	static FMatrix4x4 TransformTranslationToMatrix(const FVector3& trans)
 	{

@@ -4,6 +4,8 @@
 #include "../../Public/Physics/PhysScene.h"
 #include "../../Public/Component/SceneComponent.h"
 #include "../../Public/Core/Cast.h"
+#include "../../Public/Component/ShapeComponent.h"
+#include "../../Public/Collision/Collision.h"
 
 AActor::AActor() :
 	RootComponent(nullptr)
@@ -109,7 +111,7 @@ TArray<FCollision*> AActor::GetCollisions() const
 	{
 		if (comp->GetComponentType() == EComponentType::Shape)
 		{
-			FCollision* c = Cast<UShapeComponent*>->GetCollision();
+			FCollision* c = Cast<UShapeComponent>(comp)->GetCollision();
 			if (c)
 			{
 				result.push_back(c);

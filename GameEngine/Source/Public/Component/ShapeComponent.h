@@ -1,7 +1,7 @@
 #pragma once
 #include "PrimitiveComponent.h"
 
-class FCollision;
+struct FCollision;
 
 //unlike UE, this component has only collision.
 class UShapeComponent : public UPrimitiveComponent

@@ -1,7 +1,7 @@
 #pragma once
 #include "../Core/Math.h"
 
-class FCollision;
+struct FCollision;
 
 //UE FHitResult
 struct FHitResult

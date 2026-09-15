@@ -168,6 +168,7 @@ public:
 	//The first parameter is the caller!
 	//Every normal lies on the second parameter's surface and is oriented toward the first parameter!
 	//Do not "normal = second - first", use GetNormalDirection.
+	static FVector3 GetNormalDirection(const FVector3& Caller, const FVector3& Target);
 
 	static bool Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult);
 
@@ -186,8 +187,4 @@ public:
 	static bool Intersect(const FLineSegment& l, const FAABB& b, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FCapsule& C, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FOBB& O, FHitResult& OutResult);
-
-	static bool TestSidePlane(float start, float end, float d, const FVector3& norm, std::vector<std::pair<float, FVector3>>& out);
-
-	static FVector3 GetNormalDirection(const FVector3& Caller, const FVector3& Target);
 };

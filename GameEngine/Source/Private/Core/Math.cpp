@@ -40,7 +40,7 @@ const FMatrix4x4 FMatrix4x4::Identity(m4Ident);
 const FQuaternion FQuaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
 const FTransform FTransform::Identity;
 
-FVector2 FVector2::Transform(const FVector2& vec, const FMatrix3x3& mat, float w = 1.0f)
+FVector2 FVector2::Transform(const FVector2& vec, const FMatrix3x3& mat, float w)
 {
 	FVector2 retVal;
 	retVal.x = vec.x * mat.mat[0][0] + vec.y * mat.mat[1][0] + w * mat.mat[2][0];
@@ -64,11 +64,11 @@ FVector3 FVector3::TransformWithPerspDiv(const FVector3& vec, const FMatrix4x4& 
 	retVal.x = vec.x * mat.mat[0][0] + vec.y * mat.mat[1][0] + vec.z * mat.mat[2][0] + w * mat.mat[3][0];
 	retVal.y = vec.x * mat.mat[0][1] + vec.y * mat.mat[1][1] + vec.z * mat.mat[2][1] + w * mat.mat[3][1];
 	retVal.z = vec.x * mat.mat[0][2] + vec.y * mat.mat[1][2] + vec.z * mat.mat[2][2] + w * mat.mat[3][2];
-	float w = vec.x * mat.mat[0][3] + vec.y * mat.mat[1][3] + vec.z * mat.mat[2][3] + w * mat.mat[3][3];
-	if (!Math::NearZero(Math::Abs(w)))
+	float transformedW = vec.x * mat.mat[0][3] + vec.y * mat.mat[1][3] + vec.z * mat.mat[2][3] + w * mat.mat[3][3];
+	if (!Math::NearZero(Math::Abs(transformedW)))
 	{
-		w = 1.0f / w;
-		retVal *= w;
+		transformedW = 1.0f / transformedW;
+		retVal *= transformedW;
 	}
 	return retVal;
 }
@@ -198,7 +198,7 @@ void FMatrix4x4::Invert()
 	}
 }
 
-FMatrix4x4 FMatrix4x4::TransformQuaternionToMatrix(const class FQuaternion& q)
+FMatrix4x4 FMatrix4x4::TransformQuaternionToMatrix(const FQuaternion& q)
 {
 	float mat[4][4];
 

@@ -3,9 +3,9 @@
 #include "../Tick/ActorTickFunction.h"
 
 class UActorComponent;
-class FCollision;
 class UPrimitiveComponent;
 class USceneComponent;
+struct FCollision;
 
 class AActor : public UObject
 {

@@ -3,16 +3,23 @@
 #include "../Core/Math.h"
 
 class AActor;
+struct FCollision;
+
+struct FPhysicsBodyEntry
+{
+	AActor* OwningActor = nullptr;  //nullptr is empty.
+};
 
 struct FPhysScene
 {
 private:
 	static FPhysScene* Instance;
 
-	TArray<AActor*> Actors;
-	TArray<AActor*> PendingActors;
+	TArray<FPhysicsBodyEntry> RegisteredBodies;
+	TSet<size_t> FreeIndices;
+	TMap<AActor*, size_t> ActorToIndex;
 
-	bool IsUpdatingActors = false;
+	std::unordered_set<FCollision*> Collisions;
 
 public:
 	FPhysScene();

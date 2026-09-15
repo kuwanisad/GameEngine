@@ -1,5 +1,5 @@
 #include "../../Public/Tick/ActorComponentTickFunction.h"
-#include "../../Component/UActorComponent.h"
+#include "../../Public/Component/ActorComponent.h"
 
 void FActorComponentTickFunction::ExecuteTick(float DeltaTime)
 {

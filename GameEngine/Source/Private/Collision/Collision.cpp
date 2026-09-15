@@ -1,5 +1,7 @@
 #include "../../Public/Collision/Collision.h"
 
+#include <limits>
+
 const int32 CollisionStatics::IterationCount = 8;
 
 FLineSegment::FLineSegment(const FVector3& _Start, const FVector3 _End) :
@@ -761,7 +763,7 @@ FOBB::FOBB(const FVector3& _Center, const FQuaternion& _Rotation, const FVector3
 	Rotation(_Rotation),
 	Extents(_Extents)
 {
-	Type == ECollisionType::OBB;
+	Type = ECollisionType::OBB;
 }
 
 FOBB::~FOBB()
@@ -868,8 +870,8 @@ bool CollisionStatics::Intersect(const FAABB& a, const FAABB& b, FHitResult& Out
 		return false;
 	}
 
-	FVector3 overlapMin = Math::Max(a_min, b_min);
-	FVector3 overlapMax = Math::Min(a_max, b_max);
+	FVector3 overlapMin(Math::Max(a_min.x, b_min.x), Math::Max(a_min.y, b_min.y), Math::Max(a_min.z, b_min.z));
+	FVector3 overlapMax(Math::Min(a_max.x, b_max.x), Math::Min(a_max.y, b_min.y), Math::Min(a_max.z, b_max.z));
 	FVector3 overlap = overlapMax - overlapMin;
 
 	FVector3 dir = GetNormalDirection(a.GetCenter(), b.GetCenter());
@@ -1528,26 +1530,211 @@ bool CollisionStatics::Intersect(const FLineSegment& l, const FPlane& p, FHitRes
 
 bool CollisionStatics::Intersect(const FLineSegment& l, const FAABB& b, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FVector3 l_start = l.GetStart();
+	FVector3 l_end = l.GetEnd();
+	FVector3 l_direction = l_end - l_start;
+
+	FVector3 b_min = b.GetMin();
+	FVector3 b_max = b.GetMax();
+
+	float min_t = 0.f;
+	float max_t = 1.f;
+
+	int32 min_axis = -1;
+	float min_axis_t = 0.f;
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		// The segment is parallel to this axis.
+		if (Math::NearZero(l_direction[i]))
+		{
+			// If the entire segment lies outside the AABB
+			// along this axis, it cannot intersect the AABB.
+			if (l_start[i] < b_min[i] || l_start[i] > b_max[i])
+			{
+				return false;
+			}
+
+			// Since there is no movement along this axis,
+			// this axis does not affect the t range.
+			continue;
+		}
+
+		// s + d * t = v
+		// t = (v - s) / d
+		// Calculate the t values where the segment intersects
+		// the two AABB planes along this axis.
+		const float inv_direction = 1.f / l_direction[i];
+
+		float t1 = (b_min[i] - l_start[i]) * inv_direction;
+		float t2 = (b_max[i] - l_start[i]) * inv_direction;
+
+		// The order of t1 and t2 depends on the direction,
+		// so make sure they are sorted.
+		const float axis_min_t = Math::Min(t1, t2);
+		const float axis_max_t = Math::Max(t1, t2);
+
+		// Intersect the current t range with the t range
+		// of the current axis.
+		if (axis_min_t > min_t)
+		{
+			min_t = axis_min_t;
+			min_axis = i;
+			min_axis_t = axis_min_t;
+		}
+
+		max_t = Math::Min(max_t, axis_max_t);
+
+		// The intersection of the t ranges is empty.
+		if (min_t > max_t)
+		{
+			return false;
+		}
+	}
+
+	// The segment intersects the AABB along all three axes.
+	// If min_t is less than 0, the segment starts inside the AABB.
+	if (min_t < 0.f)
+	{
+		min_t = 0.f;
+	}
+
+	// The intersection lies outside the segment.
+	if (min_t > 1.f)
+	{
+		return false;
+	}
+
+	// Calculate the impact point.
+	const FVector3 impactPoint = l.PointOnSegment(min_t);
+
+	FVector3 normal = FVector3::Zero;
+
+	// The segment starts inside the AABB.
+	if (min_axis == -1)
+	{
+		// Find the closest AABB face to the start point
+		// and use its outward direction as the normal.
+		float distance = std::numeric_limits<float>::max();
+
+		for (int32 i = 0; i < 3; ++i)
+		{
+			const float minDistance =
+				Math::Abs(l_start[i] - b_min[i]);
+
+			const float maxDistance =
+				Math::Abs(b_max[i] - l_start[i]);
+
+			if (minDistance < distance)
+			{
+				distance = minDistance;
+				min_axis = i;
+				normal = FVector3::Zero;
+				normal[i] = -1.f;
+			}
+
+			if (maxDistance < distance)
+			{
+				distance = maxDistance;
+				min_axis = i;
+				normal = FVector3::Zero;
+				normal[i] = 1.f;
+			}
+		}
+	}
+	else
+	{
+		// Determine which AABB face was entered along the axis
+		// that produced min_t.
+		const float t1 =
+			(b_min[min_axis] - l_start[min_axis]) /
+			l_direction[min_axis];
+
+		const float t2 =
+			(b_max[min_axis] - l_start[min_axis]) /
+			l_direction[min_axis];
+
+		normal = FVector3::Zero;
+
+		if (Math::NearZero(t1 - min_axis_t))
+		{
+			// The segment entered through the b_min face.
+			normal[min_axis] = -1.f;
+		}
+		else
+		{
+			// The segment entered through the b_max face.
+			normal[min_axis] = 1.f;
+		}
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = impactPoint;
+	OutResult.Normal = normal;
+
+	return true;
 }
+
 
 bool CollisionStatics::Intersect(const FLineSegment& l, const FCapsule& C, FHitResult& OutResult)
 {
-	return false;
+	OutResult.BlockingHit = false;
+
+	FVector3 l_point;
+	FVector3 c_point;
+
+	float distSq = FLineSegment::MinDistSq(l, C.GetSegment(), l_point, c_point);
+	float c_r = C.GetRadius();
+
+	if (distSq > c_r * c_r)
+	{
+		return false;
+	}
+
+	FVector3 diff = GetNormalDirection(l_point, c_point);
+	FVector3 normal = Math::NearZero(diff.LengthSq()) ? FVector3::Zero : diff / Math::Sqrt(distSq);
+
+	OutResult.BlockingHit = true;
+	OutResult.ImpactPoint = c_point + normal * c_r;
+	OutResult.Normal = normal;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FLineSegment& l, const FOBB& O, FHitResult& OutResult)
 {
-	return false;
-}
+	FQuaternion Rot = O.GetRotation();
+	FQuaternion invRot = Rot;
+	invRot.Conjugate();
 
-bool CollisionStatics::TestSidePlane(float start, float end, float d, const FVector3& norm, std::vector<std::pair<float, FVector3>>& out)
-{
-	return false;
+	FVector3 o_center = O.GetCenter();
+	FVector3 o_extent = O.GetExtent();
+
+	/*
+	world = (local * R) + P
+	(world - P) * R^-1 = local
+	*/
+
+	FVector3 l_local_start = FVector3::Transform(l.GetStart() - o_center, invRot);
+	FVector3 l_local_end = FVector3::Transform(l.GetEnd() - o_center, invRot);
+
+	FLineSegment local_segment(l_local_start, l_local_end);
+	FAABB local_OBB(-o_extent, o_extent);
+
+	bool result = CollisionStatics::Intersect(local_segment, local_OBB, OutResult);
+
+	if (result)
+	{
+		OutResult.ImpactPoint = FVector3::Transform(OutResult.ImpactPoint, Rot) + o_center;
+		OutResult.Normal = FVector3::Transform(OutResult.Normal, Rot);
+	}
+
+	return result;
 }
 
 FVector3 CollisionStatics::GetNormalDirection(const FVector3& Caller, const FVector3& Target)
 {
-
 	return Caller - Target;
 }
