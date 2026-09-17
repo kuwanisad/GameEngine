@@ -18,28 +18,30 @@ struct FBVHNode
 	bool IsLeaf() const { return object != nullptr; }
 };
 
-struct FBVH
+class UBVH
 {
 protected:
 	FBVHNode* root = nullptr;
 
 	TArray<FCollision*> Collisions;
 
-	static bool Intersect(const FAABB& a, const FAABB& b);
-	static bool Intersect(const FCapsule& C, const FAABB& box);
+	bool Intersect(const FAABB& a, const FAABB& b) const;
+	bool Intersect(const FCapsule& C, const FAABB& box) const;
+	bool Intersect(const FLineSegment& l, const FAABB& b) const;
+	bool IntersectSegmentWithCollision(const FLineSegment& l, FCollision* target, FHitResult& outHit) const;
 
 	void Free();
 	void FreeNode(FBVHNode* node);
-	static FAABB ComputeBounds(const TArray<FCollision*>& objs);
 	void Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>& out) const;
 	void QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray<FCollision*>& out) const;
 	void Raycast_Internal(FBVHNode* node, const FLineSegment& segment, FHitResult& OutResult, float& bestDistSq, bool& found) const;
 
 	static FAABB Union(const FAABB& a, const FAABB& b);
+	FAABB ComputeBounds(const TArray<FCollision*>& objs);
 
 public:
-	FBVH();
-	~FBVH();
+	UBVH();
+	~UBVH();
 
 	void Build(TArray<FCollision*> objs);
 	FBVHNode* BuildTree(TArray<FCollision*> objs);

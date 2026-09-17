@@ -1,9 +1,18 @@
 #pragma once
+#include <functional>
+
+#include "../Core/PCH.h"
 #include "../Core/CoreMinimal.h"
 #include "../Core/Math.h"
+#include "../Collision/HitResult.h"
 
 class AActor;
+class UBVH;
 struct FCollision;
+struct FLineSegment;
+
+template <typename T>
+concept CollisionChildClass = std::derived_from<T, FCollision>;
 
 struct FPhysicsBodyEntry
 {
@@ -15,23 +24,58 @@ struct FPhysScene
 private:
 	static FPhysScene* Instance;
 
+	UBVH* WorldBVH;
+
 	TArray<FPhysicsBodyEntry> RegisteredBodies;
 	TSet<size_t> FreeIndices;
 	TMap<AActor*, size_t> ActorToIndex;
 
 	std::unordered_set<FCollision*> Collisions;
 
+	//It is called by QueryOverlaps
+	template<CollisionChildClass ShapeType>
+	void ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+
+	template<CollisionChildClass ShapeType>
+	static ShapeType TranslateShape(const ShapeType& s, const FVector3& offset);
+
+	template<CollisionChildClass ShapeType>
+	void SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover,
+		float& bestT, FHitResult& bestHit, bool& found);
+
 public:
 	FPhysScene();
 	~FPhysScene();
+
+	static FPhysScene* Get();
 
 	bool RegisterBody(AActor* _actor);
 	void UnregisterBody(AActor* _actor);
 
 	void MoveActor(AActor* _Actor, const FVector3& DesiredPos, float margin);
 
+	FPhysScene(const FPhysScene&) = delete;
+	FPhysScene& operator=(const FPhysScene&) = delete;
 
-	static FPhysScene* Get();
+	bool SegmentCast(const FLineSegment& l, FHitResult& OutResult);
+
+	void AddCollision(FCollision* InCollision);
+	void RemoveCollision(FCollision* InCollision);
+
+	bool RegisterBody(AActor* actor);
+	void UnregisterBody(AActor* actor);
+
+	void ForEachRegisteredBody(std::function<void(AActor*)> f);
+
+	void QueryOverlaps(AActor* mover, const FVector3& testPos, std::vector<FHitResult>& outHits, float margin = 0.0f);
+
+	bool SweepQuery(AActor* mover, const FVector3& fromPos, const FVector3& toPos, float& outT, FHitResult& outHit);
+
+	void Step(float DeltaTime);
+	void Update();
+
+	// Only AActor::SetActorLocation
+	void MoveActor(AActor* _Actor, const FVector3& DesiredPos, float margin = 0.0f);
 
 public:
 	//Investigation of variables was aided by Claude
@@ -93,3 +137,19 @@ public:
 	// step for FBodyInstance objects with bEnableGravity enabled.
 	static const FVector3 Gravity;
 };
+
+template<CollisionChildClass ShapeType>
+inline void FPhysScene::ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits)
+{
+}
+
+template<CollisionChildClass ShapeType>
+inline ShapeType FPhysScene::TranslateShape(const ShapeType& s, const FVector3& offset)
+{
+	return ShapeType();
+}
+
+template<CollisionChildClass ShapeType>
+inline void FPhysScene::SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found)
+{
+}

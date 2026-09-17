@@ -1,22 +1,22 @@
 #include "../../Public/Collision/BVH.h"
 
-FBVH::FBVH()
+UBVH::UBVH()
 {
 }
 
-FBVH::~FBVH()
+UBVH::~UBVH()
 {
 	Free();
 }
 
-bool FBVH::Intersect(const FAABB& a, const FAABB& b)
+bool UBVH::Intersect(const FAABB& a, const FAABB& b) const
 {
 	return (a.GetMin().x <= b.GetMax().x && a.GetMax().x >= b.GetMin().x) &&
 		(a.GetMin().y <= b.GetMax().y && a.GetMax().y >= b.GetMin().y) &&
 		(a.GetMin().z <= b.GetMax().z && a.GetMax().z >= b.GetMin().z);
 }
 
-bool FBVH::Intersect(const FCapsule& C, const FAABB& box)
+bool UBVH::Intersect(const FCapsule& C, const FAABB& box) const
 {
 	// AABB는 이미 축정렬이라 OBB 버전과 달리 로컬 공간 변환(회전) 자체가 필요 없음 -
 	// center 기준 상대좌표로만 옮기면 그게 곧 "로컬 공간"임.
@@ -64,7 +64,131 @@ bool FBVH::Intersect(const FCapsule& C, const FAABB& box)
 	return distSq > r * r;
 }
 
-void FBVH::Free()
+bool UBVH::Intersect(const FLineSegment& l, const FAABB& b) const
+{
+	FVector3 l_start = l.GetStart();
+	FVector3 l_end = l.GetEnd();
+	FVector3 l_direction = l_end - l_start;
+
+	FVector3 b_min = b.GetMin();
+	FVector3 b_max = b.GetMax();
+
+	float min_t = 0.f;
+	float max_t = 1.f;
+
+	int32 min_axis = -1;
+	float min_axis_t = 0.f;
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		// The segment is parallel to this axis.
+		if (Math::NearZero(l_direction[i]))
+		{
+			// If the entire segment lies outside the AABB
+			// along this axis, it cannot intersect the AABB.
+			if (l_start[i] < b_min[i] || l_start[i] > b_max[i])
+			{
+				return false;
+			}
+
+			// Since there is no movement along this axis,
+			// this axis does not affect the t range.
+			continue;
+		}
+
+		// s + d * t = v
+		// t = (v - s) / d
+		// Calculate the t values where the segment intersects
+		// the two AABB planes along this axis.
+		const float inv_direction = 1.f / l_direction[i];
+
+		float t1 = (b_min[i] - l_start[i]) * inv_direction;
+		float t2 = (b_max[i] - l_start[i]) * inv_direction;
+
+		// The order of t1 and t2 depends on the direction,
+		// so make sure they are sorted.
+		const float axis_min_t = Math::Min(t1, t2);
+		const float axis_max_t = Math::Max(t1, t2);
+
+		// Intersect the current t range with the t range
+		// of the current axis.
+		if (axis_min_t > min_t)
+		{
+			min_t = axis_min_t;
+			min_axis = i;
+			min_axis_t = axis_min_t;
+		}
+
+		max_t = Math::Min(max_t, axis_max_t);
+
+		// The intersection of the t ranges is empty.
+		if (min_t > max_t)
+		{
+			return false;
+		}
+	}
+
+	// The segment intersects the AABB along all three axes.
+	// If min_t is less than 0, the segment starts inside the AABB.
+	if (min_t < 0.f)
+	{
+		min_t = 0.f;
+	}
+
+	// The intersection lies outside the segment.
+	if (min_t > 1.f)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UBVH::IntersectSegmentWithCollision(const FLineSegment& l, FCollision* target, FHitResult& outHit) const
+{
+	bool hit_flag = false;
+	outHit.BlockingHit = false;
+
+	if (target == nullptr)
+	{
+		return false;
+	}
+
+	switch (target->GetType())
+	{
+	case ECollisionType::Sphere:
+		hit_flag = CollisionStatics::Intersect(l, (const FSphere&)(*target), outHit);
+		break;
+	case ECollisionType::OBB:
+		hit_flag = CollisionStatics::Intersect(l, (const FOBB&)(*target), outHit);
+		break;
+	case ECollisionType::Capsule:
+		hit_flag = CollisionStatics::Intersect(l, (const FCapsule&)(*target), outHit);
+		break;
+	case ECollisionType::LineSegment:
+	{
+		FVector3 p1, p2;
+		float distSq = Math::NearZero(FLineSegment::MinDistSq(l, (const FLineSegment&)(*target), p1, p2));
+
+		if (Math::NearZero(distSq))
+		{
+			outHit.BlockingHit = true;
+			outHit.ImpactPoint = p1;
+
+			//Lines don't have surfaces...
+			outHit.Normal = FVector3::Zero;
+			hit_flag = true;
+		}
+	}
+		break;
+	}
+
+	outHit.CollidedTarget = hit_flag ? target : nullptr;
+
+	return hit_flag;
+}
+
+void UBVH::Free()
 {
 	if (root != nullptr)
 	{
@@ -75,7 +199,7 @@ void FBVH::Free()
 	}
 }
 
-void FBVH::FreeNode(FBVHNode* node)
+void UBVH::FreeNode(FBVHNode* node)
 {
 	if (node == nullptr)
 	{
@@ -87,7 +211,7 @@ void FBVH::FreeNode(FBVHNode* node)
 	delete node;
 }
 
-FAABB FBVH::ComputeBounds(const TArray<FCollision*>& objs)
+FAABB UBVH::ComputeBounds(const TArray<FCollision*>& objs)
 {
 	if (objs.empty())
 	{
@@ -104,7 +228,7 @@ FAABB FBVH::ComputeBounds(const TArray<FCollision*>& objs)
 	return box;
 }
 
-FAABB FBVH::Union(const FAABB& a, const FAABB& b)
+FAABB UBVH::Union(const FAABB& a, const FAABB& b)
 {
 	FVector3 minVec(
 		Math::Min(a.GetMin().x, b.GetMin().x),
@@ -119,7 +243,7 @@ FAABB FBVH::Union(const FAABB& a, const FAABB& b)
 	return FAABB(minVec, maxVec);
 }
 
-void FBVH::Build(TArray<FCollision*> objs)
+void UBVH::Build(TArray<FCollision*> objs)
 {
 	Free();
 
@@ -133,7 +257,7 @@ void FBVH::Build(TArray<FCollision*> objs)
 	root = BuildTree(objs);
 }
 
-FBVHNode* FBVH::BuildTree(TArray<FCollision*> objs)
+FBVHNode* UBVH::BuildTree(TArray<FCollision*> objs)
 {
 	if (objs.empty())
 	{
@@ -227,12 +351,12 @@ FBVHNode* FBVH::BuildTree(TArray<FCollision*> objs)
 	return node;
 }
 
-void FBVH::Query(const FAABB& box, TArray<FCollision*>& out) const
+void UBVH::Query(const FAABB& box, TArray<FCollision*>& out) const
 {
 	Query_Internal(root, box, out);
 }
 
-void FBVH::Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>& out) const
+void UBVH::Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>& out) const
 {
 	if (node == nullptr)
 	{
@@ -254,12 +378,12 @@ void FBVH::Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>&
 	Query_Internal(node->right, box, out);
 }
 
-void FBVH::QueryCapsule(const FCapsule& capsule, TArray<FCollision*>& out) const
+void UBVH::QueryCapsule(const FCapsule& capsule, TArray<FCollision*>& out) const
 {
 	QueryCapsule_Internal(root, capsule, out);
 }
 
-void FBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray<FCollision*>& out) const
+void UBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray<FCollision*>& out) const
 {
 	if (node == nullptr)
 	{
@@ -281,7 +405,7 @@ void FBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray
 	QueryCapsule_Internal(node->right, capsule, out);
 }
 
-bool FBVH::Raycast(const FLineSegment& segment, FHitResult& OutResult) const
+bool UBVH::Raycast(const FLineSegment& segment, FHitResult& OutResult) const
 {
 	OutResult.BlockingHit = false;
 
@@ -293,17 +417,46 @@ bool FBVH::Raycast(const FLineSegment& segment, FHitResult& OutResult) const
 	return result;
 }
 
-void FBVH::Raycast_Internal(FBVHNode* node, const FLineSegment& segment, FHitResult& OutResult, float& bestDistSq, bool& found) const
+void UBVH::Raycast_Internal(FBVHNode* node, const FLineSegment& segment, FHitResult& OutResult, float& bestDistSq, bool& found) const
 {
+	if (node == nullptr)
+	{
+		return;
+	}
+
+	if (Intersect(segment, node->box) == false)
+	{
+		return;
+	}
+
+	if (node->IsLeaf())
+	{
+		FHitResult hit;
+		if (IntersectSegmentWithCollision(segment, node->object, hit))
+		{
+			float distSq = (hit.ImpactPoint - segment.GetStart()).LengthSq();
+
+			if (distSq < bestDistSq)
+			{
+				bestDistSq = distSq;
+				OutResult = hit;
+				found = this;
+			}
+			return;
+		}
+	}
+
+	Raycast_Internal(node->left, segment, OutResult, bestDistSq, found);
+	Raycast_Internal(node->right, segment, OutResult, bestDistSq, found);
 }
 
-void FBVH::AddCollision(FCollision* InCollision)
+void UBVH::AddCollision(FCollision* InCollision)
 {
 	Collisions.push_back(InCollision);
 	Build(Collisions);
 }
 
-void FBVH::RemoveCollision(FCollision* InCollision)
+void UBVH::RemoveCollision(FCollision* InCollision)
 {
 	for (int32 i = Collisions.size() - 1; i >= 0; --i)
 	{

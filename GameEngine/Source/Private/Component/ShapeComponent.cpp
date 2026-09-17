@@ -25,6 +25,7 @@ void UShapeComponent::SetCollision(FCollision* InCollision)
 
     if (_Collision)
     {
+        _Collision->SetOwner(Owner);
         GetOwner()->RegisterPhysicsBodyIfNeeded();
     }
 }

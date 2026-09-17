@@ -5,11 +5,12 @@
 #include "../Core/CoreMinimal.h"
 #include "HitResult.h"
 
+class AActor;
+
 enum class ECollisionType
 {
 	None,
 	Sphere,
-	Box,
 	OBB,
 	LineSegment,
 	Capsule,
@@ -50,15 +51,19 @@ struct FCollision
 {
 protected:
 	ECollisionType Type;
+	AActor* Owner;
 
 public:
 	FCollision();
 	virtual ~FCollision();
+	void SetOwner(AActor* InOwner);
+	AActor* GetOwner() const;
 	ECollisionType GetType() const { return Type; }
 	virtual FAABB GetBoundingBox() const = 0;
 
 	//Global coordinate system
 	virtual FVector3 GetCenter() const = 0;
+	virtual void SetCenter(const FVector3& InCenter) = 0;
 
 	/*
 	GJK support function
@@ -81,10 +86,12 @@ public:
 	static float MinDistSq(const FLineSegment& S1, const FLineSegment& S2, FVector3& outPointOnS1, FVector3& outPointOnS2);
 	FAABB GetBoundingBox() const override;
 	FVector3 GetCenter() const override;
+	void SetCenter(const FVector3& InCenter) override;
 	FVector3 Support(const FVector3& Direction) const override;
 
 	FVector3 GetStart() const;
 	FVector3 GetEnd() const;
+
 };
 
 struct FPlane
@@ -113,6 +120,7 @@ public:
 	bool Contains(const FVector3& _point) const;
 	FAABB GetBoundingBox() const override;
 	FVector3 GetCenter() const override;
+	void SetCenter(const FVector3& InCenter) override;
 	FVector3 Support(const FVector3& Direction) const override;
 	float GetRadius() const;
 };
@@ -132,6 +140,7 @@ public:
 	float GetRadius() const;
 	FAABB GetBoundingBox() const override;
 	FVector3 GetCenter() const override;
+	void SetCenter(const FVector3& InCenter) override;
 	FVector3 Support(const FVector3& Direction) const override;
 };
 
@@ -148,12 +157,12 @@ public:
 
 	FAABB GetBoundingBox() const override;
 	FVector3 GetCenter() const override;
+	void SetCenter(const FVector3& InCenter) override;
 	FQuaternion GetRotation() const;
 	void Rotate(const FQuaternion& InRotation);
 	FVector3 GetExtent() const;
 	FVector3 Support(const FVector3& Direction) const override;
 
-	void SetCenter(const FVector3& InCenter);
 	void SetExtent(const FVector3& InExtent);
 	void SetRotation(const FQuaternion& InRotation);
 };
@@ -181,6 +190,7 @@ public:
 	static bool Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult);
 	static bool Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult);
 	static bool Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult);
+	static bool Intersect(const FSphere& s, const FCapsule& c, FHitResult& OutResult);
 
 	static bool Intersect(const FLineSegment& l, const FSphere& s, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FPlane& p, FHitResult& OutResult);

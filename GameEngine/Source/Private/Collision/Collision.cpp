@@ -474,6 +474,16 @@ FVector3 FLineSegment::GetEnd() const
 	return End;
 }
 
+void FLineSegment::SetCenter(const FVector3& InCenter)
+{
+	FVector3 current_center = PointOnSegment(0.5f);
+
+	FVector3 diff = InCenter - current_center;
+
+	Start += diff;
+	End += diff;
+}
+
 FPlane::FPlane(const FVector3& _Normal, float _D) :
 	Normal(_Normal),
 	D(_D)
@@ -542,6 +552,11 @@ FAABB FSphere::GetBoundingBox() const
 FVector3 FSphere::GetCenter() const
 {
 	return Center;
+}
+
+void FSphere::SetCenter(const FVector3& InCenter)
+{
+	Center = InCenter;
 }
 
 FVector3 FSphere::Support(const FVector3& Direction) const
@@ -679,12 +694,23 @@ float FAABB::GetSurfaceArea() const
 }
 
 FCollision::FCollision() :
+	Owner(nullptr),
 	Type(ECollisionType::None)
 {
 }
 
 FCollision::~FCollision()
 {
+}
+
+void FCollision::SetOwner(AActor* InOwner)
+{
+	Owner = InOwner;
+}
+
+AActor* FCollision::GetOwner() const
+{
+	return Owner;
 }
 
 FCapsule::FCapsule(const FVector3& _Start, const FVector3& _End, float _Radius) :
@@ -735,6 +761,11 @@ FAABB FCapsule::GetBoundingBox() const
 FVector3 FCapsule::GetCenter() const
 {
 	return Segment.GetCenter();
+}
+
+void FCapsule::SetCenter(const FVector3& InCenter)
+{
+	Segment.SetCenter(InCenter);
 }
 
 FVector3 FCapsule::Support(const FVector3& Direction) const
@@ -802,6 +833,11 @@ FVector3 FOBB::GetCenter() const
 	return Center;
 }
 
+void FOBB::SetCenter(const FVector3& InCenter)
+{
+	Center = InCenter;
+}
+
 FQuaternion FOBB::GetRotation() const
 {
 	return Rotation;
@@ -829,11 +865,6 @@ FVector3 FOBB::Support(const FVector3& Direction) const
 	point += axisZ * (Extents.x * ((FVector3::Dot(Direction, axisZ) >= 0) ? 1.f : -1.f));
 
 	return point;
-}
-
-void FOBB::SetCenter(const FVector3& InCenter)
-{
-	Center = InCenter;
 }
 
 void FOBB::SetExtent(const FVector3& InExtent)
@@ -1732,6 +1763,67 @@ bool CollisionStatics::Intersect(const FLineSegment& l, const FOBB& O, FHitResul
 	}
 
 	return result;
+}
+
+bool CollisionStatics::Intersect(const FSphere& s, const FCapsule& c, FHitResult& OutResult)
+{
+	OutResult.BlockingHit = false;
+
+	/*
+	line = start + direction * t
+
+	direction * (point - start - direction * t)  = 0
+
+	direction * point - direction * start - |direction|^2 * t = 0
+
+	(direction * point - direction * start) / |direction|^2 = t
+	*/
+
+	FLineSegment c_seg = c.GetSegment();
+	FVector3 start = c_seg.GetStart();
+	FVector3 point = s.GetCenter();
+	FVector3 direction = c_seg.GetEnd() - start;
+	float c_r = c.GetRadius();
+	float s_r = s.GetRadius();
+
+	if (Math::NearZero(direction.LengthSq()))
+	{
+		FSphere s2(start, c_r);
+		return CollisionStatics::Intersect(s, s2, OutResult);
+	}
+
+	float t = FVector3::Dot(direction, (point - start)) / direction.LengthSq();
+	t = Math::Clamp(t, 0.f, 1.f);
+
+	FVector3 point_on_c_seg = c_seg.PointOnSegment(t);
+
+	FVector3 diff = GetNormalDirection(point, point_on_c_seg);
+	float diff_distSq = diff.LengthSq();
+
+	if (diff_distSq > (c_r + s_r) * (c_r + s_r))
+	{
+		OutResult.BlockingHit = false;
+		return false;
+	}
+
+	float diff_dist = Math::Sqrt(diff_distSq);
+
+	OutResult.BlockingHit = true;
+
+
+	if (Math::NearZero(diff_distSq))
+	{
+		//It's a perfect overlap, so the normal direction is ambiguous...
+		OutResult.Normal = FVector3::Zero;
+		OutResult.PenetrationDepth = s.GetRadius() + c_r;
+	}
+	else
+	{
+		OutResult.Normal = diff / diff_dist;
+		OutResult.PenetrationDepth = s.GetRadius() + c_r - diff_dist;
+	}
+
+	return true;
 }
 
 FVector3 CollisionStatics::GetNormalDirection(const FVector3& Caller, const FVector3& Target)

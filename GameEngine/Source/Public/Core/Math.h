@@ -302,19 +302,20 @@ public:
 		}
 	}
 
+	FVector3 operator+=(const FVector3& a)
+	{
+		x += a.x;
+		y += a.y;
+		z += a.z;
+
+		return *this;
+	}
+
 	FVector3& operator*=(float scalar)
 	{
 		x *= scalar;
 		y *= scalar;
 		z *= scalar;
-		return *this;
-	}
-
-	FVector3& operator+=(const FVector3& right)
-	{
-		x += right.x;
-		y += right.y;
-		z += right.z;
 		return *this;
 	}
 
