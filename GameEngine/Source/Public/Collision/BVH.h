@@ -24,16 +24,14 @@ protected:
 	FBVHNode* root = nullptr;
 
 	TArray<FCollision*> Collisions;
-
-	bool Intersect(const FAABB& a, const FAABB& b) const;
-	bool Intersect(const FCapsule& C, const FAABB& box) const;
-	bool Intersect(const FLineSegment& l, const FAABB& b) const;
 	bool IntersectSegmentWithCollision(const FLineSegment& l, FCollision* target, FHitResult& outHit) const;
 
 	void Free();
 	void FreeNode(FBVHNode* node);
 	void Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>& out) const;
 	void QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray<FCollision*>& out) const;
+	void QuerySphere_Internal(FBVHNode* node, const FSphere& Sphere, TArray<FCollision*>& out) const;
+	void QueryOBB_Internal(FBVHNode* node, const FOBB& OBB, TArray<FCollision*>& out) const;
 	void Raycast_Internal(FBVHNode* node, const FLineSegment& segment, FHitResult& OutResult, float& bestDistSq, bool& found) const;
 
 	static FAABB Union(const FAABB& a, const FAABB& b);
@@ -47,6 +45,8 @@ public:
 	FBVHNode* BuildTree(TArray<FCollision*> objs);
 	void Query(const FAABB& box, TArray<FCollision*>& out) const;
 	void QueryCapsule(const FCapsule& shape, TArray<FCollision*>& out) const;
+	void QuerySphere(const FSphere& shape, TArray<FCollision*>& out) const;
+	void QueryOBB(const FOBB& shape, TArray<FCollision*>& out) const;
 	bool Raycast(const FLineSegment& segment, FHitResult& OutResult) const;
 
 	//오브젝트 목록을 갱신하고 트리를 다시 빌드

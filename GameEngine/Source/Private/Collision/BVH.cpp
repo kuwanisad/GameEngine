@@ -9,141 +9,6 @@ UBVH::~UBVH()
 	Free();
 }
 
-bool UBVH::Intersect(const FAABB& a, const FAABB& b) const
-{
-	return (a.GetMin().x <= b.GetMax().x && a.GetMax().x >= b.GetMin().x) &&
-		(a.GetMin().y <= b.GetMax().y && a.GetMax().y >= b.GetMin().y) &&
-		(a.GetMin().z <= b.GetMax().z && a.GetMax().z >= b.GetMin().z);
-}
-
-bool UBVH::Intersect(const FCapsule& C, const FAABB& box) const
-{
-	// AABB는 이미 축정렬이라 OBB 버전과 달리 로컬 공간 변환(회전) 자체가 필요 없음 -
-	// center 기준 상대좌표로만 옮기면 그게 곧 "로컬 공간"임.
-	FVector3 center = box.GetCenter();
-	FVector3 ext = box.GetExtent();
-
-	FLineSegment seg = C.GetSegment();
-
-	FVector3 a = seg.GetStart() - center;
-	FVector3 b = seg.GetEnd() - center;
-
-	FVector3 d = b - a;
-	float lenSq = d.LengthSq();
-
-	// =========================================================
-	// 캡슐 중심선과 박스 사이의 실제 최근접점 쌍(p, q) 찾기 (Capsule-OBB와 동일한
-	// alternating projection - 증명도 그대로 적용됨: 둘 다 볼록도형이라 수렴 보장됨)
-	// =========================================================
-	FVector3 p = a;
-	FVector3 q = FVector3::Zero;
-
-	const int IterationCount = 8;
-
-	for (int i = 0; i < IterationCount; i++)
-	{
-		q.x = Math::Clamp(p.x, -ext.x, ext.x);
-		q.y = Math::Clamp(p.y, -ext.y, ext.y);
-		q.z = Math::Clamp(p.z, -ext.z, ext.z);
-
-		if (lenSq <= 0.0f)
-		{
-			// 캡슐 길이가 0인 퇴화 케이스(사실상 구): 선분 위의 점은 항상 a로 고정
-			break;
-		}
-
-		float t = Math::Clamp(FVector3::Dot(q - a, d) / lenSq, 0.0f, 1.0f);
-		p = a + d * t;
-	}
-
-	FVector3 diff = p - q;
-	float distSq = diff.LengthSq();
-
-	float r = C.GetRadius();
-
-	return distSq > r * r;
-}
-
-bool UBVH::Intersect(const FLineSegment& l, const FAABB& b) const
-{
-	FVector3 l_start = l.GetStart();
-	FVector3 l_end = l.GetEnd();
-	FVector3 l_direction = l_end - l_start;
-
-	FVector3 b_min = b.GetMin();
-	FVector3 b_max = b.GetMax();
-
-	float min_t = 0.f;
-	float max_t = 1.f;
-
-	int32 min_axis = -1;
-	float min_axis_t = 0.f;
-
-	for (int32 i = 0; i < 3; ++i)
-	{
-		// The segment is parallel to this axis.
-		if (Math::NearZero(l_direction[i]))
-		{
-			// If the entire segment lies outside the AABB
-			// along this axis, it cannot intersect the AABB.
-			if (l_start[i] < b_min[i] || l_start[i] > b_max[i])
-			{
-				return false;
-			}
-
-			// Since there is no movement along this axis,
-			// this axis does not affect the t range.
-			continue;
-		}
-
-		// s + d * t = v
-		// t = (v - s) / d
-		// Calculate the t values where the segment intersects
-		// the two AABB planes along this axis.
-		const float inv_direction = 1.f / l_direction[i];
-
-		float t1 = (b_min[i] - l_start[i]) * inv_direction;
-		float t2 = (b_max[i] - l_start[i]) * inv_direction;
-
-		// The order of t1 and t2 depends on the direction,
-		// so make sure they are sorted.
-		const float axis_min_t = Math::Min(t1, t2);
-		const float axis_max_t = Math::Max(t1, t2);
-
-		// Intersect the current t range with the t range
-		// of the current axis.
-		if (axis_min_t > min_t)
-		{
-			min_t = axis_min_t;
-			min_axis = i;
-			min_axis_t = axis_min_t;
-		}
-
-		max_t = Math::Min(max_t, axis_max_t);
-
-		// The intersection of the t ranges is empty.
-		if (min_t > max_t)
-		{
-			return false;
-		}
-	}
-
-	// The segment intersects the AABB along all three axes.
-	// If min_t is less than 0, the segment starts inside the AABB.
-	if (min_t < 0.f)
-	{
-		min_t = 0.f;
-	}
-
-	// The intersection lies outside the segment.
-	if (min_t > 1.f)
-	{
-		return false;
-	}
-
-	return true;
-}
-
 bool UBVH::IntersectSegmentWithCollision(const FLineSegment& l, FCollision* target, FHitResult& outHit) const
 {
 	bool hit_flag = false;
@@ -363,7 +228,9 @@ void UBVH::Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>&
 		return;
 	}
 
-	if (Intersect(node->box, box) == false)
+	FHitResult hit;
+
+	if (CollisionStatics::Intersect(node->box, box, hit) == false)
 	{
 		return;
 	}
@@ -378,9 +245,19 @@ void UBVH::Query_Internal(FBVHNode* node, const FAABB& box, TArray<FCollision*>&
 	Query_Internal(node->right, box, out);
 }
 
-void UBVH::QueryCapsule(const FCapsule& capsule, TArray<FCollision*>& out) const
+void UBVH::QueryCapsule(const FCapsule& shape, TArray<FCollision*>& out) const
 {
-	QueryCapsule_Internal(root, capsule, out);
+	QueryCapsule_Internal(root, shape, out);
+}
+
+void UBVH::QuerySphere(const FSphere& shape, TArray<FCollision*>& out) const
+{
+	QuerySphere_Internal(root, shape, out);
+}
+
+void UBVH::QueryOBB(const FOBB& shape, TArray<FCollision*>& out) const
+{
+	QueryOBB_Internal(root, shape, out);
 }
 
 void UBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray<FCollision*>& out) const
@@ -390,7 +267,9 @@ void UBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray
 		return;
 	}
 
-	if (Intersect(capsule, node->box) == false)
+	FHitResult hit;
+
+	if (CollisionStatics::Intersect(capsule, node->box, hit) == false)
 	{
 		return;
 	}
@@ -403,6 +282,54 @@ void UBVH::QueryCapsule_Internal(FBVHNode* node, const FCapsule& capsule, TArray
 
 	QueryCapsule_Internal(node->left, capsule, out);
 	QueryCapsule_Internal(node->right, capsule, out);
+}
+
+void UBVH::QuerySphere_Internal(FBVHNode* node, const FSphere& sphere, TArray<FCollision*>& out) const
+{
+	if (node == nullptr)
+	{
+		return;
+	}
+
+	FHitResult hit;
+
+	if (CollisionStatics::Intersect(sphere, node->box, hit) == false)
+	{
+		return;
+	}
+
+	if (node->IsLeaf())
+	{
+		out.push_back(node->object);
+		return;
+	}
+
+	QuerySphere_Internal(node->left, sphere, out);
+	QuerySphere_Internal(node->right, sphere, out);
+}
+
+void UBVH::QueryOBB_Internal(FBVHNode* node, const FOBB& OBB, TArray<FCollision*>& out) const
+{
+	if (node == nullptr)
+	{
+		return;
+	}
+
+	FHitResult hit;
+
+	if (CollisionStatics::Intersect(OBB, node->box, hit) == false)
+	{
+		return;
+	}
+
+	if (node->IsLeaf())
+	{
+		out.push_back(node->object);
+		return;
+	}
+
+	QueryOBB_Internal(node->left, OBB, out);
+	QueryOBB_Internal(node->right, OBB, out);
 }
 
 bool UBVH::Raycast(const FLineSegment& segment, FHitResult& OutResult) const
@@ -423,8 +350,9 @@ void UBVH::Raycast_Internal(FBVHNode* node, const FLineSegment& segment, FHitRes
 	{
 		return;
 	}
+	FHitResult hit;
 
-	if (Intersect(segment, node->box) == false)
+	if (CollisionStatics::Intersect(segment, node->box, hit) == false)
 	{
 		return;
 	}

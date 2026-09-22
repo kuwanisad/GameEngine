@@ -1043,6 +1043,15 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& Out
 	return true;
 }
 
+bool CollisionStatics::Intersect(const FOBB& O1, const FAABB& A2, FHitResult& OutResult)
+{
+	FOBB obb(A2.GetCenter(), FQuaternion::Identity, A2.GetExtent());
+
+	bool result = Intersect(O1, obb, OutResult);
+
+	return result;
+}
+
 bool CollisionStatics::Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult)
 {
 	OutResult.BlockingHit = false;

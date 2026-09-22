@@ -182,6 +182,7 @@ public:
 	static bool Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult);
 
 	static bool Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult);
+	static bool Intersect(const FOBB& O1, const FAABB& A2, FHitResult& OutResult);
 
 	static bool Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult);
 	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult);

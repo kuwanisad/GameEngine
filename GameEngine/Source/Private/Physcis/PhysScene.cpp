@@ -305,6 +305,29 @@ bool FPhysScene::SweepQuery(AActor* mover, const FVector3& fromPos, const FVecto
 template<>
 inline void FPhysScene::SweepQueryCandidates<FSphere>(const FSphere& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found)
 {
+	FSphere sweep_sphere(startShape.GetCenter() + displacement, startShape.GetRadius());
+
+	TArray<FCollision*> candidates;
+	WorldBVH->QuerySphere(sweep_sphere, candidates);
+
+	for (FCollision* candidate : candidates)
+	{
+		if (candidate->GetOwner() == mover)
+		{
+			continue;
+		}
+
+		switch (candidate->GetType())
+		{
+		case ECollisionType::Sphere:
+			break;
+		case ECollisionType::Capsule:
+			break;
+		case ECollisionType::OBB:
+			break;
+		}
+	}
+
 }
 
 template<>

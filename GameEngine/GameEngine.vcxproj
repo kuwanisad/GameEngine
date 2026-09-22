@@ -41,6 +41,7 @@
     <ClInclude Include="Source\Public\Actor\Actor.h" />
     <ClInclude Include="Source\Public\Collision\BVH.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
+    <ClInclude Include="Source\Public\Collision\GJKStatics.h" />
     <ClInclude Include="Source\Public\Collision\HitResult.h" />
     <ClInclude Include="Source\Public\Component\ActorComponent.h" />
     <ClInclude Include="Source\Public\Component\ComponentType.h" />
