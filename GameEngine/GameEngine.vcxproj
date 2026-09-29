@@ -22,6 +22,7 @@
     <ClCompile Include="Source\Private\Actor\Actor.cpp" />
     <ClCompile Include="Source\Private\Collision\BVH.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
+    <ClCompile Include="Source\Private\Collision\GJKStatics.cpp" />
     <ClCompile Include="Source\Private\Component\ShapeComponent.cpp" />
     <ClCompile Include="Source\Private\Component\AttachmentTransformRules.cpp" />
     <ClCompile Include="Source\Private\Component\PrimitiveComponent.cpp" />

@@ -123,6 +123,9 @@
     <ClCompile Include="Source\Private\Collision\BVH.cpp">
       <Filter>소스 파일\Source\Private\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Private\Collision\GJKStatics.cpp">
+      <Filter>소스 파일\Source\Private\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Public\Core\Engine.h">
