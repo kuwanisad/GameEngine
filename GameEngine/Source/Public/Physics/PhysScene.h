@@ -11,9 +11,6 @@ class UBVH;
 struct FCollision;
 struct FLineSegment;
 
-template <typename T>
-concept CollisionChildClass = std::derived_from<T, FCollision>;
-
 struct FPhysicsBodyEntry
 {
 	AActor* OwningActor = nullptr;  //nullptr is empty.
@@ -33,15 +30,17 @@ private:
 	std::unordered_set<FCollision*> Collisions;
 
 	//It is called by QueryOverlaps
-	template<CollisionChildClass ShapeType>
-	void ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+	void ProcessOverlapCandidates(const FSphere& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+	void ProcessOverlapCandidates(const FCapsule& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+	void ProcessOverlapCandidates(const FOBB& test_collision, AActor* mover, TArray<FHitResult>& outHits);
 
-	template<CollisionChildClass ShapeType>
-	static ShapeType TranslateShape(const ShapeType& s, const FVector3& offset);
+	static FSphere TranslateShape(const FSphere& s, const FVector3& offset);
+	static FCapsule TranslateShape(const FCapsule& s, const FVector3& offset);
+	static FOBB TranslateShape(const FOBB& s, const FVector3& offset);
 
-	template<CollisionChildClass ShapeType>
-	void SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover,
-		float& bestT, FHitResult& bestHit, bool& found);
+	void SweepQueryCandidates(const FSphere& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
+	void SweepQueryCandidates(const FCapsule& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
+	void SweepQueryCandidates(const FOBB& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
 
 public:
 	FPhysScene();
@@ -136,20 +135,6 @@ public:
 	// The integrator adds this value as a force/acceleration contribution each
 	// step for FBodyInstance objects with bEnableGravity enabled.
 	static const FVector3 Gravity;
+	template<CollisionChildClass ShapeType>
+	void SweepQueryCandidates(const FSphere& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
 };
-
-template<CollisionChildClass ShapeType>
-inline void FPhysScene::ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits)
-{
-}
-
-template<CollisionChildClass ShapeType>
-inline ShapeType FPhysScene::TranslateShape(const ShapeType& s, const FVector3& offset)
-{
-	return ShapeType();
-}
-
-template<CollisionChildClass ShapeType>
-inline void FPhysScene::SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found)
-{
-}

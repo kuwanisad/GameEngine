@@ -187,6 +187,7 @@ public:
 	static bool Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult);
 	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult);
 	static bool Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult);
+	static bool Intersect(const FCapsule& c, const FSphere& s, FHitResult& OutResult);
 
 	static bool Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult);
 	static bool Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult);

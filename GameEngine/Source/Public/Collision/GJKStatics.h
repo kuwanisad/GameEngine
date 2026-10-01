@@ -17,7 +17,6 @@ struct GJKStatics
 private:
 	using SupportFunc = std::function<FVector3(const FVector3&)>;
 
-
 public:
 	static bool Intersect(const FCollision& A, const FCollision& B);
 
