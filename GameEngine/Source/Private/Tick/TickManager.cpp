@@ -64,16 +64,6 @@ void UTickManager::RunTickGroup(ETickingGroup Group, float DeltaTime)
 	}
 }
 
-UTickManager* UTickManager::Get()
-{
-	if (Instance == nullptr)
-	{
-		Instance = new UTickManager();
-	}
-
-	return Instance;
-}
-
 bool UTickManager::TryExecute(FTickFunction* TickFunction, float DeltaTime)
 {
 	if (TickFunction == nullptr)

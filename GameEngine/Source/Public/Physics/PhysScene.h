@@ -5,11 +5,14 @@
 #include "../Core/CoreMinimal.h"
 #include "../Core/Math.h"
 #include "../Collision/HitResult.h"
+#include "../Collision/Collision.h"
 
 class AActor;
 class UBVH;
-struct FCollision;
 struct FLineSegment;
+
+template <typename T>
+concept CollisionChildClass = std::derived_from<T, FCollision>;
 
 struct FPhysicsBodyEntry
 {
@@ -30,17 +33,15 @@ private:
 	std::unordered_set<FCollision*> Collisions;
 
 	//It is called by QueryOverlaps
-	void ProcessOverlapCandidates(const FSphere& test_collision, AActor* mover, TArray<FHitResult>& outHits);
-	void ProcessOverlapCandidates(const FCapsule& test_collision, AActor* mover, TArray<FHitResult>& outHits);
-	void ProcessOverlapCandidates(const FOBB& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+	template<CollisionChildClass ShapeType>
+	void ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits);
+
+	template<CollisionChildClass ShapeType>
+	void SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
 
 	static FSphere TranslateShape(const FSphere& s, const FVector3& offset);
 	static FCapsule TranslateShape(const FCapsule& s, const FVector3& offset);
 	static FOBB TranslateShape(const FOBB& s, const FVector3& offset);
-
-	void SweepQueryCandidates(const FSphere& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
-	void SweepQueryCandidates(const FCapsule& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
-	void SweepQueryCandidates(const FOBB& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
 
 public:
 	FPhysScene();
@@ -52,9 +53,6 @@ public:
 	void UnregisterBody(AActor* _actor);
 
 	void MoveActor(AActor* _Actor, const FVector3& DesiredPos, float margin);
-
-	FPhysScene(const FPhysScene&) = delete;
-	FPhysScene& operator=(const FPhysScene&) = delete;
 
 	bool SegmentCast(const FLineSegment& l, FHitResult& OutResult);
 
@@ -135,6 +133,100 @@ public:
 	// The integrator adds this value as a force/acceleration contribution each
 	// step for FBodyInstance objects with bEnableGravity enabled.
 	static const FVector3 Gravity;
-	template<CollisionChildClass ShapeType>
-	void SweepQueryCandidates(const FSphere& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found);
 };
+
+template<CollisionChildClass ShapeType>
+inline void FPhysScene::ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits)
+{
+	TArray<FCollision*> candidates;
+
+	WorldBVH->Query(test_collision.GetBoundingBox(), candidates);
+
+	for (FCollision* candidate : candidates)
+	{
+		if (candidate->GetOwner() == mover)
+		{
+			continue;
+		}
+
+		bool hit_flag = false;
+
+		FHitResult hit;
+
+		switch (candidate->GetType())
+		{
+		case ECollisionType::Sphere:
+			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FSphere*>(candidate), hit);
+			break;
+		case ECollisionType::Capsule:
+			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FCapsule*>(candidate), hit);
+			break;
+		case ECollisionType::OBB:
+			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FSphere*>(candidate), hit);
+			break;
+		}
+	}
+}
+
+
+template<CollisionChildClass ShapeType>
+inline void FPhysScene::SweepQueryCandidates(const ShapeType& startShape, const FVector3& displacement, AActor* mover, float& bestT, FHitResult& bestHit, bool& found)
+{
+	float bounding_radius = startShape.GetBoundingBox().GetExtent().Length();
+	FCapsule sweep_capsule(startShape.GetCenter(), startShape.GetCenter() + displacement, bounding_radius);
+
+	TArray<FCollision*> candidates;
+	WorldBVH->QuerySphere(sweep_capsule, candidates);
+
+	for (FCollision* candidate : candidates)
+	{
+		if (candidate->GetOwner() == mover)
+		{
+			continue;
+		}
+
+		float t;
+		if (GJKStatics::SweepIntersect(startShape, displacement, *candidate, t) == false)
+		{
+			continue;
+		}
+
+		ShapeType sphere_moved = TranslateShape(startShape, displacement * t);
+		FHitResult hit;
+
+		bool result;
+
+		switch (candidate->GetType())
+		{
+		case ECollisionType::Sphere:
+			result = CollisionStatics::Intersect(sphere_moved, *(FSphere*)candidate, hit);
+			break;
+		case ECollisionType::Capsule:
+			result = CollisionStatics::Intersect(sphere_moved, *(FCapsule*)candidate, hit);
+			break;
+		case ECollisionType::OBB:
+			result = CollisionStatics::Intersect(sphere_moved, *(FOBB*)candidate, hit);
+			break;
+		}
+
+		if (result == false)
+		{
+			float lenSq = displacement.LengthSq();
+			hit.Normal = Math::NearZero(lenSq) ? FVector3::UnitX : (displacement * -1.0f) / Math::Sqrt(lenSq);
+			hit.PenetrationDepth = 0.0f;
+		}
+
+		if (Math::NearZero(t) && FVector3::Dot(hit.Normal, displacement) >= 0.f)
+		{
+			//처음부터 접촉하는데 멀어지는 방향이라서 넘김
+			continue;
+		}
+
+		if (t < bestT)
+		{
+			bestT = t;
+			bestHit = hit;
+			found = true;
+		}
+	}
+}

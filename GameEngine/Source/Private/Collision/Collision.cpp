@@ -1283,7 +1283,20 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FSphere& s, FHitResult
 	d * (target - s) / (- |d|^2) = t
 	*/
 
+	OutResult.BlockingHit = false;
+
 	FLineSegment seg = c.GetSegment();
+
+	float s_radius = s.GetRadius();
+
+	if (seg.MinDistSq(s.GetCenter()) > (c.GetRadius() + s_radius) * (c.GetRadius() + s_radius))
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+
+	FVector3 s_center = s.GetCenter();
 
 	FVector3 start = seg.GetStart();
 	FVector3 d = seg.GetEnd() - start;
@@ -1293,10 +1306,14 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FSphere& s, FHitResult
 
 	t = Math::Clamp(t, 0.f, 1.f);
 
-	FVector3 candidate_point = seg.PointOnSegment(t);
-	asdfasdfs
+	FVector3 point_on_seg = seg.PointOnSegment(t);
+	FVector3 normal = GetNormalDirection(point_on_seg, s_center);
 
-	return false;
+	normal.Normalize();
+	OutResult.Normal = normal;
+	OutResult.ImpactPoint = normal * s_radius;
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult)

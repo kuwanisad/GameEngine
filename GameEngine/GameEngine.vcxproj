@@ -32,6 +32,8 @@
     <ClCompile Include="Source\Private\Core\Main.cpp" />
     <ClCompile Include="Source\Private\Core\Math.cpp" />
     <ClCompile Include="Source\Private\Debugging\DebugManager.cpp" />
+    <ClCompile Include="Source\Private\Input\EnhancedInputComponent.cpp" />
+    <ClCompile Include="Source\Private\Input\InputSubsystem.cpp" />
     <ClCompile Include="Source\Private\Object\Object.cpp" />
     <ClCompile Include="Source\Private\Physcis\PhysScene.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp" />
@@ -40,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Public\Actor\Actor.h" />
+    <ClInclude Include="Source\Public\Actor\FActorSpawnParameters.h" />
     <ClInclude Include="Source\Public\Collision\BVH.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
     <ClInclude Include="Source\Public\Collision\GJKStatics.h" />
@@ -54,8 +57,22 @@
     <ClInclude Include="Source\Public\Core\Engine.h" />
     <ClInclude Include="Source\Public\Core\Math.h" />
     <ClInclude Include="Source\Public\Debugging\DebugManager.h" />
+    <ClInclude Include="Source\Public\Input\EnhancedActionKeyMapping.h" />
+    <ClInclude Include="Source\Public\Input\EnhancedInputComponent.h" />
+    <ClInclude Include="Source\Public\Input\InputAction.h" />
+    <ClInclude Include="Source\Public\Input\InputActionValue.h" />
+    <ClInclude Include="Source\Public\Input\InputMappingContext.h" />
+    <ClInclude Include="Source\Public\Input\InputModifier.h" />
+    <ClInclude Include="Source\Public\Input\InputSubsystem.h" />
+    <ClInclude Include="Source\Public\Input\InputTrigger.h" />
+    <ClInclude Include="Source\Public\Input\InputTriggers.h" />
+    <ClInclude Include="Source\Public\Input\Keys.h" />
+    <ClInclude Include="Source\Public\Input\RawInputState.h" />
+    <ClInclude Include="Source\Public\Input\TriggerEvent.h" />
+    <ClInclude Include="Source\Public\Input\TriggerState.h" />
     <ClInclude Include="Source\Public\Object\Object.h" />
     <ClInclude Include="Source\Public\Physics\BodyInstance.h" />
+    <ClInclude Include="Source\Public\Physics\PhysicalMaterial.h" />
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />

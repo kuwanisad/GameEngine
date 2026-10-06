@@ -20,12 +20,12 @@ AActor::~AActor()
 {
 	if (IsRegisteredInPhysicsLayer)
 	{
-		FPhysScene::Get()->UnregisterBody(this);
+		UEngine::GetEngine()->GetPhysScene()->UnregisterBody(this);
 	}
 
-	UTickManager::Get()->UnregisterTickFunction(&PrimaryActorTick);
+	UEngine::GetEngine()->GetTickManager()->UnregisterTickFunction(&PrimaryActorTick);
 
-	UEngine::Get()->RemoveActor(this);
+	UEngine::GetEngine()->RemoveActor(this);
 
 	while (!Components.empty())
 	{
@@ -35,9 +35,9 @@ AActor::~AActor()
 
 void AActor::Init()
 {
-	UEngine::Get()->AddActor(this);
+	UEngine::GetEngine()->AddActor(this);
 
-	UTickManager::Get()->RegisterTickFunction(&PrimaryActorTick);
+	UEngine::GetEngine()->GetTickManager()->RegisterTickFunction(&PrimaryActorTick);
 }
 
 void AActor::Tick(float DeltaTime)
@@ -53,7 +53,7 @@ void AActor::SetActorLocation(const FVector3& pos, bool Sweep, float margin)
 {
 	if (Sweep)
 	{
-		FPhysScene::Get()->MoveActor(this, pos, margin);
+		UEngine::GetEngine()->GetPhysScene()->MoveActor(this, pos, margin);
 	}
 	else
 	{
@@ -182,6 +182,6 @@ void AActor::RegisterPhysicsBodyIfNeeded()
 
 	if (GetCollisions().size())
 	{
-		IsRegisteredInPhysicsLayer = FPhysScene::Get()->RegisterBody(this);
+		UEngine::GetEngine()->GetPhysScene()->RegisterBody(this);
 	}
 }

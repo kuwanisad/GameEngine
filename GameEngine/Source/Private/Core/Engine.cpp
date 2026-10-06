@@ -1,6 +1,10 @@
-#include "../../Public/Core/Engine.h"
 #include <cstdio>
 #include <algorithm>
+
+#include "../../Public/Core/Engine.h"
+#include "../../Public/Physics/PhysScene.h"
+#include "../../Public/Tick/TickManager.h"
+#include "../../Public/Input/InputSubsystem.h"
 
 UEngine::UEngine()
 {
@@ -10,7 +14,20 @@ UEngine::~UEngine()
 {
 }
 
-UEngine* UEngine::Get()
+bool UEngine::Initialize()
+{
+	return false;
+}
+
+void UEngine::RunLoop()
+{
+}
+
+void UEngine::Shutdown()
+{
+}
+
+UEngine* UEngine::GetEngine()
 {
 	if (Instance == nullptr)
 	{
@@ -18,6 +35,36 @@ UEngine* UEngine::Get()
 	}
 
 	return Instance;
+}
+
+FPhysScene* UEngine::GetPhysScene()
+{
+	if (PhysScene == nullptr)
+	{
+		PhysScene = new FPhysScene();
+	}
+
+	return PhysScene;
+}
+
+UTickManager* UEngine::GetTickManager()
+{
+	if (TickManager == nullptr)
+	{
+		TickManager = new UTickManager();
+	}
+
+	return TickManager;
+}
+
+UInputSubsystem* UEngine::GetInputSubsystem()
+{
+	if (InputSubsystem == nullptr)
+	{
+		InputSubsystem = new UInputSubsystem();
+	}
+
+	return InputSubsystem;
 }
 
 void UEngine::AddActor(AActor* InActor)
@@ -47,4 +94,12 @@ void UEngine::RemoveActor(AActor* _Actor)
 		std::iter_swap(iter, Actors.end() - 1);
 		Actors.pop_back();
 	}
+}
+
+void UEngine::AddSprite(SpriteComponent* _Sprite)
+{
+}
+
+void UEngine::RemoveSprite(SpriteComponent* _Sprite)
+{
 }

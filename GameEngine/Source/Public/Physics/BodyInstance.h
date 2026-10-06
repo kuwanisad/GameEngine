@@ -1,6 +1,7 @@
 #pragma once
 #include "../Core/CoreMinimal.h"
 #include "../Core/Math.h"
+#include "PhysicalMaterial.h"
 
 /*
 UE FBodyInstance
@@ -23,6 +24,8 @@ struct FBodyInstance
 	}
 
 	float MassInKg = 1.0f;
+
+	UPhysicalMaterial PhysMaterial;
 
 	FVector3 LinearVelocity = FVector3::Zero;
 

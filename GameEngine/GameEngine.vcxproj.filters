@@ -70,6 +70,12 @@
     <Filter Include="소스 파일\Source\Public\Physics">
       <UniqueIdentifier>{e72df7c6-de47-4d5c-8898-af36a4c21de5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Input">
+      <UniqueIdentifier>{3bd45dbf-bdc0-4360-b201-3d3ed27aa6ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Input">
+      <UniqueIdentifier>{1fbcc7bb-7dc8-4621-9036-27b5ea4b28b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -125,6 +131,12 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Collision\GJKStatics.cpp">
       <Filter>소스 파일\Source\Private\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Input\InputSubsystem.cpp">
+      <Filter>소스 파일\Source\Private\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Input\EnhancedInputComponent.cpp">
+      <Filter>소스 파일\Source\Private\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,6 +208,51 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Collision\GJKStatics.h">
       <Filter>소스 파일\Source\Public\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Physics\PhysicalMaterial.h">
+      <Filter>소스 파일\Source\Public\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Actor\FActorSpawnParameters.h">
+      <Filter>소스 파일\Source\Public\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputSubsystem.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\RawInputState.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\Keys.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\EnhancedInputComponent.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputAction.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\TriggerState.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\TriggerEvent.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputActionValue.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputMappingContext.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\EnhancedActionKeyMapping.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputModifier.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputTrigger.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputTriggers.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

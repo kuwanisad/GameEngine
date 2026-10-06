@@ -8,6 +8,9 @@ class FTickFunction;
 class UTickManager
 {
 public:
+	UTickManager();
+	~UTickManager();
+
 	void RegisterTickFunction(FTickFunction* TickFunction);
 	void UnregisterTickFunction(FTickFunction* TickFunction);
 
@@ -16,12 +19,7 @@ public:
 
 	void RunTickGroup(ETickingGroup Group, float DeltaTime);
 
-	static UTickManager* Get();
-
 private:
-	//Static class
-	UTickManager();
-	~UTickManager();
 
 	bool TryExecute(FTickFunction* TickFunction, float DeltaTime);
 
@@ -29,6 +27,4 @@ private:
 
 	// Tick Prerequisite
 	std::vector<FTickFunction*> Deferred;
-
-	static UTickManager* Instance;
 };

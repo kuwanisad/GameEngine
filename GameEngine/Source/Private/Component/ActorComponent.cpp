@@ -1,6 +1,7 @@
 #include "../../Public/Component/ActorComponent.h"
 #include "../../Public/Actor/Actor.h"
 #include "../../Public/Tick/TickManager.h"
+#include "../../Public/Core/Engine.h"
 
 
 UActorComponent::UActorComponent(AActor* _Owner) : Owner(_Owner)
@@ -13,12 +14,12 @@ UActorComponent::UActorComponent(AActor* _Owner) : Owner(_Owner)
 
 UActorComponent::~UActorComponent()
 {
-	UTickManager::Get()->UnregisterTickFunction(&PrimaryComponentTick);
+	UEngine::GetEngine()->GetTickManager()->UnregisterTickFunction(&PrimaryComponentTick);
 }
 
 void UActorComponent::Init()
 {
-	UTickManager::Get()->RegisterTickFunction(&PrimaryComponentTick);
+	UEngine::GetEngine()->GetTickManager()->RegisterTickFunction(&PrimaryComponentTick);
 }
 
 void UActorComponent::Tick(float DeltaTime)
