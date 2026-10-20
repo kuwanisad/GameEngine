@@ -18,8 +18,9 @@ public:
 	ETriggerState UpdateState(const FInputActionValue& ModifiedValue) override
 	{
 		bool IsActive = ModifiedValue.IsNonZero();
-
+		WasActive = IsActive;
 		ETriggerState Result = (IsActive && !WasActive) ? ETriggerState::Triggered : ETriggerState::None;
+		return Result;
 	}
 
 private:

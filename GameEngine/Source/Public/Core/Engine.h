@@ -22,9 +22,19 @@ private:
 	TArray<AActor*> Actors;
 	TArray<AActor*> PendingActors;
 
+	bool IsRunning = false;
 	bool IsUpdatingActors = false;
+	uint32 TickCount;
 
 	float CurrentDeltaSeconds = 0.f;
+
+	void ProcessInput();
+	void UpdateGame();
+	void GenerateOutput();
+	void LoadData();
+	void UnloadData();
+
+	void ResetAccumulatedForceThisTick();
 
 public:
 	UEngine();

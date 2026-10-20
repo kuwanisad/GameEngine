@@ -1,12 +1,13 @@
-#include <cstdio>
-#include <algorithm>
-
 #include "../../Public/Core/Engine.h"
 #include "../../Public/Physics/PhysScene.h"
 #include "../../Public/Tick/TickManager.h"
 #include "../../Public/Input/InputSubsystem.h"
 
 UEngine::UEngine()
+	: IsRunning(true),
+	IsUpdatingActors(false),
+	TickCount(0),
+	PhysScene(nullptr)
 {
 }
 
@@ -17,6 +18,30 @@ UEngine::~UEngine()
 bool UEngine::Initialize()
 {
 	return false;
+}
+
+void UEngine::ProcessInput()
+{
+}
+
+void UEngine::UpdateGame()
+{
+}
+
+void UEngine::GenerateOutput()
+{
+}
+
+void UEngine::LoadData()
+{
+}
+
+void UEngine::UnloadData()
+{
+}
+
+void UEngine::ResetAccumulatedForceThisTick()
+{
 }
 
 void UEngine::RunLoop()
