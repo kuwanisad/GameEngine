@@ -76,6 +76,12 @@
     <Filter Include="소스 파일\Source\Private\Input">
       <UniqueIdentifier>{1fbcc7bb-7dc8-4621-9036-27b5ea4b28b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Test">
+      <UniqueIdentifier>{6e271cff-8ed3-41cf-8ca5-ed42d2514bd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Rendering">
+      <UniqueIdentifier>{11206ec1-a095-4b78-a3aa-3fe2b45e0c05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -252,6 +258,12 @@
       <Filter>소스 파일\Source\Public\Input</Filter>
     </ClInclude>
     <ClInclude Include="Source\Public\Input\InputTriggers.h">
+      <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\GameplayInputActions.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Input\InputModifiers.h">
       <Filter>소스 파일\Source\Public\Input</Filter>
     </ClInclude>
   </ItemGroup>

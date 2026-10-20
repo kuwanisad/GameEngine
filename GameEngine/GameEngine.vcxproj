@@ -63,6 +63,7 @@
     <ClInclude Include="Source\Public\Input\InputActionValue.h" />
     <ClInclude Include="Source\Public\Input\InputMappingContext.h" />
     <ClInclude Include="Source\Public\Input\InputModifier.h" />
+    <ClInclude Include="Source\Public\Input\InputModifiers.h" />
     <ClInclude Include="Source\Public\Input\InputSubsystem.h" />
     <ClInclude Include="Source\Public\Input\InputTrigger.h" />
     <ClInclude Include="Source\Public\Input\InputTriggers.h" />
@@ -74,6 +75,7 @@
     <ClInclude Include="Source\Public\Physics\BodyInstance.h" />
     <ClInclude Include="Source\Public\Physics\PhysicalMaterial.h" />
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
+    <ClInclude Include="Source\Public\Test\GameplayInputActions.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />
