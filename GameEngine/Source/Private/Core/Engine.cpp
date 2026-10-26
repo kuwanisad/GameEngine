@@ -3,6 +3,8 @@
 #include "../../Public/Tick/TickManager.h"
 #include "../../Public/Input/InputSubsystem.h"
 
+#include <algorithm>
+
 UEngine::UEngine()
 	: IsRunning(true),
 	IsUpdatingActors(false),
@@ -104,16 +106,16 @@ void UEngine::AddActor(AActor* InActor)
 	}
 }
 
-void UEngine::RemoveActor(AActor* _Actor)
+void UEngine::RemoveActor(AActor* InActor)
 {
-	auto iter = std::find(PendingActors.begin(), PendingActors.end(), _Actor);
+	auto iter = std::find(PendingActors.begin(), PendingActors.end(), InActor);
 	if (iter != PendingActors.end())
 	{
 		std::iter_swap(iter, PendingActors.end() - 1);
 		PendingActors.pop_back();
 	}
 
-	iter = std::find(Actors.begin(), Actors.end(), _Actor);
+	iter = std::find(Actors.begin(), Actors.end(), InActor);
 	if (iter != Actors.end())
 	{
 		std::iter_swap(iter, Actors.end() - 1);

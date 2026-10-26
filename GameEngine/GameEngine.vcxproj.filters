@@ -82,6 +82,9 @@
     <Filter Include="소스 파일\Source\Public\Rendering">
       <UniqueIdentifier>{11206ec1-a095-4b78-a3aa-3fe2b45e0c05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Private\Rendering">
+      <UniqueIdentifier>{7ef216ca-4c88-4522-b1a8-cec33c310099}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -143,6 +146,18 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Input\EnhancedInputComponent.cpp">
       <Filter>소스 파일\Source\Private\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\VertexContainer.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\RenderingStatics.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\Texture.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\Shader.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +280,18 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Input\InputModifiers.h">
       <Filter>소스 파일\Source\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\VertexContainer.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\RenderingStatics.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\Texture.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\Shader.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

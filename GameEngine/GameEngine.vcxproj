@@ -36,6 +36,10 @@
     <ClCompile Include="Source\Private\Input\InputSubsystem.cpp" />
     <ClCompile Include="Source\Private\Object\Object.cpp" />
     <ClCompile Include="Source\Private\Physcis\PhysScene.cpp" />
+    <ClCompile Include="Source\Private\Rendering\RenderingStatics.cpp" />
+    <ClCompile Include="Source\Private\Rendering\Shader.cpp" />
+    <ClCompile Include="Source\Private\Rendering\Texture.cpp" />
+    <ClCompile Include="Source\Private\Rendering\VertexContainer.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\TickManager.cpp" />
@@ -75,6 +79,10 @@
     <ClInclude Include="Source\Public\Physics\BodyInstance.h" />
     <ClInclude Include="Source\Public\Physics\PhysicalMaterial.h" />
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
+    <ClInclude Include="Source\Public\Rendering\RenderingStatics.h" />
+    <ClInclude Include="Source\Public\Rendering\Shader.h" />
+    <ClInclude Include="Source\Public\Rendering\Texture.h" />
+    <ClInclude Include="Source\Public\Rendering\VertexContainer.h" />
     <ClInclude Include="Source\Public\Test\GameplayInputActions.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />

@@ -7,7 +7,7 @@
 
 UEnhancedInputComponent::UEnhancedInputComponent(AActor* _Owner) : UActorComponent(_Owner)
 {
-
+	UEngine::GetEngine()->GetInputSubsystem()->RegisterInputComponent(this);
 }
 
 UEnhancedInputComponent::~UEnhancedInputComponent()

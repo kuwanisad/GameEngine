@@ -12,6 +12,8 @@ using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 
+using engine_size_t = size_t;
+
 //이런 식으로 명명하는 이유는 언리얼을 교재로 삼았음을 뜻함
 using FString = std::string;
 

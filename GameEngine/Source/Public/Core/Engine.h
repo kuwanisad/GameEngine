@@ -55,7 +55,7 @@ public:
 	static UEngine* GetEngine();
 
 	void AddActor(AActor* InActor);
-	void RemoveActor(AActor* _Actor);
+	void RemoveActor(AActor* InActor);
 
 	void AddSprite(SpriteComponent* _Sprite);
 	void RemoveSprite(SpriteComponent* _Sprite);
