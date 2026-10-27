@@ -85,6 +85,12 @@
     <Filter Include="소스 파일\Source\Private\Rendering">
       <UniqueIdentifier>{7ef216ca-4c88-4522-b1a8-cec33c310099}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Asset">
+      <UniqueIdentifier>{9d355614-5c39-495c-aed6-c0cd746c73a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Asset">
+      <UniqueIdentifier>{f1691212-b510-48fb-9adb-2cd176fa55ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -158,6 +164,15 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Rendering\Shader.cpp">
       <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\Mesh.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\Renderer.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Asset\AssetManager.cpp">
+      <Filter>소스 파일\Source\Private\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +307,15 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Rendering\Shader.h">
       <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\Mesh.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\Renderer.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Asset\AssetManager.h">
+      <Filter>소스 파일\Source\Public\Asset</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

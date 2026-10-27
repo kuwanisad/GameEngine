@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Actor\Actor.cpp" />
+    <ClCompile Include="Source\Private\Asset\AssetManager.cpp" />
     <ClCompile Include="Source\Private\Collision\BVH.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
     <ClCompile Include="Source\Private\Collision\GJKStatics.cpp" />
@@ -36,6 +37,8 @@
     <ClCompile Include="Source\Private\Input\InputSubsystem.cpp" />
     <ClCompile Include="Source\Private\Object\Object.cpp" />
     <ClCompile Include="Source\Private\Physcis\PhysScene.cpp" />
+    <ClCompile Include="Source\Private\Rendering\Mesh.cpp" />
+    <ClCompile Include="Source\Private\Rendering\Renderer.cpp" />
     <ClCompile Include="Source\Private\Rendering\RenderingStatics.cpp" />
     <ClCompile Include="Source\Private\Rendering\Shader.cpp" />
     <ClCompile Include="Source\Private\Rendering\Texture.cpp" />
@@ -47,6 +50,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Public\Actor\Actor.h" />
     <ClInclude Include="Source\Public\Actor\FActorSpawnParameters.h" />
+    <ClInclude Include="Source\Public\Asset\AssetManager.h" />
     <ClInclude Include="Source\Public\Collision\BVH.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
     <ClInclude Include="Source\Public\Collision\GJKStatics.h" />
@@ -79,6 +83,8 @@
     <ClInclude Include="Source\Public\Physics\BodyInstance.h" />
     <ClInclude Include="Source\Public\Physics\PhysicalMaterial.h" />
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
+    <ClInclude Include="Source\Public\Rendering\Mesh.h" />
+    <ClInclude Include="Source\Public\Rendering\Renderer.h" />
     <ClInclude Include="Source\Public\Rendering\RenderingStatics.h" />
     <ClInclude Include="Source\Public\Rendering\Shader.h" />
     <ClInclude Include="Source\Public\Rendering\Texture.h" />

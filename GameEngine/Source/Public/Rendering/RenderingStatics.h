@@ -9,4 +9,6 @@ public:
 	static engine_size_t VertexPosSize;
 	static engine_size_t VertexNormSize;
 	static engine_size_t VertexUVSize;
+
+	static FString WhiteTextureName;
 };

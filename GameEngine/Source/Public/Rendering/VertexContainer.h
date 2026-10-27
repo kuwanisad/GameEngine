@@ -1,6 +1,6 @@
 #pragma once
 
-class FVertexContainer
+struct FVertexContainer
 {
 private:
 	unsigned int VertexCount;

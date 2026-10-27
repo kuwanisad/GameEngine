@@ -6,19 +6,39 @@
 #include <GL/glew.h>
 #include <SDL.h>
 
-bool UTexture::Load(const FString& FileName)
-{
-	return false;
-}
-
-void UTexture::CreateWhite1x1()
+UTexture::UTexture() :
+	ID(0),
+	width(0),
+	Height(0)
 {
 }
 
-void UTexture::Unload()
+UTexture::~UTexture()
 {
+}
+
+void UTexture::SetName(const FString& InName)
+{
+	Name = InName;
+}
+
+void UTexture::SetSize(int32 InWidth, int32 InHeight)
+{
+	width = InWidth;
+	Height = InHeight;
+}
+
+void UTexture::SetID(uint32 InID)
+{
+	ID = InID;
 }
 
 void UTexture::SetActive()
 {
+	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+void UTexture::Unload()
+{
+	glDeleteTextures(1, &ID);
 }
