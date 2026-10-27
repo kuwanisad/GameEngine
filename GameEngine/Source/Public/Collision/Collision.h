@@ -181,18 +181,20 @@ public:
 
 	static bool Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult);
 
-	static bool Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult);
 	static bool Intersect(const FOBB& O1, const FAABB& A2, FHitResult& OutResult);
+	static bool Intersect(const FOBB& O1, const FCapsule& c, FHitResult& OutResult); //검토 필요
+	static bool Intersect(const FOBB& O1, const FOBB& O2, FHitResult& OutResult);
+	static bool Intersect(const FOBB& O1, const FSphere& s, FHitResult& OutResult);
 
-	static bool Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult);
-	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult);
 	static bool Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult);
+	static bool Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult);
+	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult); //검토 필요
 	static bool Intersect(const FCapsule& c, const FSphere& s, FHitResult& OutResult);
 
 	static bool Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult);
-	static bool Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult);
-	static bool Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult);
 	static bool Intersect(const FSphere& s, const FCapsule& c, FHitResult& OutResult);
+	static bool Intersect(const FSphere& s, const FOBB& o, FHitResult& OutResult);
+	static bool Intersect(const FSphere& a, const FSphere& b, FHitResult& OutResult);
 
 	static bool Intersect(const FLineSegment& l, const FSphere& s, FHitResult& OutResult);
 	static bool Intersect(const FLineSegment& l, const FPlane& p, FHitResult& OutResult);

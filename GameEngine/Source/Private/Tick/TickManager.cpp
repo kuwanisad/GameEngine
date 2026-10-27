@@ -2,9 +2,6 @@
 #include "../../Public/Tick/TickFunction.h"
 #include <algorithm>
 
-UTickManager* UTickManager::Instance = nullptr;
-
-
 void UTickManager::RegisterTickFunction(FTickFunction* TickFunction)
 {
 	TickFunctionsByGroup[static_cast<int>(TickFunction->TickGroup)].push_back(TickFunction);
@@ -87,6 +84,10 @@ bool UTickManager::TryExecute(FTickFunction* TickFunction, float DeltaTime)
 
 	TickFunction->HasTickedThisFrame = true;
 	return true;
+}
+
+UTickManager::UTickManager()
+{
 }
 
 UTickManager::~UTickManager()

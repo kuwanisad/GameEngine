@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+UEngine* UEngine::Instance = nullptr;
+
 UEngine::UEngine()
 	: IsRunning(true),
 	IsUpdatingActors(false),

@@ -6,6 +6,8 @@
 #include "../Core/Math.h"
 #include "../Collision/HitResult.h"
 #include "../Collision/Collision.h"
+#include "../Collision/GJKStatics.h"
+#include "../Collision/BVH.h"
 
 class AActor;
 class UBVH;
@@ -52,15 +54,10 @@ public:
 	bool RegisterBody(AActor* _actor);
 	void UnregisterBody(AActor* _actor);
 
-	void MoveActor(AActor* _Actor, const FVector3& DesiredPos, float margin);
-
 	bool SegmentCast(const FLineSegment& l, FHitResult& OutResult);
 
 	void AddCollision(FCollision* InCollision);
 	void RemoveCollision(FCollision* InCollision);
-
-	bool RegisterBody(AActor* actor);
-	void UnregisterBody(AActor* actor);
 
 	void ForEachRegisteredBody(std::function<void(AActor*)> f);
 
@@ -176,7 +173,7 @@ inline void FPhysScene::SweepQueryCandidates(const ShapeType& startShape, const 
 	FCapsule sweep_capsule(startShape.GetCenter(), startShape.GetCenter() + displacement, bounding_radius);
 
 	TArray<FCollision*> candidates;
-	WorldBVH->QuerySphere(sweep_capsule, candidates);
+	WorldBVH->QueryCapsule(sweep_capsule, candidates);
 
 	for (FCollision* candidate : candidates)
 	{

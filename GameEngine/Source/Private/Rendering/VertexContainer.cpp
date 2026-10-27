@@ -17,9 +17,9 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 
 	switch (_Layout)
 	{
-	case VertexContainer::PosNormTex:
+	case FVertexContainer::Layout::PosNormTex:
 		break;
-	case VertexContainer::PosNormSkinTex:
+	case FVertexContainer::Layout::PosNormSkinTex:
 		//본 인덱스 + 보간값이라서 *2
 		VertexSize += RenderingStatics::VertexLerpBoneCount * 2;
 		break;
@@ -52,12 +52,12 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 
 	switch (_Layout)
 	{
-	case VertexContainer::PosNormTex:
+	case FVertexContainer::Layout::PosNormTex:
 		//텍스처 uv
 		glEnableVertexAttribArray(ShaderLayout);
 		glVertexAttribPointer(ShaderLayout, 2, GL_FLOAT, GL_FALSE, VertexSize, reinterpret_cast<void*>(PointerOffset));
 		break;
-	case VertexContainer::PosNormSkinTex:
+	case FVertexContainer::Layout::PosNormSkinTex:
 		//스키닝 본 인덱스(int)
 		glEnableVertexAttribArray(ShaderLayout);
 
@@ -79,7 +79,7 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 	}
 }
 
-FVertexContainer::~VertexContainer()
+FVertexContainer::~FVertexContainer()
 {
 	glDeleteBuffers(1, &VBO_ID);
 	glDeleteBuffers(1, &IBO_ID);

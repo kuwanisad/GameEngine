@@ -50,8 +50,6 @@ public:
 	template<ActorChildClass T>
 	T* SpawnActor(const FVector3& Location, const FQuaternion& Rotation, const FVector3& Scale);
 
-	void RemoveActor(class AActor* _Actor);
-
 	static UEngine* GetEngine();
 
 	void AddActor(AActor* InActor);

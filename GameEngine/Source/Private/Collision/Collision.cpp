@@ -1043,6 +1043,75 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& Out
 	return true;
 }
 
+bool CollisionStatics::Intersect(const FOBB& O1, const FSphere& s, FHitResult& OutResult)
+{
+	OutResult.BlockingHit = false;
+
+	FQuaternion invRot = O1.GetRotation();
+	invRot.Conjugate();
+
+	FVector3 center = O1.GetCenter();
+	FVector3 extent = O1.GetExtent();
+
+	FVector3 local_s_center = FVector3::Transform(s.GetCenter() - center, invRot);
+
+	float radius = s.GetRadius();
+
+	FVector3 closest;
+	closest.x = Math::Clamp(local_s_center.x, -extent.x, extent.x);
+	closest.y = Math::Clamp(local_s_center.y, -extent.y, extent.y);
+	closest.z = Math::Clamp(local_s_center.z, -extent.z, extent.z);
+
+	FVector3 diff = GetNormalDirection(local_s_center, closest);
+	float distSq = diff.LengthSq();
+
+	if (distSq > radius * radius)
+	{
+		return false;
+	}
+
+	FVector3 local_normal = FVector3::Zero;
+	float dist = Math::Sqrt(distSq);
+
+	if (Math::NearZero(distSq))
+	{
+		float minDist = Math::Infinity;
+
+		for (int32 i = 0; i < 3; ++i)
+		{
+			float distToMin = local_s_center[i] + extent[i];
+			float distToMax = extent[i] - local_s_center[i];
+
+			if (distToMin < minDist)
+			{
+				minDist = distToMin;
+				local_normal = FVector3::Zero;
+				local_normal[i] = -1.f;
+			}
+
+			if (distToMax < minDist)
+			{
+				minDist = distToMax;
+				local_normal = FVector3::Zero;
+				local_normal[i] = 1.f;
+			}
+		}
+
+		OutResult.PenetrationDepth = radius + minDist;
+	}
+	else
+	{
+		local_normal = diff / dist;
+		OutResult.PenetrationDepth = radius - dist;
+	}
+
+	OutResult.BlockingHit = true;
+	OutResult.Normal = FVector3::Transform(local_normal, O1.GetRotation());
+	OutResult.ImpactPoint = FVector3::Transform(closest, O1.GetRotation()) + center;
+
+	return true;
+}
+
 bool CollisionStatics::Intersect(const FOBB& O1, const FAABB& A2, FHitResult& OutResult)
 {
 	FOBB obb(A2.GetCenter(), FQuaternion::Identity, A2.GetExtent());
@@ -1050,6 +1119,174 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FAABB& A2, FHitResult& Ou
 	bool result = Intersect(O1, obb, OutResult);
 
 	return result;
+}
+
+bool CollisionStatics::Intersect(const FOBB& O1, const FCapsule& c, FHitResult& OutResult)
+{
+	OutResult.BlockingHit = false;
+
+	FQuaternion invRot = O1.GetRotation();
+	invRot.Conjugate();
+
+	FVector3 center = O1.GetCenter();
+	FVector3 extent = O1.GetExtent();
+
+	FLineSegment seg = c.GetSegment();
+
+	FVector3 start = FVector3::Transform(seg.GetStart() - center, invRot);
+
+	FVector3 end = FVector3::Transform(seg.GetEnd() - center, invRot);
+
+	FVector3 direction = end - start;
+
+	float breakpoints[8]{};
+	int32 breakpointCount = 0;
+
+	breakpoints[breakpointCount++] = 0.f;
+	breakpoints[breakpointCount++] = 1.f;
+
+	for (int32 axis = 0; axis < 3; ++axis)
+	{
+		if (Math::NearZero(direction[axis]))
+		{
+			continue;
+		}
+
+		float tMin = (-extent[axis] - start[axis]) / direction[axis];
+		float tMax = (extent[axis] - start[axis]) / direction[axis];
+
+		if (tMin > 0.f && tMin < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMin;
+		}
+
+		if (tMax > 0.f && tMax < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMax;
+		}
+	}
+
+	for (int32 i = 1; i < breakpointCount; ++i)
+	{
+		float value = breakpoints[i];
+		int32 j = i - 1;
+
+		while (j >= 0 && breakpoints[j] > value)
+		{
+			breakpoints[j + 1] = breakpoints[j];
+			--j;
+		}
+
+		breakpoints[j + 1] = value;
+	}
+
+	float minDistSq = Math::Infinity;
+	FVector3 closestSegmentPoint = FVector3::Zero;
+	FVector3 closestBoxPoint = FVector3::Zero;
+
+	for (int32 i = 0; i < breakpointCount - 1; ++i)
+	{
+		float t0 = breakpoints[i];
+		float t1 = breakpoints[i + 1];
+		float mid = (t0 + t1) * 0.5f;
+
+		float numerator = 0.f;
+		float denominator = 0.f;
+
+		for (int32 axis = 0; axis < 3; ++axis)
+		{
+			float midPos = start[axis] + direction[axis] * mid;
+			float boundary;
+
+			if (midPos < -extent[axis])
+			{
+				boundary = -extent[axis];
+			}
+			else if (midPos > extent[axis])
+			{
+				boundary = extent[axis];
+			}
+			else
+			{
+				continue;
+			}
+
+			numerator += direction[axis] * (start[axis] - boundary);
+			denominator += direction[axis] * direction[axis];
+		}
+
+		float t = t0;
+
+		if (!Math::NearZero(denominator))
+		{
+			t = Math::Clamp(-numerator / denominator, t0, t1);
+		}
+
+		FVector3 p = start + direction * t;
+
+		FVector3 q(
+			Math::Clamp(p.x, -extent.x, extent.x),
+			Math::Clamp(p.y, -extent.y, extent.y),
+			Math::Clamp(p.z, -extent.z, extent.z)
+		);
+
+		float distSq = (p - q).LengthSq();
+
+		if (distSq < minDistSq)
+		{
+			minDistSq = distSq;
+			closestSegmentPoint = p;
+			closestBoxPoint = q;
+		}
+	}
+
+	float radius = c.GetRadius();
+
+	if (minDistSq > radius * radius)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+
+	OutResult.ImpactPoint = FVector3::Transform(closestBoxPoint, O1.GetRotation()) + center;
+	FVector3 normalLocal;
+
+	if (Math::NearZero(minDistSq))
+	{
+		FVector3 p = closestSegmentPoint;
+
+		float faceDist[3] =
+		{
+			extent.x - Math::Abs(p.x),
+			extent.y - Math::Abs(p.y),
+			extent.z - Math::Abs(p.z)
+		};
+
+		int32 axis = 0;
+
+		if (faceDist[1] < faceDist[axis])
+		{
+			axis = 1;
+		}
+
+		if (faceDist[2] < faceDist[axis])
+		{
+			axis = 2;
+		}
+
+		normalLocal = FVector3::Zero;
+		normalLocal[axis] = (p[axis] >= 0.f) ? 1.f : -1.f;
+	}
+	else
+	{
+		normalLocal = (closestSegmentPoint - closestBoxPoint) / Math::Sqrt(minDistSq);
+	}
+
+	OutResult.Normal = FVector3::Transform(normalLocal, O1.GetRotation()) * -1.f;
+	OutResult.PenetrationDepth = radius - Math::Sqrt(minDistSq);
+
+	return true;
 }
 
 bool CollisionStatics::Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult)
@@ -1083,111 +1320,164 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& O
 {
 	OutResult.BlockingHit = false;
 
-	//capsule --> OBB local space;
 	FQuaternion invRot = o.GetRotation();
 	invRot.Conjugate();
 
 	FVector3 o_center = o.GetCenter();
-	FVector3 o_extent = o.GetExtent();
+	FVector3 extent = o.GetExtent();
 
 	FLineSegment seg = c.GetSegment();
 
-	/*
-	target * R + translation = p'
-	target * R = p' - translation
-	target = (p' - translation) * R^-1
-	*/
-	FVector3 seg_local_start = FVector3::Transform(seg.GetStart() - o_center, invRot);
-	FVector3 seg_local_end = FVector3::Transform(seg.GetEnd() - o_center, invRot);
+	FVector3 start = FVector3::Transform(seg.GetStart() - o_center, invRot);
+	FVector3 end = FVector3::Transform(seg.GetEnd() - o_center, invRot);
+	FVector3 direction = end - start;
 
-	FVector3 seg_direction = seg_local_end - seg_local_start;
-	float seg_direction_lenSq = seg_direction.LengthSq();
+	float breakpoints[8]{};
+	int32 breakpointCount = 0;
 
-	// =========================================================
-	// this commend was aidded by Claude
-	// 
-	// Find the actual closest-point pair (p, q) between the capsule centerline and the box
-	//
-	// Since both the line segment and the box are convex shapes, repeatedly
-	// projecting onto the other shape (alternating projection) is guaranteed
-	// to converge to the true closest-point pair (the pair that minimizes the
-	// global distance). The distance never increases during each iteration.
-	//   - p: current candidate point on the line segment
-	//   - q: point obtained by clamping p to the box surface
-	// =========================================================
-	FVector3 p = seg_local_start; //Start point
-	FVector3 q = FVector3::Zero;
+	breakpoints[breakpointCount++] = 0.f;
+	breakpoints[breakpointCount++] = 1.f;
 
-	for (int32 i = 0; i < IterationCount; ++i)
+	for (int32 axis = 0; axis < 3; ++axis)
 	{
-		q.x = Math::Clamp(p.x, -o_extent.x, o_extent.x);
-		q.y = Math::Clamp(p.y, -o_extent.y, o_extent.y);
-		q.z = Math::Clamp(p.z, -o_extent.z, o_extent.z);
-
-		if (Math::NearZero(seg_direction_lenSq))
+		if (Math::NearZero(direction[axis]))
 		{
-			// The capsule degenerates to a sphere.
-			break;
+			continue;
 		}
 
-		/*
-		this p is a point. not local variable p.
-		p, proj
-		(p - proj) * d = 0
-		(p - (a + dt)) * d = 0
-		pd - ad - d^2 * t = 0
-		d^2 * t = pd - ad
-		t = (pd - ad) / d^2
-		*/
-		float t = Math::Clamp(FVector3::Dot(q - seg_local_start, seg_direction) / seg_direction_lenSq, 0.f, 1.f);
-		p = seg_local_start + t * seg_direction;
+		float tMin = (-extent[axis] - start[axis]) / direction[axis];
+		float tMax = (extent[axis] - start[axis]) / direction[axis];
+
+		if (tMin > 0.f && tMin < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMin;
+		}
+
+		if (tMax > 0.f && tMax < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMax;
+		}
 	}
 
+	for (int32 i = 1; i < breakpointCount; ++i)
+	{
+		float value = breakpoints[i];
+		int32 j = i - 1;
 
-	FVector3 diff_p_q = GetNormalDirection(p, q);
-	float dist_p_q = diff_p_q.LengthSq();
+		while (j >= 0 && breakpoints[j] > value)
+		{
+			breakpoints[j + 1] = breakpoints[j];
+			--j;
+		}
 
-	float c_radius = c.GetRadius();
+		breakpoints[j + 1] = value;
+	}
 
-	if (dist_p_q > c_radius * c_radius)
+	float minDistSq = Math::Infinity;
+	FVector3 closestSegmentPoint = FVector3::Zero;
+	FVector3 closestBoxPoint = FVector3::Zero;
+
+	for (int32 i = 0; i < breakpointCount - 1; ++i)
+	{
+		float t0 = breakpoints[i];
+		float t1 = breakpoints[i + 1];
+		float mid = (t0 + t1) * 0.5f;
+
+		float numerator = 0.f;
+		float denominator = 0.f;
+
+		for (int32 axis = 0; axis < 3; ++axis)
+		{
+			float midPos = start[axis] + direction[axis] * mid;
+			float boundary;
+
+			if (midPos < -extent[axis])
+			{
+				boundary = -extent[axis];
+			}
+			else if (midPos > extent[axis])
+			{
+				boundary = extent[axis];
+			}
+			else
+			{
+				continue;
+			}
+
+			numerator += direction[axis] * (start[axis] - boundary);
+			denominator += direction[axis] * direction[axis];
+		}
+
+		float t = t0;
+
+		if (!Math::NearZero(denominator))
+		{
+			t = Math::Clamp(-numerator / denominator, t0, t1);
+		}
+
+		FVector3 p = start + direction * t;
+
+		FVector3 q(
+			Math::Clamp(p.x, -extent.x, extent.x),
+			Math::Clamp(p.y, -extent.y, extent.y),
+			Math::Clamp(p.z, -extent.z, extent.z)
+		);
+
+		FVector3 diff = p - q;
+		float distSq = diff.LengthSq();
+
+		if (distSq < minDistSq)
+		{
+			minDistSq = distSq;
+			closestSegmentPoint = p;
+			closestBoxPoint = q;
+		}
+	}
+
+	float radius = c.GetRadius();
+
+	if (minDistSq > radius * radius)
 	{
 		return false;
 	}
 
 	OutResult.BlockingHit = true;
-	OutResult.ImpactPoint = FVector3::Transform(q, o.GetRotation()) + o_center;
+	OutResult.ImpactPoint = FVector3::Transform(closestBoxPoint, o.GetRotation()) + o_center;
+	FVector3 normalLocal;
 
-	FVector3 normal_local;
-
-
-	//inside
-	if (Math::NearZero(dist_p_q))
+	if (Math::NearZero(minDistSq))
 	{
-		FVector3 p_abs(Math::Abs(p.x), Math::Abs(p.y), Math::Abs(p.z));
-		float dx = o_extent.x - p_abs.x;
-		float dy = o_extent.y - p_abs.y;
-		float dz = o_extent.z - p_abs.z;
+		FVector3 p = closestSegmentPoint;
 
-		if (dx < dy && dx < dz)
+		float faceDist[3] =
 		{
-			normal_local = FVector3(((p.x > 0) ? 1.f : -1.f), 0, 0);
-		}
-		else if (dy < dz)
+			extent.x - Math::Abs(p.x),
+			extent.y - Math::Abs(p.y),
+			extent.z - Math::Abs(p.z)
+		};
+
+		int32 axis = 0;
+
+		if (faceDist[1] < faceDist[axis])
 		{
-			normal_local = FVector3(0, ((p.y > 0) ? 1.f : -1.f), 0);
+			axis = 1;
 		}
-		else
+
+		if (faceDist[2] < faceDist[axis])
 		{
-			normal_local = FVector3(0, 0, ((p.z > 0) ? 1.f : -1.f));
+			axis = 2;
 		}
+
+		normalLocal = FVector3::Zero;
+		normalLocal[axis] = (p[axis] >= 0.f) ? 1.f : -1.f;
 	}
 	else
 	{
-		normal_local = diff_p_q / Math::Sqrt(dist_p_q);
+		normalLocal = (closestSegmentPoint - closestBoxPoint) / Math::Sqrt(minDistSq);
 	}
 
-	OutResult.Normal = FVector3::Transform(normal_local, o.GetRotation());
-	OutResult.PenetrationDepth = c_radius - Math::Sqrt(dist_p_q);
+	OutResult.Normal = FVector3::Transform(normalLocal, o.GetRotation());
+	OutResult.PenetrationDepth = radius - Math::Sqrt(minDistSq);
 
 	return true;
 }

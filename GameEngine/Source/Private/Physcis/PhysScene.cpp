@@ -7,6 +7,7 @@
 #include "../../Public/Component/ShapeComponent.h"
 #include "../../Public/Core/Cast.h"
 
+FPhysScene* FPhysScene::Instance = nullptr;
 
 const int FPhysScene::MaxPenetrationIterations = 16;
 const float FPhysScene::SleepLinearVelocityThreshold = 5.0f;

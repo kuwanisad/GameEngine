@@ -89,6 +89,7 @@
     <ClInclude Include="Source\Public\Rendering\Shader.h" />
     <ClInclude Include="Source\Public\Rendering\Texture.h" />
     <ClInclude Include="Source\Public\Rendering\VertexContainer.h" />
+    <ClInclude Include="Source\Public\stb_image\stb_image.h" />
     <ClInclude Include="Source\Public\Test\GameplayInputActions.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />

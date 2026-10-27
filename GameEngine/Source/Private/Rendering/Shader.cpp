@@ -19,12 +19,12 @@ FShaderPipeline::~FShaderPipeline()
 bool FShaderPipeline::IsVaildProgram()
 {
     GLint status;
-    glGetProgramiv(ShaderProgramID, GL_LINK_STATUS, &status);
+    glGetProgramiv(ProgramID, GL_LINK_STATUS, &status);
     if (status != GL_TRUE)
     {
         char buffer[512];
         memset(buffer, 0, 512);
-        glGetProgramInfoLog(ShaderProgramID, 511, nullptr, buffer);
+        glGetProgramInfoLog(ProgramID, 511, nullptr, buffer);
         SDL_Log("GLSL Link Status:\n%s", buffer);
         return false;
     }
@@ -62,7 +62,7 @@ void FShaderPipeline::SetMatrix(const char* Name, const FMatrix4x4& Matrix)
 
     if (loc == -1)
     {
-        std::cout << "Shader error " << Name << endl;
+        std::cout << "Shader error " << Name << std::endl;
     }
 
     glUniformMatrix4fv(loc, 1, GL_TRUE, Matrix.GetAsFloatPtr());
@@ -74,7 +74,7 @@ void FShaderPipeline::SetMatrices(const char* Name, const FMatrix4x4* Matrices, 
 
     if (loc == -1)
     {
-        std::cout << "Shader error " << Name << endl;
+        std::cout << "Shader error " << Name << std::endl;
     }
 
     // Matrix4는 순수 float 배열(내부 표현이 연속된 16개 float)이라, 매트릭스 여러 개를
@@ -88,7 +88,7 @@ void FShaderPipeline::SetVector(const char* Name, const FVector3& Vector)
 
     if (loc == -1)
     {
-        std::cout << "Shader error " << Name << endl;
+        std::cout << "Shader error " << Name << std::endl;
     }
 
     glUniform3fv(loc, 1, Vector.GetAsFloatPtr());
@@ -100,7 +100,7 @@ void FShaderPipeline::SetFloat(char* Name, float Value)
 
     if (loc == -1)
     {
-        std::cout << "Shader error " << Name << endl;
+        std::cout << "Shader error " << Name << std::endl;
     }
 
     glUniform1f(loc, Value);

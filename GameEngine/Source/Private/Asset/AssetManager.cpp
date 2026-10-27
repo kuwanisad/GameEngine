@@ -5,12 +5,14 @@
 #include "../../Public/Rendering/Texture.h"
 #include "../../Public/Rendering/Mesh.h"
 #include "../../Public/Rendering/Shader.h"
+#include "../../Public/stb_image/stb_image.h"
 
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <filesystem>
 #include <rapidjson/document.h>
+#include <SDL_log.h>
 
 UAssetManager* UAssetManager::AssetManager = nullptr;
 
@@ -61,7 +63,7 @@ bool UAssetManager::IsShaderCompiled(GLuint Shader)
 
 bool UAssetManager::IsShaderProgramValid(const FShaderPipeline* ShaderPipeline)
 {
-	IsShaderProgramValid(ShaderPipeline->GetProgramID());
+	return IsShaderProgramValid(ShaderPipeline->GetProgramID());
 }
 
 bool UAssetManager::IsShaderProgramValid(GLuint ProgramID)
@@ -215,7 +217,7 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 		indices.emplace_back(ind[2].GetUint());
 	}
 
-	FVertexContainer* new_vert_container = new FVertexContainer(vertices.data(), static_cast<unsigned>(vertices.size()) / vertSize,
+	FVertexContainer* new_vert_container = new FVertexContainer(vertices.data(), static_cast<unsigned>(vertices.size()) / vertex_size,
 		layout, indices.data(), static_cast<unsigned>(indices.size()));
 
 	UMesh* new_mesh = new UMesh();
@@ -347,7 +349,7 @@ UTexture* UAssetManager::LoadTexture(const FString& FileName)
 	if (image == nullptr)
 	{
 		SDL_Log("stb_image failed to load image %s: %s", FileName.c_str(), stbi_failure_reason());
-		return false;
+		return nullptr;
 	}
 
 	int color_format = GL_RGB;

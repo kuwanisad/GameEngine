@@ -91,6 +91,9 @@
     <Filter Include="소스 파일\Source\Private\Asset">
       <UniqueIdentifier>{f1691212-b510-48fb-9adb-2cd176fa55ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\stb_image">
+      <UniqueIdentifier>{19649fd2-36c7-4657-979c-a23241d38c07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -316,6 +319,9 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Asset\AssetManager.h">
       <Filter>소스 파일\Source\Public\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\stb_image\stb_image.h">
+      <Filter>소스 파일\Source\Public\stb_image</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 #pragma once
 #include "../Core/CoreMinimal.h"
 
+#include <GL/glew.h>
+
 class UTexture;
 class UMesh;
 class FShaderPipeline;
