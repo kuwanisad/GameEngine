@@ -266,7 +266,7 @@ bool GJKStatics::SimplexTetrahedron(TArray<FVector3>& points, FVector3& directio
         return SimplexTriangle(points, direction);
     }
     
-    return false;
+    return true;
 }
 
 bool GJKStatics::SameDirection(const FVector3& direction, const FVector3& v)
@@ -276,6 +276,6 @@ bool GJKStatics::SameDirection(const FVector3& direction, const FVector3& v)
 
 FVector3 GJKStatics::SafeNormalize(const FVector3& v)
 {
-    float lenSq = v.Length();
+    float lenSq = v.LengthSq();
     return Math::NearZero(lenSq) ? FVector3::UnitX : v / Math::Sqrt(lenSq);
 }

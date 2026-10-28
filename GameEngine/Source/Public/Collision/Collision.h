@@ -179,6 +179,8 @@ public:
 	//Do not "normal = second - first", use GetNormalDirection.
 	static FVector3 GetNormalDirection(const FVector3& Caller, const FVector3& Target);
 
+	//검토 필요가 붙은 것은 AI써서 찾았는데 결국 뾰족한 수가 없었음. 나중에 개선해야 함
+
 	static bool Intersect(const FAABB& a, const FAABB& b, FHitResult& OutResult);
 
 	static bool Intersect(const FOBB& O1, const FAABB& A2, FHitResult& OutResult);
@@ -188,7 +190,7 @@ public:
 
 	static bool Intersect(const FCapsule& c, const FAABB& box, FHitResult& OutResult);
 	static bool Intersect(const FCapsule& a, const FCapsule& b, FHitResult& OutResult);
-	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult); //검토 필요
+	static bool Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult);  //검토 필요
 	static bool Intersect(const FCapsule& c, const FSphere& s, FHitResult& OutResult);
 
 	static bool Intersect(const FSphere& s, const FAABB& box, FHitResult& OutResult);

@@ -287,7 +287,7 @@ public:
 		return FVector3(-x, -y, -z);
 	}
 
-	float& operator[](int Index)
+	float& operator[](int32 Index)
 	{
 		switch (Index)
 		{
