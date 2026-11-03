@@ -39,6 +39,8 @@ public:
 	//Call ComputeWorldTransform Function of RootComponent;
 	void ComputeWorldTransform();
 
+	FMatrix4x4 GetActorTransform() const;
+
 	void AddComponent(UActorComponent* component);
 	void RemoveComponent(UActorComponent* component);
 

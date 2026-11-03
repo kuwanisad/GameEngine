@@ -29,6 +29,7 @@
     <ClCompile Include="Source\Private\Component\PrimitiveComponent.cpp" />
     <ClCompile Include="Source\Private\Component\SceneComponent.cpp" />
     <ClCompile Include="Source\Private\Component\ActorComponent.cpp" />
+    <ClCompile Include="Source\Private\Component\SpriteComponent.cpp" />
     <ClCompile Include="Source\Private\Core\Engine.cpp" />
     <ClCompile Include="Source\Private\Core\Main.cpp" />
     <ClCompile Include="Source\Private\Core\Math.cpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="Source\Private\Physcis\PhysScene.cpp" />
     <ClCompile Include="Source\Private\Rendering\Mesh.cpp" />
     <ClCompile Include="Source\Private\Rendering\Renderer.cpp" />
+    <ClCompile Include="Source\Private\Rendering\RenderingManager.cpp" />
     <ClCompile Include="Source\Private\Rendering\RenderingStatics.cpp" />
     <ClCompile Include="Source\Private\Rendering\Shader.cpp" />
     <ClCompile Include="Source\Private\Rendering\Texture.cpp" />
@@ -50,7 +52,11 @@
   <ItemGroup>
     <ClInclude Include="Source\Public\Actor\Actor.h" />
     <ClInclude Include="Source\Public\Actor\FActorSpawnParameters.h" />
+    <ClInclude Include="Source\Public\Animation\AnimSnapshotBase.h" />
+    <ClInclude Include="Source\Public\Animation\AnimTaskFence.h" />
+    <ClInclude Include="Source\Public\Asset\AssetHandle.h" />
     <ClInclude Include="Source\Public\Asset\AssetManager.h" />
+    <ClInclude Include="Source\Public\Asset\SkeletalMeshInstance.h" />
     <ClInclude Include="Source\Public\Collision\BVH.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
     <ClInclude Include="Source\Public\Collision\GJKStatics.h" />
@@ -61,6 +67,7 @@
     <ClInclude Include="Source\Public\Component\SceneComponent.h" />
     <ClInclude Include="Source\Public\Component\ShapeComponent.h" />
     <ClInclude Include="Source\Public\Component\PrimitiveComponent.h" />
+    <ClInclude Include="Source\Public\Component\SpriteComponent.h" />
     <ClInclude Include="Source\Public\Core\CoreMinimal.h" />
     <ClInclude Include="Source\Public\Core\Engine.h" />
     <ClInclude Include="Source\Public\Core\Math.h" />
@@ -85,6 +92,7 @@
     <ClInclude Include="Source\Public\Physics\PhysScene.h" />
     <ClInclude Include="Source\Public\Rendering\Mesh.h" />
     <ClInclude Include="Source\Public\Rendering\Renderer.h" />
+    <ClInclude Include="Source\Public\Rendering\RenderingManager.h" />
     <ClInclude Include="Source\Public\Rendering\RenderingStatics.h" />
     <ClInclude Include="Source\Public\Rendering\Shader.h" />
     <ClInclude Include="Source\Public\Rendering\Texture.h" />

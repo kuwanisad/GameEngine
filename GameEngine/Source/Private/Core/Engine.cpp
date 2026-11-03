@@ -2,6 +2,7 @@
 #include "../../Public/Physics/PhysScene.h"
 #include "../../Public/Tick/TickManager.h"
 #include "../../Public/Input/InputSubsystem.h"
+#include "../../Public/Rendering/RenderingManager.h"
 
 #include <algorithm>
 
@@ -94,6 +95,16 @@ UInputSubsystem* UEngine::GetInputSubsystem()
 	}
 
 	return InputSubsystem;
+}
+
+URenderingManager* UEngine::GetRenderingManager()
+{
+	if (RenderingManager == nullptr)
+	{
+		RenderingManager = new URenderingManager();
+	}
+
+	return RenderingManager;
 }
 
 void UEngine::AddActor(AActor* InActor)

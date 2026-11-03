@@ -29,5 +29,5 @@ public:
 	void SetVertexContainer(FVertexContainer* InVertexContainer);
 	FVertexContainer* GetVertexContainer() { return VertexContainer; } const
 	const FString& GetShaderName() const { return ShaderName; }
-	float GetSpecular();
+	float GetSpecular() const { return Specular; }
 };

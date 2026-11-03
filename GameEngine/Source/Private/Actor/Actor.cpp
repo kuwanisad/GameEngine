@@ -87,6 +87,11 @@ void AActor::ComputeWorldTransform()
 	GetRootComponent()->OnUpdateWorldTransform();
 }
 
+FMatrix4x4 AActor::GetActorTransform() const
+{
+	return GetRootComponent()->GetComponentTransform();
+}
+
 void AActor::AddComponent(UActorComponent* component)
 {
 	Components.emplace_back(component);

@@ -27,8 +27,3 @@ void UMesh::SetVertexContainer(FVertexContainer* InVertexContainer)
 {
 	VertexContainer = InVertexContainer;
 }
-
-float UMesh::GetSpecular()
-{
-	return 0.0f;
-}

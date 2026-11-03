@@ -94,6 +94,9 @@
     <Filter Include="소스 파일\Source\Public\stb_image">
       <UniqueIdentifier>{19649fd2-36c7-4657-979c-a23241d38c07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Animation">
+      <UniqueIdentifier>{892ba678-7136-4025-82a1-cf62c6baeb82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -176,6 +179,12 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Asset\AssetManager.cpp">
       <Filter>소스 파일\Source\Private\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Rendering\RenderingManager.cpp">
+      <Filter>소스 파일\Source\Private\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\SpriteComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +331,24 @@
     </ClInclude>
     <ClInclude Include="Source\Public\stb_image\stb_image.h">
       <Filter>소스 파일\Source\Public\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Rendering\RenderingManager.h">
+      <Filter>소스 파일\Source\Public\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Asset\AssetHandle.h">
+      <Filter>소스 파일\Source\Public\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Asset\SkeletalMeshInstance.h">
+      <Filter>소스 파일\Source\Public\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimTaskFence.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimSnapshotBase.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\SpriteComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

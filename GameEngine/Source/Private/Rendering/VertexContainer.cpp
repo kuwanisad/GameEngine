@@ -13,7 +13,7 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 	glBindVertexArray(VAO_ID);
 
 	//위치 float 3, 노멀 float 3, 텍스처 uv 2
-	engine_size_t VertexSize = RenderingStatics::VertexDefaultSize;
+	engine_size_t VertexSize = URenderingStatics::VertexDefaultSize;
 
 	switch (_Layout)
 	{
@@ -21,7 +21,7 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 		break;
 	case FVertexContainer::Layout::PosNormSkinTex:
 		//본 인덱스 + 보간값이라서 *2
-		VertexSize += RenderingStatics::VertexLerpBoneCount * 2;
+		VertexSize += URenderingStatics::VertexLerpBoneCount * 2;
 		break;
 	}
 
@@ -42,13 +42,13 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 	glEnableVertexAttribArray(ShaderLayout);
 	glVertexAttribPointer(ShaderLayout, 3, GL_FLOAT, GL_FALSE, VertexSize, reinterpret_cast<void*>(PointerOffset));
 	++ShaderLayout;
-	PointerOffset += RenderingStatics::VertexPosSize;
+	PointerOffset += URenderingStatics::VertexPosSize;
 
 	//노멀
 	glEnableVertexAttribArray(ShaderLayout);
 	glVertexAttribPointer(ShaderLayout, 3, GL_FLOAT, GL_FALSE, VertexSize, reinterpret_cast<void*>(PointerOffset));
 	++ShaderLayout;
-	PointerOffset += RenderingStatics::VertexNormSize;
+	PointerOffset += URenderingStatics::VertexNormSize;
 
 	switch (_Layout)
 	{
@@ -62,15 +62,15 @@ FVertexContainer::FVertexContainer(const void* _Verts, unsigned int _VertexCount
 		glEnableVertexAttribArray(ShaderLayout);
 
 		//4개의 본을 가지고 보간
-		glVertexAttribIPointer(ShaderLayout, RenderingStatics::VertexLerpBoneCount, GL_UNSIGNED_BYTE, VertexSize, reinterpret_cast<void*>(PointerOffset));
+		glVertexAttribIPointer(ShaderLayout, URenderingStatics::VertexLerpBoneCount, GL_UNSIGNED_BYTE, VertexSize, reinterpret_cast<void*>(PointerOffset));
 		++ShaderLayout;
-		PointerOffset += sizeof(char) * RenderingStatics::VertexLerpBoneCount;
+		PointerOffset += sizeof(char) * URenderingStatics::VertexLerpBoneCount;
 
 		//스키닝 본 가중치(float)
 		glEnableVertexAttribArray(ShaderLayout);
-		glVertexAttribPointer(ShaderLayout, RenderingStatics::VertexLerpBoneCount, GL_UNSIGNED_BYTE, GL_TRUE, VertexSize, reinterpret_cast<void*>(PointerOffset));
+		glVertexAttribPointer(ShaderLayout, URenderingStatics::VertexLerpBoneCount, GL_UNSIGNED_BYTE, GL_TRUE, VertexSize, reinterpret_cast<void*>(PointerOffset));
 		++ShaderLayout;
-		PointerOffset += sizeof(char) * RenderingStatics::VertexLerpBoneCount;
+		PointerOffset += sizeof(char) * URenderingStatics::VertexLerpBoneCount;
 
 		//텍스처 uv
 		glEnableVertexAttribArray(ShaderLayout);
