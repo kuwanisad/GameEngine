@@ -1109,6 +1109,273 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FAABB& A2, FHitResult& Ou
 	return result;
 }
 
+bool CollisionStatics::Intersect(const FOBB& O1, const FCapsule& c, FHitResult& OutResult)
+{
+	OutResult.BlockingHit = false;
+
+	FQuaternion invRot = O1.GetRotation();
+	invRot.Conjugate();
+
+	FVector3 center = O1.GetCenter();
+	FVector3 extent = O1.GetExtent();
+
+	// 캡슐의 중심 선분
+	FLineSegment seg = c.GetSegment();
+
+	// OBB 로컬 좌표계로 변환
+	FVector3 start = FVector3::Transform(seg.GetStart() - center, invRot);
+	FVector3 end = FVector3::Transform(seg.GetEnd() - center, invRot);
+
+	FVector3 direction = end - start;
+
+	/*
+	선분과 AABB 사이의 정확한 최소 거리 계산
+	선분
+	P(t) = start + direction * t
+
+	AABB
+	-extent <= P <= extent
+	*/
+
+	float breakpoints[8]{};
+	int32 breakpointCount = 0;
+
+	breakpoints[breakpointCount++] = 0.f;
+	breakpoints[breakpointCount++] = 1.f;
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		if (Math::NearZero(direction[i]))
+		{
+			continue;
+		}
+
+		float tMin = (-extent[i] - start[i]) / direction[i];
+		float tMax = (extent[i] - start[i]) / direction[i];
+
+		if (tMin > 0.f && tMin < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMin;
+		}
+
+		if (tMax > 0.f && tMax < 1.f)
+		{
+			breakpoints[breakpointCount++] = tMax;
+		}
+	}
+
+	std::sort(
+		breakpoints,
+		breakpoints + breakpointCount);
+
+	float minDistSq = Math::Infinity;
+
+	FVector3 closestOnSegment = FVector3::Zero;
+	FVector3 closestOnBox = FVector3::Zero;
+
+	// 특정 t에서 선분과 AABB의 최근접점 계산
+	auto Evaluate = [&](float t)
+		{
+			t = Math::Clamp(t, 0.f, 1.f);
+
+			FVector3 p = start + direction * t;
+
+			FVector3 q;
+			q.x = Math::Clamp(p.x, -extent.x, extent.x);
+			q.y = Math::Clamp(p.y, -extent.y, extent.y);
+			q.z = Math::Clamp(p.z, -extent.z, extent.z);
+
+			FVector3 diff = p - q;
+			float distSq = diff.LengthSq();
+
+			if (distSq < minDistSq)
+			{
+				minDistSq = distSq;
+				closestOnSegment = p;
+				closestOnBox = q;
+			}
+		};
+
+	for (int32 i = 0; i < breakpointCount; ++i)
+	{
+		Evaluate(breakpoints[i]);
+	}
+
+	for (int32 i = 0; i < breakpointCount - 1; ++i)
+	{
+		float t0 = breakpoints[i];
+		float t1 = breakpoints[i + 1];
+
+		if (t1 <= t0)
+		{
+			continue;
+		}
+
+		float mid = (t0 + t1) * 0.5f;
+
+		FVector3 p = start + direction * mid;
+
+		float numerator = 0.f;
+		float denominator = 0.f;
+
+		for (int32 axis = 0; axis < 3; ++axis)
+		{
+			float boundary = 0.f;
+			bool outside = false;
+
+			if (p[axis] < -extent[axis])
+			{
+				boundary = -extent[axis];
+				outside = true;
+			}
+			else if (p[axis] > extent[axis])
+			{
+				boundary = extent[axis];
+				outside = true;
+			}
+
+			if (outside)
+			{
+				numerator +=
+					direction[axis] * (start[axis] - boundary);
+
+				denominator +=
+					direction[axis] * direction[axis];
+			}
+		}
+
+		if (denominator > 0.f)
+		{
+			float t = -numerator / denominator;
+
+			t = Math::Clamp(t, t0, t1);
+
+			Evaluate(t);
+		}
+	}
+
+	float radius = c.GetRadius();
+	float radiusSq = radius * radius;
+
+	if (minDistSq > radiusSq)
+	{
+		return false;
+	}
+
+	OutResult.BlockingHit = true;
+
+	FVector3 localNormal = FVector3::Zero;
+
+	float dist = Math::Sqrt(minDistSq);
+
+	if (!Math::NearZero(minDistSq))
+	{
+		// 선분과 박스의 최근접점이 서로 다른 경우
+		localNormal =
+			GetNormalDirection(closestOnSegment, closestOnBox) / dist;
+
+		OutResult.PenetrationDepth = radius - dist;
+	}
+	else
+	{
+		/*
+		중심 선분이 OBB 내부와 교차하는 경우
+		*/
+
+		float bestClearance = -Math::Infinity;
+
+		FVector3 interiorPoint = closestOnSegment;
+
+		auto EvaluateInterior = [&](float t)
+			{
+				FVector3 p = start + direction * t;
+
+				if (p.x < -extent.x || p.x > extent.x ||
+					p.y < -extent.y || p.y > extent.y ||
+					p.z < -extent.z || p.z > extent.z)
+				{
+					return;
+				}
+
+				float clearance = Math::Min(
+					Math::Min(
+						extent.x - Math::Abs(p.x),
+						extent.y - Math::Abs(p.y)),
+					extent.z - Math::Abs(p.z));
+
+				if (clearance > bestClearance)
+				{
+					bestClearance = clearance;
+					interiorPoint = p;
+				}
+			};
+
+		for (int32 i = 0; i < breakpointCount; ++i)
+		{
+			EvaluateInterior(breakpoints[i]);
+		}
+
+		for (int32 i = 0; i < breakpointCount - 1; ++i)
+		{
+			EvaluateInterior(
+				(breakpoints[i] + breakpoints[i + 1]) * 0.5f);
+		}
+
+		float minFaceDist = Math::Infinity;
+
+		for (int32 axis = 0; axis < 3; ++axis)
+		{
+			float distToMin =
+				interiorPoint[axis] + extent[axis];
+
+			float distToMax =
+				extent[axis] - interiorPoint[axis];
+
+			if (distToMin < minFaceDist)
+			{
+				minFaceDist = distToMin;
+
+				localNormal = FVector3::Zero;
+				localNormal[axis] = -1.f;
+			}
+
+			if (distToMax < minFaceDist)
+			{
+				minFaceDist = distToMax;
+
+				localNormal = FVector3::Zero;
+				localNormal[axis] = 1.f;
+			}
+		}
+
+		closestOnBox = interiorPoint;
+
+		for (int32 axis = 0; axis < 3; ++axis)
+		{
+			if (localNormal[axis] < 0.f)
+			{
+				closestOnBox[axis] = -extent[axis];
+			}
+			else if (localNormal[axis] > 0.f)
+			{
+				closestOnBox[axis] = extent[axis];
+			}
+		}
+
+		OutResult.PenetrationDepth =
+			radius + minFaceDist;
+	}
+
+	// OBB의 로컬 좌표에서 월드 좌표로 복원
+	OutResult.Normal =
+		FVector3::Transform(localNormal, O1.GetRotation());
+
+	OutResult.ImpactPoint =
+		FVector3::Transform(closestOnBox, O1.GetRotation()) + center;
+
+	return true;
+}
+
 bool CollisionStatics::Intersect(const FCapsule& c, const FOBB& o, FHitResult& OutResult)
 {
 	OutResult.BlockingHit = false;
