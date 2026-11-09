@@ -43,7 +43,7 @@ private:
 	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
 	TQueue<uint32> EmptyIndices_SkeletalMesh;
 
-	TArray<SpriteComponent*> SpriteComps;
+	TArray<USpriteComponent*> SpriteComps;
 	TQueue<uint32> EmptyIndices_SpriteComp;
 
 	TArray<UStaticMeshComponent*> MeshComps;
@@ -81,9 +81,9 @@ public:
 
 	void Draw();
 
-	void AddSprite(USpriteComponent* SpriteComp);
-	void RemoveSprite(USpriteComponent* SpriteComp);
+	void RegisterSpriteComp(USpriteComponent* SpriteComp);
+	void UnregisterSpriteComp(USpriteComponent* SpriteComp);
 
-	void AddMeshComp(UStaticMeshComponent* MeshComp);
-	void RemoveMeshComp(UStaticMeshComponent* MeshComp);
+	void RegisterMeshComp(UStaticMeshComponent* MeshComp);
+	void UnregisterMeshComp(UStaticMeshComponent* MeshComp);
 };

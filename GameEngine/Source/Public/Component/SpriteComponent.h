@@ -3,7 +3,7 @@
 #include "../Core/CoreMinimal.h"
 
 class UTexture;
-class FShaderPipeline;
+struct FShaderPipeline;
 class AActor;
 
 class USpriteComponent : public UActorComponent

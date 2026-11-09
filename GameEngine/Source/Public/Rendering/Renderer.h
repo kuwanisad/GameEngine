@@ -29,4 +29,7 @@ public:
 
 	void BeginFrame();
 	void EndFrame();
+
+	void SetViewMatrix(const FMatrix4x4& InView) { Matrix_View = InView; }
+	FMatrix4x4 GetViewProjMatrix() const { return Matrix_View * Matrix_Projection; }
 };

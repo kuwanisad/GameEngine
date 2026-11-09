@@ -11,4 +11,6 @@ public:
 	// 힘/충격량 등). 지금은 데이터만 있고 매 프레임 이걸 실제로 적분하는 로직은 아직 없음
 	// (FBodyInstance.h의 [범위] 주석 참고).
 	FBodyInstance BodyInstance;
+
+	virtual void OnDestroy() override;
 };

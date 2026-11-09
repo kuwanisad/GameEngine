@@ -6,7 +6,7 @@
 
 class UTexture;
 class UMesh;
-class FShaderPipeline;
+struct FShaderPipeline;
 class USkeleton;
 class UAnimSequence;
 class USkeletalMesh;

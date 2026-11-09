@@ -1,7 +1,9 @@
 #include "../../Public/Rendering/Mesh.h"
+#include "../../Public/Rendering/VertexContainer.h"
 
 UMesh::UMesh() :
-	VertexContainer(nullptr)
+	VertexContainer(nullptr),
+	Specular(0)
 {
 }
 
@@ -21,6 +23,16 @@ void UMesh::Unload()
 		delete VertexContainer;
 		VertexContainer = nullptr;
 	}
+}
+
+UTexture* UMesh::GetTexture(const int32 TextureIndex) const
+{
+	if (TextureIndex < 0 || Textures.size() <= TextureIndex)
+	{
+		return nullptr;
+	}
+
+	return Textures[TextureIndex];
 }
 
 void UMesh::SetVertexContainer(FVertexContainer* InVertexContainer)

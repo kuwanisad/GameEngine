@@ -26,8 +26,10 @@ public:
 
 	void Unload();
 
+	UTexture* GetTexture(const int32 TextureIndex) const;
+
 	void SetVertexContainer(FVertexContainer* InVertexContainer);
 	FVertexContainer* GetVertexContainer() { return VertexContainer; } const
-	const FString& GetShaderName() const { return ShaderName; }
+	FString GetShaderName() const { return ShaderName; }
 	float GetSpecular() const { return Specular; }
 };

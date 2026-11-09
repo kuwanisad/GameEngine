@@ -51,12 +51,12 @@ void FShaderPipeline::SetIDs(GLuint InProgramID, GLuint InVertexShaderID, GLuint
     FragShaderID = InFragShaderID;
 }
 
-void FShaderPipeline::SetActive()
+void FShaderPipeline::SetActive() const
 {
     glUseProgram(ProgramID);
 }
 
-void FShaderPipeline::SetMatrix(const char* Name, const FMatrix4x4& Matrix)
+void FShaderPipeline::SetMatrix(const char* Name, const FMatrix4x4& Matrix) const
 {
     GLuint loc = glGetUniformLocation(ProgramID, Name);
 
@@ -68,7 +68,7 @@ void FShaderPipeline::SetMatrix(const char* Name, const FMatrix4x4& Matrix)
     glUniformMatrix4fv(loc, 1, GL_TRUE, Matrix.GetAsFloatPtr());
 }
 
-void FShaderPipeline::SetMatrices(const char* Name, const FMatrix4x4* Matrices, uint32 Count)
+void FShaderPipeline::SetMatrices(const char* Name, const FMatrix4x4* Matrices, uint32 Count) const
 {
     GLuint loc = glGetUniformLocation(ProgramID, Name);
 
@@ -82,7 +82,7 @@ void FShaderPipeline::SetMatrices(const char* Name, const FMatrix4x4* Matrices, 
     glUniformMatrix4fv(loc, static_cast<GLsizei>(Count), GL_TRUE, Matrices[0].GetAsFloatPtr());
 }
 
-void FShaderPipeline::SetVector(const char* Name, const FVector3& Vector)
+void FShaderPipeline::SetVector(const char* Name, const FVector3& Vector) const
 {
     GLuint loc = glGetUniformLocation(ProgramID, Name);
 
@@ -94,7 +94,7 @@ void FShaderPipeline::SetVector(const char* Name, const FVector3& Vector)
     glUniform3fv(loc, 1, Vector.GetAsFloatPtr());
 }
 
-void FShaderPipeline::SetFloat(char* Name, float Value)
+void FShaderPipeline::SetFloat(const char* Name, float Value) const
 {
     GLuint loc = glGetUniformLocation(ProgramID, Name);
 

@@ -29,6 +29,9 @@ using TMap = std::unordered_map<KeyType, ValueType>;
 template <typename T>
 using TQueue = std::queue<T>;
 
+template <typename T, typename U>
+using TPair = std::pair<T, U>;
+
 // UE의 INDEX_NONE(부모 없음/찾지 못함 등을 나타내는 값)
 constexpr int32 INDEX_NONE = -1;
 

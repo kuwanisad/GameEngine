@@ -28,9 +28,9 @@ public:
 	GLuint GetFragShaderID() const { return FragShaderID; }
 	GLuint GetProgramID() const { return ProgramID; }
 
-	void SetActive();
-	void SetMatrix(const char* Name, const FMatrix4x4& Matrix);
-	void SetMatrices(const char* Name, const FMatrix4x4* Matrices, uint32 Count);
-	void SetVector(const char* Name, const FVector3& Vector);
-	void SetFloat(char* Name, float Value);
+	void SetActive() const;
+	void SetMatrix(const char* Name, const FMatrix4x4& Matrix) const;
+	void SetMatrices(const char* Name, const FMatrix4x4* Matrices, uint32 Count) const;
+	void SetVector(const char* Name, const FVector3& Vector) const;
+	void SetFloat(const char* Name, float Value) const;
 };

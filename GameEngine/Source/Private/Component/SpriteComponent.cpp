@@ -21,12 +21,12 @@ USpriteComponent::~USpriteComponent()
 
 void USpriteComponent::Init()
 {
-	UEngine::GetEngine()->GetRenderingManager()->AddSprite(this);
+	UEngine::GetEngine()->GetRenderingManager()->RegisterSpriteComp(this);
 }
 
 void USpriteComponent::OnDestroy()
 {
-	UEngine::GetEngine()->GetRenderingManager()->RemoveSprite(this);
+	UEngine::GetEngine()->GetRenderingManager()->UnregisterSpriteComp(this);
 }
 
 void USpriteComponent::Draw(FShaderPipeline* Pipeline)

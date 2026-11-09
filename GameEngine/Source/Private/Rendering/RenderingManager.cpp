@@ -6,7 +6,7 @@
 void URenderingManager::RenderFrame(FShaderPipeline* Pipeline)
 {
     Pipeline->SetActive();
-    Pipeline->SetMatrices(URenderingStatics::Shader_uViewProj.c_str(), GetRenderer()->GetViewProjMatrix());
+    Pipeline->SetMatrix(URenderingStatics::Shader_uViewProj.c_str(), GetRenderer()->GetViewProjMatrix());
 
 }
 
@@ -50,18 +50,18 @@ void URenderingManager::Draw()
 {
 }
 
-void URenderingManager::AddSprite(USpriteComponent* SpriteComp)
+void URenderingManager::RegisterSpriteComp(USpriteComponent* SpriteComp)
 {
 }
 
-void URenderingManager::RemoveSprite(USpriteComponent* SpriteComp)
+void URenderingManager::UnregisterSpriteComp(USpriteComponent* SpriteComp)
 {
 }
 
-void URenderingManager::AddMeshComp(UStaticMeshComponent* MeshComp)
+void URenderingManager::RegisterMeshComp(UStaticMeshComponent* MeshComp)
 {
 }
 
-void URenderingManager::RemoveMeshComp(UStaticMeshComponent* MeshComp)
+void URenderingManager::UnregisterMeshComp(UStaticMeshComponent* MeshComp)
 {
 }
