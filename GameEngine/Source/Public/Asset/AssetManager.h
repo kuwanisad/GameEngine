@@ -1,11 +1,15 @@
 #pragma once
 #include "../Core/CoreMinimal.h"
+#include "../Asset/AssetHandle.h"
 
 #include <GL/glew.h>
 
 class UTexture;
 class UMesh;
 class FShaderPipeline;
+class USkeleton;
+class UAnimSequence;
+class USkeletalMesh;
 
 struct FVertexContainer;
 
@@ -14,10 +18,18 @@ class UAssetManager
 private:
 	static UAssetManager* AssetManager;
 
+	FAssetHandle NextAssetHandle = 0;
+
+	std::unordered_map<FAssetHandle, const USkeleton*> Skeletons;
+	std::unordered_map<FAssetHandle, UAnimSequence*> AnimSequences;
+	std::unordered_map<FAssetHandle, USkeletalMesh*> SkeletalMeshes;
+
 	//텍스처, 셰이더를 매시가 멤버로 가질 수 있지만 근본적으로 서로 다른 에셋이므로...
 	TMap<FString, UTexture*> Textures;
 	TMap<FString, FShaderPipeline*> ShaderPipelines;
 	TMap<FString, UMesh*> Meshes;
+
+	FAssetHandle GetNewAssetHandle();
 
 	bool CompileShader(const FString& FileName, GLenum ShaderType, GLuint& OutShader);
 	bool IsShaderCompiled(GLuint Shader);
@@ -39,4 +51,12 @@ public:
 	UTexture* CreateWhite1x1();
 	bool UnloadTexture(const UTexture* Texture);
 	UTexture* GetTexture(const FString& Name);
+
+	FAssetHandle AddSkeleton(const USkeleton* Skeleton);
+	FAssetHandle AddAnimSequence(UAnimSequence* Sequence);
+	FAssetHandle AddSkeletalMesh(USkeletalMesh* Mesh);
+
+	const USkeleton* GetSkeleton(FAssetHandle Handle) const;
+	UAnimSequence* GetAnimSequence(FAssetHandle Handle) const;
+	USkeletalMesh* GetSkeletalMesh(FAssetHandle Handle) const;
 };

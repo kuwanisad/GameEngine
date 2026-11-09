@@ -12,4 +12,5 @@ public:
 	UObject() = default;
 	virtual ~UObject() = default;
 	virtual void Init() = 0;
+	virtual void OnDestroy();
 };

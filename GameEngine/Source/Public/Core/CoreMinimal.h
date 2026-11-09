@@ -26,6 +26,9 @@ using TSet = std::unordered_set<T>;
 template <typename KeyType, typename ValueType>
 using TMap = std::unordered_map<KeyType, ValueType>;
 
+template <typename T>
+using TQueue = std::queue<T>;
+
 // UE의 INDEX_NONE(부모 없음/찾지 못함 등을 나타내는 값)
 constexpr int32 INDEX_NONE = -1;
 

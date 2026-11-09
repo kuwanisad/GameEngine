@@ -6,6 +6,7 @@ class AActor;
 class SpriteComponent;
 class UInputSubsystem;
 class UTickManager;
+class URenderingManager;
 struct FPhysScene;
 
 template <typename T>
@@ -18,6 +19,7 @@ private:
 	FPhysScene* PhysScene;
 	UTickManager* TickManager;
 	UInputSubsystem* InputSubsystem;
+	URenderingManager* RenderingManager;
 
 	TArray<AActor*> Actors;
 	TArray<AActor*> PendingActors;
@@ -61,6 +63,7 @@ public:
 	FPhysScene* GetPhysScene();
 	UTickManager* GetTickManager();
 	UInputSubsystem* GetInputSubsystem();
+	URenderingManager* GetRenderingManager();
 
 	float GetDeltaSeconds() const { return CurrentDeltaSeconds; }
 };

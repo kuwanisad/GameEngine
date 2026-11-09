@@ -16,6 +16,11 @@
 
 UAssetManager* UAssetManager::AssetManager = nullptr;
 
+FAssetHandle UAssetManager::GetNewAssetHandle()
+{
+	return NextAssetHandle++;
+}
+
 bool UAssetManager::CompileShader(const FString& FileName, GLenum ShaderType, GLuint& OutShader)
 {
 	std::ifstream File(FileName);
@@ -326,6 +331,45 @@ UTexture* UAssetManager::GetTexture(const FString& Name)
 	return nullptr;
 }
 
+FAssetHandle UAssetManager::AddSkeleton(const USkeleton* Skeleton)
+{
+	FAssetHandle Handle = GetNewAssetHandle();
+	Skeletons[Handle] = Skeleton;
+	return Handle;
+}
+
+FAssetHandle UAssetManager::AddAnimSequence(UAnimSequence* Sequence)
+{
+	FAssetHandle Handle = GetNewAssetHandle();
+	AnimSequences[Handle] = Sequence;
+	return Handle;
+}
+
+FAssetHandle UAssetManager::AddSkeletalMesh(USkeletalMesh* Mesh)
+{
+	FAssetHandle Handle = GetNewAssetHandle();
+	SkeletalMeshes[Handle] = Mesh;
+	return Handle;
+}
+
+const USkeleton* UAssetManager::GetSkeleton(FAssetHandle Handle) const
+{
+	auto it = Skeletons.find(Handle);
+	return (it != Skeletons.end()) ? it->second : nullptr;
+}
+
+UAnimSequence* UAssetManager::GetAnimSequence(FAssetHandle Handle) const
+{
+	auto it = AnimSequences.find(Handle);
+	return (it != AnimSequences.end()) ? it->second : nullptr;
+}
+
+USkeletalMesh* UAssetManager::GetSkeletalMesh(FAssetHandle Handle) const
+{
+	auto it = SkeletalMeshes.find(Handle);
+	return (it != SkeletalMeshes.end()) ? it->second : nullptr;
+}
+
 UTexture* UAssetManager::LoadTexture(const FString& FileName)
 {
 	std::filesystem::path new_name = FileName;
@@ -385,7 +429,7 @@ UTexture* UAssetManager::LoadTexture(const FString& FileName)
 
 UTexture* UAssetManager::CreateWhite1x1()
 {
-	auto itr = Textures.find(RenderingStatics::WhiteTextureName);
+	auto itr = Textures.find(URenderingStatics::WhiteTextureName);
 
 	if (itr != Textures.end())
 	{
@@ -408,10 +452,10 @@ UTexture* UAssetManager::CreateWhite1x1()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	new_texture->SetID(id);
-	new_texture->SetName(RenderingStatics::WhiteTextureName);
+	new_texture->SetName(URenderingStatics::WhiteTextureName);
 	new_texture->SetSize(width, height);
 
-	Textures.emplace(RenderingStatics::WhiteTextureName, new_texture);
+	Textures.emplace(URenderingStatics::WhiteTextureName, new_texture);
 
 	return new_texture;
 }
