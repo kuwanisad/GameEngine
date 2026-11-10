@@ -100,6 +100,9 @@
     <Filter Include="소스 파일\Source\Private\Animation">
       <UniqueIdentifier>{2e5ede32-c633-4e0b-809e-5c3d44183435}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Public\Utilities">
+      <UniqueIdentifier>{3100ca9d-5a42-4ef2-b46c-d78341569a71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -202,6 +205,18 @@
       <Filter>소스 파일\Source\Private\Component</Filter>
     </ClCompile>
     <ClCompile Include="Source\Private\Asset\Skeleton.cpp">
+      <Filter>소스 파일\Source\Private\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Asset\FbxImporter.cpp">
+      <Filter>소스 파일\Source\Private\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Asset\SkeletalMesh.cpp">
+      <Filter>소스 파일\Source\Private\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\SkeletalMeshComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Asset\SkeletalMeshInstance.cpp">
       <Filter>소스 파일\Source\Private\Asset</Filter>
     </ClCompile>
   </ItemGroup>
@@ -406,6 +421,15 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Asset\SkeletalMesh.h">
       <Filter>소스 파일\Source\Public\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Asset\FbxImporter.h">
+      <Filter>소스 파일\Source\Public\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\SkeletalMeshComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Utilities\TSlotArray.h">
+      <Filter>소스 파일\Source\Public\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,6 +2,8 @@
 #include "../Core/CoreMinimal.h"
 #include "../Asset/AssetHandle.h"
 #include "../Asset/SkeletalMeshInstance.h"
+#include "../Animation/AnimGraphRegistry.h"
+#include "../Utilities/TSlotArray.h"
 
 #include <thread>
 #include <mutex>
@@ -33,7 +35,7 @@ private:
 	void RenderFrame(FShaderPipeline* Pipeline);
 
 	bool IsHandleValid(const FInstanceHandle& Handle);
-	FSkeletalMeshInstance* Resolve(const FInstanceHandle& Handle);
+	FSkeletalMeshInstance* ResolveInstanceHandle(const FInstanceHandle& Handle);
 
 	void ProcessInstance(FSkeletalMeshInstance& Instance);
 	void DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotBase* Snapshot, float DeltaSeconds);
@@ -41,13 +43,14 @@ private:
 	void WorkerLoop();
 	
 	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
-	TQueue<uint32> EmptyIndices_SkeletalMesh;
+	TArray<uint32> EmptyIndices_SkeletalMesh;
 
-	TArray<USpriteComponent*> SpriteComps;
-	TQueue<uint32> EmptyIndices_SpriteComp;
+	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
+	TArray<uint32> EmptyIndices_SkeletalMeshInstances;
 
-	TArray<UStaticMeshComponent*> MeshComps;
-	TQueue<uint32> EmptyIndices_MeshComp;
+	TPointerSlotArray<USpriteComponent*> SpriteComps;
+
+	TPointerSlotArray<UStaticMeshComponent*> MeshComps;
 
 	std::thread WorkerThread;
 	std::mutex QueueMutex;
@@ -66,6 +69,8 @@ private:
 
 	//렌더링이 진행될 때 누적된 델타
 	float AccumulatedDeltaSeconds = 0.0f;
+
+	uint32 GetArrayEmptySlot();
 
 public:
 	//모델이 사용하는 본 최대 개수. 이걸 변경하려면 셰이더도 맞춰야 함
@@ -86,4 +91,9 @@ public:
 
 	void RegisterMeshComp(UStaticMeshComponent* MeshComp);
 	void UnregisterMeshComp(UStaticMeshComponent* MeshComp);
+
+	FInstanceHandle RegisterInstance(UAnimInstance* OwningAnimInstance, FAssetHandle SkeletonHandle, FAssetHandle SkeletalMeshHandle, FAnimGraphHandle AnimGraphHandle);
+	void UnregisterInstance(FInstanceHandle Handle);
+
+	void UpdateSkeletalMeshTransform(FInstanceHandle Handle, const FVector3& Location, const FQuaternion& Rotation, const FVector3& Scale);
 };

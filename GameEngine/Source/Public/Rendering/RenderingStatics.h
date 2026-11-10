@@ -108,6 +108,12 @@ struct FPackedSkinWeights
 	}
 };
 
+// UE의 FSkeletalMeshLODModel를 필요한 것만 남김
+struct FSkeletalMeshLODModel
+{
+	TArray<FSkelMeshSection> Sections;
+};
+
 class URenderingStatics
 {
 public:
@@ -124,10 +130,19 @@ public:
 
 	static FString Shader_uSpecPower;
 
+	//VertexContainer의 PosNormSkinTex 오프셋과 일치해야 하는 상수
+
+	static int32 VertexPositionOffset; //float 3
+	static int32 VertexNormalOffset; //float 3
+	static int32 BoneIndexOffset; //byte 4
+	static int32 BoneWeightOffset; //byte 4
+	static int32 TextureUVOffset; //float 2
+	static int32 TotalVertexOffset; //총 40 바이트
+
 public:
 	// 정점당 무제한으로 쌓인 Influence 리스트를, 정점당 상위 4개로 잘라 정규화함
 	static void NormalizeAndPackInfluences(const TArray<FBoneInfluence>& Influences, int32 VertexCount, TArray<FPackedSkinWeights>& OutPackedWeights);
 
 	// UE의 FMeshUtilities::BuildSkeletalMesh로 Faces, Wedges, Points, Influences를 섹션 1개 최종 정점, 인덱스 버퍼로 조립함
-	static bool BuildSkeletalMesh(const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points);
+	static bool BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points);
 };

@@ -54,12 +54,9 @@ public:
 class USkeleton
 {
 public:
-	const UReferenceSkeleton& GetReferenceSkeleton() const { return ReferenceSkeleton; }
-
-	bool Load(const FString& FileName);
+	UReferenceSkeleton& GetReferenceSkeleton() { return ReferenceSkeleton; }
 
 	const TArray<FMatrix4x4>& GetInverseBindPoseComponentSpace() const;
-
 private:
 	UReferenceSkeleton ReferenceSkeleton;
 	mutable TArray<FMatrix4x4> CachedInverseBindPose;

@@ -19,6 +19,14 @@ FString URenderingStatics::Shader_uWorldTransform = "uWorldTransform";
 
 FString URenderingStatics::Shader_uSpecPower = "uSpecPower";
 
+//VertexContainer의 PosNormSkinTex 참고
+int32 URenderingStatics::VertexPositionOffset = 0;
+int32 URenderingStatics::VertexNormalOffset = VertexPositionOffset + 12;
+int32 URenderingStatics::BoneIndexOffset = VertexNormalOffset + 12;
+int32 URenderingStatics::BoneWeightOffset = BoneIndexOffset + 4;
+int32 URenderingStatics::TextureUVOffset = BoneWeightOffset + 4;
+int32 URenderingStatics::TotalVertexOffset = TextureUVOffset + 8;
+
 void URenderingStatics::NormalizeAndPackInfluences(const TArray<FBoneInfluence>& Influences, int32 VertexCount, TArray<FPackedSkinWeights>& OutPackedWeights)
 {
 	OutPackedWeights.clear();
@@ -91,7 +99,7 @@ void URenderingStatics::NormalizeAndPackInfluences(const TArray<FBoneInfluence>&
 	}
 }
 
-bool URenderingStatics::BuildSkeletalMesh(const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points)
+bool URenderingStatics::BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points)
 {
 	if (Points.empty() || Wedges.empty() || Faces.empty())
 	{
@@ -105,7 +113,34 @@ bool URenderingStatics::BuildSkeletalMesh(const UReferenceSkeleton* Skeleton, co
 	Section.SoftVertices.reserve(Wedges.size());
 	Section.Indices.reserve(Faces.size() * 3);
 
-	//TODO: Autodesk SDK를 먼저 써야 함
+	for (const FTriangle& Face : Faces)
+	{
+		for (int32 Corner = 0; Corner < 3; ++Corner)
+		{
+			int32 WedgeIndex = Face.WedgeIndex[Corner];
+			const FVertex& Wedge = Wedges[WedgeIndex];
 
-	return false;
+			FSoftSkinVertex Vertex;
+			Vertex.Position = Points[Wedge.VertexIndex];
+			Vertex.UVs[0] = Wedge.UVs[0];
+			Vertex.TangentZ = Face.TangentZ[Corner];
+
+			const FPackedSkinWeights& SkinWeights = PointSkinWeights[Wedge.VertexIndex];
+			for (int32 i = 0; i < VertexLerpBoneCount; ++i)
+			{
+				Vertex.InfluenceBones[i] = SkinWeights.InfluenceBones[i];
+				Vertex.InfluenceWeights[i] = SkinWeights.InfluenceWeights[i];
+			}
+
+			int32 NewIndex = static_cast<int32>(Section.SoftVertices.size());
+			Section.SoftVertices.emplace_back(Vertex);
+			Section.Indices.emplace_back(static_cast<uint32>(NewIndex));
+		}
+	}
+
+	Section.TriangleCount = static_cast<int32>(Section.Indices.size() / 3);
+
+	OutLODModel.Sections.emplace_back(Section);
+
+	return true;
 }

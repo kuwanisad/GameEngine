@@ -25,4 +25,10 @@ public:
 		Factories[Handle] = Builder;
 		return Handle;
 	}
+
+	IAnimGraphBase* CreateGraph(FAnimGraphHandle Handle) const
+	{
+		auto it = Factories.find(Handle);
+		return (it != Factories.end()) ? it->second() : nullptr;
+	}
 };

@@ -18,11 +18,11 @@ class UAssetManager
 private:
 	static UAssetManager* AssetManager;
 
-	FAssetHandle NextAssetHandle = 0;
+	FAssetHandle NextAssetHandle = 1;
 
-	std::unordered_map<FAssetHandle, const USkeleton*> Skeletons;
-	std::unordered_map<FAssetHandle, UAnimSequence*> AnimSequences;
-	std::unordered_map<FAssetHandle, USkeletalMesh*> SkeletalMeshes;
+	TMap<FAssetHandle, USkeleton*> Skeletons;
+	TMap<FAssetHandle, UAnimSequence*> AnimSequences;
+	TMap<FAssetHandle, USkeletalMesh*> SkeletalMeshes;
 
 	//텍스처, 셰이더를 매시가 멤버로 가질 수 있지만 근본적으로 서로 다른 에셋이므로...
 	TMap<FString, UTexture*> Textures;
@@ -36,8 +36,10 @@ private:
 	bool IsShaderProgramValid(const FShaderPipeline* ShaderPipeline);
 	bool IsShaderProgramValid(GLuint ProgramID);
 
+	void PackSkeletonVertexBuffer(const TArray<FSoftSkinVertex>& SoftVertices, TArray<uint8>& OutBuffer);
 public:
 	static UAssetManager* Get();
+	static FAssetHandle InValidHandle;
 	
 	UMesh* LoadMesh(const FString& FileName);
 	bool UnloadMesh(const UMesh* Mesh);
@@ -52,9 +54,9 @@ public:
 	bool UnloadTexture(const UTexture* Texture);
 	UTexture* GetTexture(const FString& Name);
 
-	FAssetHandle AddSkeleton(const USkeleton* Skeleton);
-	FAssetHandle AddAnimSequence(UAnimSequence* Sequence);
-	FAssetHandle AddSkeletalMesh(USkeletalMesh* Mesh);
+	FAssetHandle LoadSkeleton(const FString& FileName);
+	FAssetHandle LoadAnimSequence(const FString& FileName, const UReferenceSkeleton& TargetSkeleton, float SampleRate);
+	FAssetHandle LoadSkeletalMesh(const FString& FileName);
 
 	const USkeleton* GetSkeleton(FAssetHandle Handle) const;
 	UAnimSequence* GetAnimSequence(FAssetHandle Handle) const;

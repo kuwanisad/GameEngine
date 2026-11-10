@@ -6,6 +6,9 @@
 #include "../../Public/Rendering/Mesh.h"
 #include "../../Public/Rendering/Shader.h"
 #include "../../Public/stb_image/stb_image.h"
+#include "../../Public/Asset/FbxImporter.h"
+#include "../../Public/Animation/AnimSequence.h"
+#include "../../Public/Asset/SkeletalMesh.h"
 
 #include <fstream>
 #include <sstream>
@@ -15,6 +18,8 @@
 #include <SDL_log.h>
 
 UAssetManager* UAssetManager::AssetManager = nullptr;
+FAssetHandle UAssetManager::InValidHandle = 0;
+
 
 FAssetHandle UAssetManager::GetNewAssetHandle()
 {
@@ -331,25 +336,138 @@ UTexture* UAssetManager::GetTexture(const FString& Name)
 	return nullptr;
 }
 
-FAssetHandle UAssetManager::AddSkeleton(const USkeleton* Skeleton)
+FAssetHandle UAssetManager::LoadSkeleton(const FString& FileName)
 {
+	auto FbxImporter = UFbxImporter::Get();
+
+	if (FbxImporter->ImportFromFile(FileName) == false)
+	{
+		return;
+	}
+
+	USkeleton* OutSkeleton = new USkeleton();
+
+	if (FbxImporter->ImportSkeleton(OutSkeleton->GetReferenceSkeleton()) == false)
+	{
+		return;
+	}
+
 	FAssetHandle Handle = GetNewAssetHandle();
-	Skeletons[Handle] = Skeleton;
+	Skeletons[Handle] = OutSkeleton;
+
 	return Handle;
 }
 
-FAssetHandle UAssetManager::AddAnimSequence(UAnimSequence* Sequence)
+FAssetHandle UAssetManager::LoadAnimSequence(const FString& FileName, const UReferenceSkeleton& TargetSkeleton, float SampleRate)
 {
+	auto FbxImporter = UFbxImporter::Get();
+
+	if (FbxImporter->ImportFromFile(FileName) == false)
+	{
+		return;
+	}
+
+	auto* OutSequence = new UAnimSequence();
+
+	if (FbxImporter->ImportAnimation(TargetSkeleton, *OutSequence) == false)
+	{
+		return;
+	}
+
 	FAssetHandle Handle = GetNewAssetHandle();
-	AnimSequences[Handle] = Sequence;
+	AnimSequences[Handle] = OutSequence;
 	return Handle;
 }
 
-FAssetHandle UAssetManager::AddSkeletalMesh(USkeletalMesh* Mesh)
+void UAssetManager::PackSkeletonVertexBuffer(const TArray<FSoftSkinVertex>& SoftVertices, TArray<uint8>& OutBuffer)
 {
-	FAssetHandle Handle = GetNewAssetHandle();
-	SkeletalMeshes[Handle] = Mesh;
-	return Handle;
+	OutBuffer.resize(SoftVertices.size() * URenderingStatics::TotalVertexOffset);
+
+	for (size_t i = 0; i < SoftVertices.size(); ++i)
+	{
+		const FSoftSkinVertex& V = SoftVertices[i];
+		uint8* Dst = OutBuffer.data() + i * URenderingStatics::TotalVertexOffset;
+
+		std::memcpy(Dst + URenderingStatics::VertexPositionOffset, V.Position.GetAsFloatPtr(), sizeof(float) * 3);
+		std::memcpy(Dst + URenderingStatics::VertexNormalOffset, V.TangentZ.GetAsFloatPtr(), sizeof(float) * 3);
+		std::memcpy(Dst + URenderingStatics::BoneIndexOffset, V.InfluenceBones, 4);
+		std::memcpy(Dst + URenderingStatics::BoneWeightOffset, V.InfluenceWeights, 4);
+		std::memcpy(Dst + URenderingStatics::TextureUVOffset, &V.UVs[0].x, sizeof(float) * 2);
+	}
+}
+
+FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
+{
+	auto Importer = UFbxImporter::Get();
+
+	if (Importer->ImportFromFile(FileName) == false)
+	{
+		SDL_Log("USkeletalMesh::Load - failed to open '%s'", FileName.c_str());
+		return InValidHandle;
+	}
+
+	auto* NewSkeleton = new USkeleton();
+	if (Importer->ImportSkeleton(NewSkeleton->GetReferenceSkeleton()) == false)
+	{
+		SDL_Log("USkeletalMesh::Load - failed to import skeleton");
+		Unload();
+		return InValidHandle;
+	}
+
+	TArray<FBoneInfluence> Influences;
+	int32 VertexCount = 0;
+	if (Importer->ImportSkinWeights(NewSkeleton->GetReferenceSkeleton(), Influences, VertexCount) == false)
+	{
+		SDL_Log("USkeletalMesh::Load - failed to import skin weights");
+		return InValidHandle;
+	}
+
+	FSkeletalMeshImportData ImportData;
+	if (Importer->ImportGeometry(ImportData) == false)
+	{
+		SDL_Log("USkeletalMesh::Load - failed to import geometry");
+		return InValidHandle;
+	}
+
+	FSkeletalMeshLODModel LODModel;
+	if (URenderingStatics::BuildSkeletalMesh(LODModel, (const UReferenceSkeleton*)&NewSkeleton->GetReferenceSkeleton(),
+		Influences, ImportData.Wedges, ImportData.Faces, ImportData.Points) == false)
+	{
+		SDL_Log("USkeletalMesh::Load - BuildSkeletalMesh failed");
+		return InValidHandle;
+	}
+
+	if (LODModel.Sections.empty())
+	{
+		SDL_Log("USkeletalMesh::Load - no sections produced");
+		return InValidHandle;
+	}
+
+	const FSkelMeshSection& Section = LODModel.Sections[0];
+	TArray<uint8> VertexBuffer;
+	PackSkeletonVertexBuffer(Section.SoftVertices, VertexBuffer);
+
+	USkeletalMesh* NewSM = new USkeletalMesh();
+
+	//나중에 텍스트 로드해야 함
+	UTexture* NewTexture = UAssetManager::CreateWhite1x1();
+
+	auto* NewVertexContainer = new FVertexContainer(VertexBuffer.data(), static_cast<unsigned int>(Section.SoftVertices.size()),
+		FVertexContainer::Layout::PosNormSkinTex, Section.Indices.data(), static_cast<unsigned int>(Section.Indices.size()));
+
+	NewSM->SetVertexContainer(NewVertexContainer);
+	NewSM->SetSkeleton(NewSkeleton);
+	NewSM->SetTexture(NewTexture);
+
+	FAssetHandle NewHandle = GetNewAssetHandle();
+
+	SkeletalMeshes[NewHandle] = NewSM;
+
+	SDL_Log("USkeletalMesh::Load - loaded '%s': %d bones, %d vertices, %d triangles",
+		FileName.c_str(), NewSkeleton->GetReferenceSkeleton().GetNum(),
+		static_cast<int32>(Section.SoftVertices.size()), Section.TriangleCount);
+
+	return NewHandle;
 }
 
 const USkeleton* UAssetManager::GetSkeleton(FAssetHandle Handle) const

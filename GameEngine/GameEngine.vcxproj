@@ -24,6 +24,9 @@
     <ClCompile Include="Source\Private\Animation\AnimTrack.cpp" />
     <ClCompile Include="Source\Private\Animation\BoneTransform.cpp" />
     <ClCompile Include="Source\Private\Asset\AssetManager.cpp" />
+    <ClCompile Include="Source\Private\Asset\FbxImporter.cpp" />
+    <ClCompile Include="Source\Private\Asset\SkeletalMesh.cpp" />
+    <ClCompile Include="Source\Private\Asset\SkeletalMeshInstance.cpp" />
     <ClCompile Include="Source\Private\Asset\Skeleton.cpp" />
     <ClCompile Include="Source\Private\Collision\BVH.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
@@ -33,6 +36,7 @@
     <ClCompile Include="Source\Private\Component\PrimitiveComponent.cpp" />
     <ClCompile Include="Source\Private\Component\SceneComponent.cpp" />
     <ClCompile Include="Source\Private\Component\ActorComponent.cpp" />
+    <ClCompile Include="Source\Private\Component\SkeletalMeshComponent.cpp" />
     <ClCompile Include="Source\Private\Component\SpriteComponent.cpp" />
     <ClCompile Include="Source\Private\Component\StaticMeshComponent.cpp" />
     <ClCompile Include="Source\Private\Core\Engine.cpp" />
@@ -70,6 +74,7 @@
     <ClInclude Include="Source\Public\Animation\BoneTransform.h" />
     <ClInclude Include="Source\Public\Asset\AssetHandle.h" />
     <ClInclude Include="Source\Public\Asset\AssetManager.h" />
+    <ClInclude Include="Source\Public\Asset\FbxImporter.h" />
     <ClInclude Include="Source\Public\Asset\InstanceHandle.h" />
     <ClInclude Include="Source\Public\Asset\SkeletalMesh.h" />
     <ClInclude Include="Source\Public\Asset\SkeletalMeshInstance.h" />
@@ -84,6 +89,7 @@
     <ClInclude Include="Source\Public\Component\SceneComponent.h" />
     <ClInclude Include="Source\Public\Component\ShapeComponent.h" />
     <ClInclude Include="Source\Public\Component\PrimitiveComponent.h" />
+    <ClInclude Include="Source\Public\Component\SkeletalMeshComponent.h" />
     <ClInclude Include="Source\Public\Component\SpriteComponent.h" />
     <ClInclude Include="Source\Public\Component\StaticMeshComponent.h" />
     <ClInclude Include="Source\Public\Core\CoreMinimal.h" />
@@ -122,6 +128,7 @@
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickGroup.h" />
     <ClInclude Include="Source\Public\Tick\TickManager.h" />
+    <ClInclude Include="Source\Public\Utilities\TSlotArray.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
