@@ -130,6 +130,12 @@ public:
 
 	static FString Shader_uSpecPower;
 
+	static FString Shader_Light_uCameraPos;
+	static FString Shader_Light_uAmbientLight;
+	static FString Shader_Light_uDirLight_mDirection;
+	static FString Shader_Light_uDirLight_mDiffuseColor;
+	static FString Shader_Light_uDirLight_mSpecColor;
+
 	//VertexContainer의 PosNormSkinTex 오프셋과 일치해야 하는 상수
 
 	static int32 VertexPositionOffset; //float 3
@@ -138,6 +144,10 @@ public:
 	static int32 BoneWeightOffset; //byte 4
 	static int32 TextureUVOffset; //float 2
 	static int32 TotalVertexOffset; //총 40 바이트
+
+	static float PerspectiveFOV_DegreeY;
+	static float PerspectiveFOV_Near;
+	static float PerspectiveFOV_Far;
 
 public:
 	// 정점당 무제한으로 쌓인 Influence 리스트를, 정점당 상위 4개로 잘라 정규화함

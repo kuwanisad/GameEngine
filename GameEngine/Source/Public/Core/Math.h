@@ -798,6 +798,18 @@ public:
 		return FMatrix4x4(temp);
 	}
 
+	static FMatrix4x4 CreateSimpleViewProj(float width, float height)
+	{
+		float temp[4][4] =
+		{
+			{ 2.0f / width, 0.0f, 0.0f, 0.0f },
+			{ 0.0f, 2.0f / height, 0.0f, 0.0f },
+			{ 0.0f, 0.0f, 1.0f, 0.0f },
+			{ 0.0f, 0.0f, 1.0f, 1.0f }
+		};
+		return FMatrix4x4(temp);
+	}
+
 	static const FMatrix4x4 Identity;
 };
 

@@ -1,5 +1,6 @@
 #include "../../Public/Rendering/RenderingStatics.h"
 #include "../../Public/Asset/Skeleton.h"
+#include "../../Public/Core/Math.h"
 
 #include <algorithm>
 
@@ -19,6 +20,12 @@ FString URenderingStatics::Shader_uWorldTransform = "uWorldTransform";
 
 FString URenderingStatics::Shader_uSpecPower = "uSpecPower";
 
+FString URenderingStatics::Shader_Light_uCameraPos = "uCameraPos";
+FString URenderingStatics::Shader_Light_uAmbientLight = "uAmbientLight";
+FString URenderingStatics::Shader_Light_uDirLight_mDirection = "uDirLight.mDirection";
+FString URenderingStatics::Shader_Light_uDirLight_mDiffuseColor = "uDirLight.mDiffuseColor";
+FString URenderingStatics::Shader_Light_uDirLight_mSpecColor = "uDirLight.mSpecColor";
+
 //VertexContainer의 PosNormSkinTex 참고
 int32 URenderingStatics::VertexPositionOffset = 0;
 int32 URenderingStatics::VertexNormalOffset = VertexPositionOffset + 12;
@@ -26,6 +33,10 @@ int32 URenderingStatics::BoneIndexOffset = VertexNormalOffset + 12;
 int32 URenderingStatics::BoneWeightOffset = BoneIndexOffset + 4;
 int32 URenderingStatics::TextureUVOffset = BoneWeightOffset + 4;
 int32 URenderingStatics::TotalVertexOffset = TextureUVOffset + 8;
+
+float URenderingStatics::PerspectiveFOV_DegreeY = Math::ToRadians(70.0f);
+float URenderingStatics::PerspectiveFOV_Near = 25.f;
+float URenderingStatics::PerspectiveFOV_Far = 10000.f;
 
 void URenderingStatics::NormalizeAndPackInfluences(const TArray<FBoneInfluence>& Influences, int32 VertexCount, TArray<FPackedSkinWeights>& OutPackedWeights)
 {
