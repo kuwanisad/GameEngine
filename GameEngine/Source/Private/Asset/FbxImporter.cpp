@@ -276,7 +276,7 @@ bool UFbxImporter::ImportSkeleton(UReferenceSkeleton& OutSkeleton)
 	}
 
 	SDL_Log("FFbxImporter::ImportSkeleton - imported %d bones from '%s'",
-		OutSkeleton.GetNum(), MeshNode->GetName());
+		OutSkeleton.GetBoneCount(), MeshNode->GetName());
 
 	return true;
 }
@@ -525,7 +525,7 @@ bool UFbxImporter::ImportAnimation(const UReferenceSkeleton& TargetSkeleton, UAn
 	}
 
 	OutSequence.BoneTracks.clear();
-	OutSequence.BoneTracks.resize(TargetSkeleton.GetNum());
+	OutSequence.BoneTracks.resize(TargetSkeleton.GetBoneCount());
 
 	int32 FrameCount = static_cast<int32>(DurationSeconds * SampleRate) + 1;
 

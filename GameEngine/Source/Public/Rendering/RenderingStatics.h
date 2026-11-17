@@ -4,6 +4,8 @@
 
 class UReferenceSkeleton;
 
+using DelayedFrame = short;
+
 // 최대 UV 채널 수
 constexpr int32 MAX_TEXCOORDS = 4;
 
@@ -145,9 +147,17 @@ public:
 	static int32 TextureUVOffset; //float 2
 	static int32 TotalVertexOffset; //총 40 바이트
 
+	static int32 PaletteBufferCount;
+
 	static float PerspectiveFOV_DegreeY;
 	static float PerspectiveFOV_Near;
 	static float PerspectiveFOV_Far;
+
+	//이 값과 DelayedFrameCount를 같이 써서 렌더링 지연을 구현해야 함
+	static constexpr DelayedFrame MaxGlobalDelayedFrames = 1;
+
+	//모델이 사용하는 본 최대 개수. 이걸 변경하려면 셰이더도 맞춰야 함
+	static constexpr int32 MaxBoneMatriceCount = 96;
 
 public:
 	// 정점당 무제한으로 쌓인 Influence 리스트를, 정점당 상위 4개로 잘라 정규화함

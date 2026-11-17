@@ -34,6 +34,9 @@ int32 URenderingStatics::BoneWeightOffset = BoneIndexOffset + 4;
 int32 URenderingStatics::TextureUVOffset = BoneWeightOffset + 4;
 int32 URenderingStatics::TotalVertexOffset = TextureUVOffset + 8;
 
+int32 URenderingStatics::PaletteBufferCount = 2;
+
+
 float URenderingStatics::PerspectiveFOV_DegreeY = Math::ToRadians(70.0f);
 float URenderingStatics::PerspectiveFOV_Near = 25.f;
 float URenderingStatics::PerspectiveFOV_Far = 10000.f;

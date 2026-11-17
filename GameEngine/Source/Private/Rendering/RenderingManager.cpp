@@ -2,6 +2,9 @@
 #include "../../Public/Rendering/Shader.h"
 #include "../../Public/Rendering/RenderingStatics.h"
 #include "../../Public/rendering/Renderer.h"
+#include "../../Public/Asset/Skeleton.h"
+#include "../../Public/Asset/AssetManager.h"
+#include "../../Public/Animation/AnimInstance.h"
 
 void URenderingManager::RenderFrame(FShaderPipeline* Pipeline)
 {
@@ -32,55 +35,134 @@ FSkeletalMeshInstance* URenderingManager::ResolveInstanceHandle(const FInstanceH
     return &Instance;
 }
 
-void URenderingManager::ProcessInstance(FSkeletalMeshInstance& Instance)
+void URenderingManager::ProcessInstances()
 {
+    auto& Instances = GetSkeletalMeshInstances();
+
+    for (int32 i = 0; i < Instances.size(); ++i)
+    {
+        auto& CurrentInstance = Instances[i];
+
+        if (CurrentInstance.IsSlotOccupied && CurrentInstance.IsAlive)
+        {
+            if (CurrentInstance.RenderFence.IsFenceComplete())
+            {
+                delete CurrentInstance.Graph;
+                CurrentInstance.Graph = nullptr;
+                delete CurrentInstance.CurrentSnapshot;
+                CurrentInstance.CurrentSnapshot = nullptr;
+                CurrentInstance.IsSlotOccupied = false;
+                CurrentInstance.Generation++;   //워커 스레드가 이전 번호면 구버전으로 인식하도록
+                EmptyIndices_SkeletalMeshInstances.push_back(CurrentInstance.SelfIndex);
+            }
+        }
+    }
 }
 
-void URenderingManager::DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotBase* Snapshot, float DeltaSeconds)
+bool URenderingManager::Init(float ScreenWidth, float ScreenHeight)
 {
+    IsInitCalled = true;
+
+    Renderer = new URenderer();
+    Renderer->SetRenderingManager(this);
+
+    Renderer->SetScreenWidth(ScreenWidth);
+    Renderer->SetScreenHeight(ScreenHeight);
+
+    if (Renderer->Init() == false)
+    {
+        delete Renderer;
+        Renderer = nullptr;
+        IsInitCalled = false;
+        return false;
+    }
+
+    IsShuttingDown = false;
+    Renderer->SetIsShuttingDown(IsShuttingDown);
+
+    return true;
 }
 
-void URenderingManager::UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* SkinnedShader)
+void URenderingManager::Shutdown()
 {
-}
+    if (Renderer != nullptr)
+    {
+        Renderer->UnloadData();
+        Renderer->Shutdown();
+        delete Renderer;
+        Renderer = nullptr;
+    }
 
-void URenderingManager::WorkerLoop()
-{
-}
-
-void URenderingManager::SetPaletteBufferCount(int32 InPaletteBufferCount)
-{
-    PaletteBufferCount = InPaletteBufferCount;
-}
-
-bool URenderingManager::Init(UEngine* InEngine, float ScreenWidth, float ScreenHeight)
-{
-    return false;
-}
-
-bool URenderingManager::Shutdown()
-{
-    return false;
+    IsInitCalled = false;
 }
 
 void URenderingManager::Draw()
 {
+    Renderer->BeginFrame();
+    Renderer->RenderFrame();
+    Renderer->EndFrame();
+}
+
+bool URenderingManager::ScheduleRendering(float DeltaSeconds)
+{
+    AccumulatedDeltaSeconds += DeltaSeconds;
+
+    if (Renderer->IsPendingJob())
+    {
+        DelayedFrameCount++;
+        if (DelayedFrameCount > URenderingStatics::MaxGlobalDelayedFrames)
+        {
+            while (Renderer->IsPendingJob())
+            {
+                std::this_thread::yield();
+            }
+            DelayedFrameCount = 0;
+            return true;
+        }
+
+        return false;
+    }
+
+    DelayedFrameCount = 0;
+    return true;
+}
+
+void URenderingManager::FlushAndDispatch()
+{
+    ProcessInstances();
+
+    for (uint32 i = 0; i < GetSkeletalMeshInstances().size(); ++i)
+    {
+        FSkeletalMeshInstance& Instance = SkeletalMeshInstances[i];
+        if (Instance.IsSlotOccupied == false || !Instance.IsAlive)
+        {
+            continue;
+        }
+        FAnimSnapshotBase* NewSnapshot = Instance.OwningAnimInstance->GetSnapshot();
+        Renderer->DispatchToWorker(Instance, NewSnapshot, AccumulatedDeltaSeconds);
+    }
+
+    AccumulatedDeltaSeconds = 0.f;
 }
 
 void URenderingManager::RegisterSpriteComp(USpriteComponent* SpriteComp)
 {
+    SpriteComps.Add(SpriteComp);
 }
 
 void URenderingManager::UnregisterSpriteComp(USpriteComponent* SpriteComp)
 {
+    SpriteComps.Remove(SpriteComp);
 }
 
 void URenderingManager::RegisterMeshComp(UStaticMeshComponent* MeshComp)
 {
+    MeshComps.Add(MeshComp);
 }
 
 void URenderingManager::UnregisterMeshComp(UStaticMeshComponent* MeshComp)
 {
+    MeshComps.Remove(MeshComp);
 }
 
 FInstanceHandle URenderingManager::RegisterInstance(UAnimInstance* OwningAnimInstance, FAssetHandle SkeletonHandle, FAssetHandle SkeletalMeshHandle, FAnimGraphHandle AnimGraphHandle)

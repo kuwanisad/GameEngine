@@ -431,5 +431,8 @@
     <ClInclude Include="Source\Public\Utilities\TSlotArray.h">
       <Filter>소스 파일\Source\Public\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Public\Utilities\TPointerSlotArray.h">
+      <Filter>소스 파일\Source\Public\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

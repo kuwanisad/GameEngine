@@ -464,7 +464,7 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	SkeletalMeshes[NewHandle] = NewSM;
 
 	SDL_Log("USkeletalMesh::Load - loaded '%s': %d bones, %d vertices, %d triangles",
-		FileName.c_str(), NewSkeleton->GetReferenceSkeleton().GetNum(),
+		FileName.c_str(), NewSkeleton->GetReferenceSkeleton().GetBoneCount(),
 		static_cast<int32>(Section.SoftVertices.size()), Section.TriangleCount);
 
 	return NewHandle;

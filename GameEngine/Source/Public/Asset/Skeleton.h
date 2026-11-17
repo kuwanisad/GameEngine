@@ -43,7 +43,7 @@ public:
 		return BoneInfos[BoneIndex].ParentIndex;
 	}
 
-	int32 GetNum() const { return static_cast<int32>(BoneInfos.size()); }
+	int32 GetBoneCount() const { return static_cast<int32>(BoneInfos.size()); }
 
 	const FMeshBoneInfo& GetRefBoneInfo(int32 BoneIndex) const { return BoneInfos[BoneIndex]; }
 	const FTransform& GetRefBonePose(int32 BoneIndex) const { return BonePoses[BoneIndex]; }
@@ -54,7 +54,7 @@ public:
 class USkeleton
 {
 public:
-	UReferenceSkeleton& GetReferenceSkeleton() { return ReferenceSkeleton; }
+	const UReferenceSkeleton& GetReferenceSkeleton() const { return ReferenceSkeleton; }
 
 	const TArray<FMatrix4x4>& GetInverseBindPoseComponentSpace() const;
 private:

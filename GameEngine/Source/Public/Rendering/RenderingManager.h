@@ -3,7 +3,7 @@
 #include "../Asset/AssetHandle.h"
 #include "../Asset/SkeletalMeshInstance.h"
 #include "../Animation/AnimGraphRegistry.h"
-#include "../Utilities/TSlotArray.h"
+#include "../Utilities/TPointerSlotArray.h"
 
 #include <thread>
 #include <mutex>
@@ -11,8 +11,6 @@
 #include <functional>
 #include <atomic>
 #include <queue>
-
-using DelayedFrame = short;
 
 class URenderer;
 class UEngine;
@@ -28,22 +26,15 @@ struct FShaderPipeline;
 class URenderingManager
 {
 private:
-	static int32 PaletteBufferCount;
-	static bool IsStartUpCalled;
+	bool IsInitCalled;
+
+	bool IsShuttingDown;
 
 	URenderer* Renderer;
 	void RenderFrame(FShaderPipeline* Pipeline);
 
 	bool IsHandleValid(const FInstanceHandle& Handle);
 	FSkeletalMeshInstance* ResolveInstanceHandle(const FInstanceHandle& Handle);
-
-	void ProcessInstance(FSkeletalMeshInstance& Instance);
-	void DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotBase* Snapshot, float DeltaSeconds);
-	void UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* SkinnedShader);
-	void WorkerLoop();
-	
-	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
-	TArray<uint32> EmptyIndices_SkeletalMesh;
 
 	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
 	TArray<uint32> EmptyIndices_SkeletalMeshInstances;
@@ -52,39 +43,24 @@ private:
 
 	TPointerSlotArray<UStaticMeshComponent*> MeshComps;
 
-	std::thread WorkerThread;
-	std::mutex QueueMutex;
-	std::condition_variable QueueCV;
-	TArray<std::function<void()>> PendingCommands;
-	bool IsShuttingDown = false;
-
-	//마지막 프레임에 실행된 혹은 남은 작업 수
-	std::atomic<uint32_t> PendingJobCount{ 0 };
-
 	//밀린 프레임
 	std::atomic<DelayedFrame> DelayedFrameCount{ 0 };
-
-	//이 값과 DelayedFrameCount를 같이 써서 렌더링 지연을 구현해야 함
-	static constexpr DelayedFrame MaxGlobalDelayedFrames = 1;
 
 	//렌더링이 진행될 때 누적된 델타
 	float AccumulatedDeltaSeconds = 0.0f;
 
-	uint32 GetArrayEmptySlot();
+	void ProcessInstances();
 
 public:
-	//모델이 사용하는 본 최대 개수. 이걸 변경하려면 셰이더도 맞춰야 함
-	static constexpr int32 MaxBoneMatrices = 96;
-
-	static void SetPaletteBufferCount(int32 InPaletteBufferCount);
-	static int32 GetPaletteBufferCount() { return PaletteBufferCount; }
-
-	bool Init(UEngine* InEngine, float ScreenWidth, float ScreenHeight);
-	bool Shutdown();
+	bool Init(float ScreenWidth, float ScreenHeight);
+	void Shutdown();
 
 	URenderer* GetRenderer() const { return Renderer; }
 
 	void Draw();
+
+	bool ScheduleRendering(float DeltaSeconds);
+	void FlushAndDispatch();
 
 	void RegisterSpriteComp(USpriteComponent* SpriteComp);
 	void UnregisterSpriteComp(USpriteComponent* SpriteComp);
@@ -96,4 +72,10 @@ public:
 	void UnregisterInstance(FInstanceHandle Handle);
 
 	void UpdateSkeletalMeshTransform(FInstanceHandle Handle, const FVector3& Location, const FQuaternion& Rotation, const FVector3& Scale);
+
+	const TPointerSlotArray<UStaticMeshComponent*>& GetStaticMeshComps() const { return MeshComps; }
+	const TPointerSlotArray<USpriteComponent*>& GetSpriteComps() const { return SpriteComps; }
+
+	TArray<FSkeletalMeshInstance>& GetSkeletalMeshInstances() { return SkeletalMeshInstances; }
+	TArray<uint32>& GetSkeletalMeshInstancesEmptyIndices() { return EmptyIndices_SkeletalMeshInstances; }
 };

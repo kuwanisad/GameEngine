@@ -128,6 +128,7 @@
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickGroup.h" />
     <ClInclude Include="Source\Public\Tick\TickManager.h" />
+    <ClInclude Include="Source\Public\Utilities\TPointerSlotArray.h" />
     <ClInclude Include="Source\Public\Utilities\TSlotArray.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

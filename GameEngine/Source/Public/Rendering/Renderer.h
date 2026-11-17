@@ -6,6 +6,8 @@
 struct FShaderPipeline;
 struct FVertexContainer;
 
+class URenderingManager;
+
 struct FDirectionalLight
 {
 	FVector3 Direction;
@@ -33,10 +35,24 @@ private:
 	FVector3 AmbientLight;
 	FDirectionalLight DirectionalLight;
 
+	URenderingManager* RenderingManager;
+
+	std::thread WorkerThread;
+	std::mutex QueueMutex;
+	std::condition_variable QueueCV;
+	TArray<std::function<void()>> PendingCommands;
+	bool IsShuttingDown = false;
+
+	//마지막 프레임에 실행된 혹은 남은 작업 수
+	std::atomic<uint32_t> PendingJobCount{ 0 };
+
 	bool LoadShaders();
 
 	//참고서의 함수
 	void CreateSpriteVerts();
+
+	void WorkerLoop();
+	void UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* SkinnedShader);
 
 public:
 	URenderer();
@@ -49,6 +65,7 @@ public:
 	void UnloadData();
 
 	void BeginFrame();
+	void RenderFrame();
 	void EndFrame();
 
 	void SetViewMatrix(const FMatrix4x4& InView) { Matrix_View = InView; }
@@ -62,8 +79,16 @@ public:
 
 	FShaderPipeline* GetSkinnedShader() const { return ShaderPipeline_Skin; }
 
-	void SetLightUniforms(FShaderPipeline* InShader);
+	void SetLightUniforms(FShaderPipeline* InShader) const;
 
 	void SetAmbientLight(FVector3& InAmbientLight) { AmbientLight = InAmbientLight; }
 	FDirectionalLight& GetDirectionalLight() { return DirectionalLight; }
+
+	void SetRenderingManager(URenderingManager* InManager) { RenderingManager = InManager; }
+
+	void SetIsShuttingDown(bool Value) { IsShuttingDown = Value; }
+
+	void DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotBase* Snapshot, float DeltaSeconds);
+
+	bool IsPendingJob();
 };
