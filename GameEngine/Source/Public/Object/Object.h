@@ -13,4 +13,5 @@ public:
 	virtual ~UObject() = default;
 	virtual void Init() = 0;
 	virtual void OnDestroy();
+	bool GetIsPendingKill() const {return IsPendingKill;}
 };

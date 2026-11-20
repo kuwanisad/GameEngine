@@ -65,9 +65,6 @@ public:
 	void AddActor(AActor* InActor);
 	void RemoveActor(AActor* InActor);
 
-	void AddSprite(SpriteComponent* _Sprite);
-	void RemoveSprite(SpriteComponent* _Sprite);
-
 	FPhysScene* GetPhysScene();
 	UTickManager* GetTickManager();
 	UInputSubsystem* GetInputSubsystem();

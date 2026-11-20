@@ -45,7 +45,7 @@ bool UAssetManager::CompileShader(const FString& FileName, GLenum ShaderType, GL
 	glShaderSource(OutShader, 1, &DataChar, nullptr);
 	glCompileShader(OutShader);
 
-	if (!IsShaderProgramValid(OutShader))
+	if (IsShaderCompiled(OutShader) == false)
 	{
 		SDL_Log("Failed to compile shader %s", FileName.c_str());
 		return false;

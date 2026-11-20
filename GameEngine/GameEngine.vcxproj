@@ -285,6 +285,11 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(SolutionDir)external\SDL\lib\x64\SDL2.dll" "$(OutDir)"
+xcopy /Y "$(SolutionDir)external\GLEW\bin\Release\x64\glew32.dll" "$(OutDir)"
+xcopy /Y "$(SolutionDir)external\AutodeskFBX\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
