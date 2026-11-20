@@ -12,6 +12,8 @@ class IAnimGraphBase;
 
 struct FSkeletalMeshInstance
 {
+	FSkeletalMeshInstance();
+
 	uint32 SelfIndex = 0;
 	uint32 Generation = 0;
 	bool IsAlive = true;
@@ -42,8 +44,9 @@ struct FSkeletalMeshInstance
 
 	//큐로 하는 편이 낫지 않을까 싶지만 다른 객체가 아직 안 된 경우 기존값을 써야 하므로 일단 존치
 	TArray<TArray<FMatrix4x4>> RenderingPalette;
-	int32 ReadIndex = 0;
 
 	//작업이 진행돼서 ReadIndex ++해야 함
+	int32 ReadIndex = 0;
+
 	bool IsHasPendingSwap = false;
 };

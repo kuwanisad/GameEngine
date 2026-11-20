@@ -26,13 +26,13 @@ FSkeletalMeshInstance* URenderingManager::ResolveInstanceHandle(const FInstanceH
         return nullptr;
     }
 
-    FSkeletalMeshInstance& Instance = SkeletalMeshInstances[Handle.Index];
-    if (!Instance.IsSlotOccupied || Instance.Generation != Handle.Generation)
+    std::shared_ptr<FSkeletalMeshInstance>& Instance = SkeletalMeshInstances[Handle.Index];
+    if (!Instance->IsSlotOccupied || Instance->Generation != Handle.Generation)
     {
         return nullptr; //이미 다른 객체가 점유
     }
 
-    return &Instance;
+    return Instance.get();
 }
 
 void URenderingManager::ProcessInstances()
@@ -43,17 +43,17 @@ void URenderingManager::ProcessInstances()
     {
         auto& CurrentInstance = Instances[i];
 
-        if (CurrentInstance.IsSlotOccupied && CurrentInstance.IsAlive)
+        if (CurrentInstance->IsSlotOccupied && CurrentInstance->IsAlive)
         {
-            if (CurrentInstance.RenderFence.IsFenceComplete())
+            if (CurrentInstance->RenderFence.IsFenceComplete())
             {
-                delete CurrentInstance.Graph;
-                CurrentInstance.Graph = nullptr;
-                delete CurrentInstance.CurrentSnapshot;
-                CurrentInstance.CurrentSnapshot = nullptr;
-                CurrentInstance.IsSlotOccupied = false;
-                CurrentInstance.Generation++;   //워커 스레드가 이전 번호면 구버전으로 인식하도록
-                EmptyIndices_SkeletalMeshInstances.push_back(CurrentInstance.SelfIndex);
+                delete CurrentInstance->Graph;
+                CurrentInstance->Graph = nullptr;
+                delete CurrentInstance->CurrentSnapshot;
+                CurrentInstance->CurrentSnapshot = nullptr;
+                CurrentInstance->IsSlotOccupied = false;
+                CurrentInstance->Generation++;   //워커 스레드가 이전 번호면 구버전으로 인식하도록
+                EmptyIndices_SkeletalMeshInstances.push_back(CurrentInstance->SelfIndex);
             }
         }
     }
@@ -133,13 +133,13 @@ void URenderingManager::FlushAndDispatch()
 
     for (uint32 i = 0; i < GetSkeletalMeshInstances().size(); ++i)
     {
-        FSkeletalMeshInstance& Instance = SkeletalMeshInstances[i];
-        if (Instance.IsSlotOccupied == false || !Instance.IsAlive)
+        std::shared_ptr<FSkeletalMeshInstance>& Instance = SkeletalMeshInstances[i];
+        if (Instance->IsSlotOccupied == false || !Instance->IsAlive)
         {
             continue;
         }
-        FAnimSnapshotBase* NewSnapshot = Instance.OwningAnimInstance->GetSnapshot();
-        Renderer->DispatchToWorker(Instance, NewSnapshot, AccumulatedDeltaSeconds);
+        FAnimSnapshotBase* NewSnapshot = Instance->OwningAnimInstance->GetSnapshot();
+        Renderer->DispatchToWorker(*Instance, NewSnapshot, AccumulatedDeltaSeconds);
     }
 
     AccumulatedDeltaSeconds = 0.f;
@@ -177,25 +177,23 @@ FInstanceHandle URenderingManager::RegisterInstance(UAnimInstance* OwningAnimIns
     else
     {
         Index = EmptyIndices_SkeletalMeshInstances.size();
-        SkeletalMeshInstances.emplace_back(FSkeletalMeshInstance());
+        SkeletalMeshInstances.resize(static_cast<std::vector<FSkeletalMeshInstance, std::allocator<FSkeletalMeshInstance>>::size_type>(Index) + 1);
     }
 
-    SkeletalMeshInstances.emplace_back(FSkeletalMeshInstance());
+    std::shared_ptr<FSkeletalMeshInstance>& NewInstance = SkeletalMeshInstances[Index];
+    NewInstance->SelfIndex = Index;
+    NewInstance->IsAlive = true;
+    NewInstance->IsSlotOccupied = true;
+    NewInstance->SkeletonHandle = SkeletonHandle;
+    NewInstance->SkeletalMeshHandle = SkeletalMeshHandle;
+    NewInstance->OwningAnimInstance = OwningAnimInstance;
+    NewInstance->Graph = UAnimGraphRegistry::Get().CreateGraph(AnimGraphHandle);
+    NewInstance->CurrentSnapshot = nullptr;
+    NewInstance->RenderingPalette.assign(URenderingStatics::PaletteBufferCount, TArray<FMatrix4x4>(URenderingStatics::MaxBoneMatrixCount, FMatrix4x4::Identity));
+    NewInstance->ReadIndex = 0;
+    NewInstance->IsHasPendingSwap = false;
 
-    FSkeletalMeshInstance& NewInstance = SkeletalMeshInstances[Index];
-    NewInstance.SelfIndex = Index;
-    NewInstance.IsAlive = true;
-    NewInstance.IsSlotOccupied = true;
-    NewInstance.SkeletonHandle = SkeletonHandle;
-    NewInstance.SkeletalMeshHandle = SkeletalMeshHandle;
-    NewInstance.OwningAnimInstance = OwningAnimInstance;
-    NewInstance.Graph = UAnimGraphRegistry::Get().CreateGraph(AnimGraphHandle);
-    NewInstance.CurrentSnapshot = nullptr;
-    NewInstance.RenderingPalette.assign(PaletteBufferCount, TArray<FMatrix4x4>(MaxBoneMatrices, FMatrix4x4::Identity));
-    NewInstance.ReadIndex = 0;
-    NewInstance.IsHasPendingSwap = false;
-
-    return FInstanceHandle{ Index, NewInstance.Generation };
+    return FInstanceHandle{ Index, NewInstance->Generation };
 }
 
 void URenderingManager::UnregisterInstance(FInstanceHandle Handle)

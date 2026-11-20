@@ -1,6 +1,10 @@
 #pragma once
 #include "../Core/Math.h"
+#include "../Asset/SkeletalMeshInstance.h"
 
+#include <functional>
+#include <condition_variable>
+#include <atomic>
 #include <SDL.h>
 
 struct FShaderPipeline;
@@ -41,6 +45,7 @@ private:
 	std::mutex QueueMutex;
 	std::condition_variable QueueCV;
 	TArray<std::function<void()>> PendingCommands;
+
 	bool IsShuttingDown = false;
 
 	//마지막 프레임에 실행된 혹은 남은 작업 수

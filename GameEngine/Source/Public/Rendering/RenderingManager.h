@@ -4,6 +4,7 @@
 #include "../Asset/SkeletalMeshInstance.h"
 #include "../Animation/AnimGraphRegistry.h"
 #include "../Utilities/TPointerSlotArray.h"
+#include "../Rendering/RenderingStatics.h"
 
 #include <thread>
 #include <mutex>
@@ -36,7 +37,7 @@ private:
 	bool IsHandleValid(const FInstanceHandle& Handle);
 	FSkeletalMeshInstance* ResolveInstanceHandle(const FInstanceHandle& Handle);
 
-	TArray<FSkeletalMeshInstance> SkeletalMeshInstances;
+	TArray<std::shared_ptr<FSkeletalMeshInstance>> SkeletalMeshInstances;
 	TArray<uint32> EmptyIndices_SkeletalMeshInstances;
 
 	TPointerSlotArray<USpriteComponent*> SpriteComps;
@@ -76,6 +77,6 @@ public:
 	const TPointerSlotArray<UStaticMeshComponent*>& GetStaticMeshComps() const { return MeshComps; }
 	const TPointerSlotArray<USpriteComponent*>& GetSpriteComps() const { return SpriteComps; }
 
-	TArray<FSkeletalMeshInstance>& GetSkeletalMeshInstances() { return SkeletalMeshInstances; }
+	TArray<std::shared_ptr<FSkeletalMeshInstance>>& GetSkeletalMeshInstances() { return SkeletalMeshInstances; }
 	TArray<uint32>& GetSkeletalMeshInstancesEmptyIndices() { return EmptyIndices_SkeletalMeshInstances; }
 };

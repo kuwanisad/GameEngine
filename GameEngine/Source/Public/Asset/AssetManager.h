@@ -1,6 +1,7 @@
 #pragma once
 #include "../Core/CoreMinimal.h"
 #include "../Asset/AssetHandle.h"
+#include "../Rendering/RenderingStatics.h"
 
 #include <GL/glew.h>
 
@@ -39,7 +40,7 @@ private:
 	void PackSkeletonVertexBuffer(const TArray<FSoftSkinVertex>& SoftVertices, TArray<uint8>& OutBuffer);
 public:
 	static UAssetManager* Get();
-	static FAssetHandle InValidHandle;
+	static FAssetHandle InvalidHandle;
 	
 	UMesh* LoadMesh(const FString& FileName);
 	bool UnloadMesh(const UMesh* Mesh);

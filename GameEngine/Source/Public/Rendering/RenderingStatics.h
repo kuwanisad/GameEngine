@@ -157,7 +157,7 @@ public:
 	static constexpr DelayedFrame MaxGlobalDelayedFrames = 1;
 
 	//모델이 사용하는 본 최대 개수. 이걸 변경하려면 셰이더도 맞춰야 함
-	static constexpr int32 MaxBoneMatriceCount = 96;
+	static constexpr int32 MaxBoneMatrixCount = 96;
 
 public:
 	// 정점당 무제한으로 쌓인 Influence 리스트를, 정점당 상위 4개로 잘라 정규화함

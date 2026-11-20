@@ -377,7 +377,7 @@ bool UFbxImporter::ImportGeometry(FSkeletalMeshImportData& OutImportData) const
 	for (int32 PointIndex = 0; PointIndex < ControlPointCount; ++PointIndex)
 	{
 		const FbxVector4& P = ControlPoints[PointIndex];
-		OutImportData.Points[PointIndex] = Vector3(
+		OutImportData.Points[PointIndex] = FVector3(
 			static_cast<float>(P[0]), static_cast<float>(P[1]), static_cast<float>(P[2]));
 	}
 
@@ -406,7 +406,7 @@ bool UFbxImporter::ImportGeometry(FSkeletalMeshImportData& OutImportData) const
 				FbxVector2 UV;
 				bool bUnmapped = false;
 				Mesh->GetPolygonVertexUV(TriangleIndex, Corner, UVSetName, UV, bUnmapped);
-				Wedge.UVs[0] = Vector2(static_cast<float>(UV[0]), static_cast<float>(UV[1]));
+				Wedge.UVs[0] = FVector2(static_cast<float>(UV[0]), static_cast<float>(UV[1]));
 			}
 
 			int32 WedgeIndex = static_cast<int32>(OutImportData.Wedges.size());

@@ -103,6 +103,7 @@ void URenderer::DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotB
 	FSkeletalMeshInstance* InstancePtr = &Instance;
 
 	Instance.IsHasPendingSwap = true;
+	IAnimGraphBase* Graph = Instance.Graph;
 
 	PendingJobCount.fetch_add(1);
 
@@ -110,17 +111,17 @@ void URenderer::DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotB
 		std::lock_guard<std::mutex> Lock(QueueMutex);
 
 		PendingCommands.emplace_back(
-			[this, Snapshot, &Instance, InstancePtr, WriteIndex, Skel, DeltaSeconds]
+			[this, Snapshot, &Instance, InstancePtr, WriteIndex, Graph, Skel, DeltaSeconds]() mutable
 			{
 				TArray<FBoneTransform> LocalPose;
 
-				if (InstancePtr->Graph == nullptr)
+				if (Graph == nullptr)
 				{
 					return;
 				}
 
-				InstancePtr->Graph->Update(DeltaSeconds, *Snapshot);
-				InstancePtr->Graph->Evaluate(LocalPose, *Snapshot);
+				Graph->Update(DeltaSeconds, *Snapshot);
+				Graph->Evaluate(LocalPose, *Snapshot);
 
 				if (Skel == nullptr)
 				{
@@ -210,11 +211,11 @@ void URenderer::UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* 
 
 	if (Palette.empty())
 	{
-		Palette.resize(URenderingStatics::MaxBoneMatriceCount, FMatrix4x4::Identity);
+		Palette.resize(URenderingStatics::MaxBoneMatrixCount, FMatrix4x4::Identity);
 	}
-	else if (static_cast<int32>(Palette.size()) > URenderingStatics::MaxBoneMatriceCount)
+	else if (static_cast<int32>(Palette.size()) > URenderingStatics::MaxBoneMatrixCount)
 	{
-		Palette.resize(URenderingStatics::MaxBoneMatriceCount);
+		Palette.resize(URenderingStatics::MaxBoneMatrixCount);
 	}
 
 	UTexture* Tex = Mesh->GetTexture();
@@ -338,9 +339,9 @@ void URenderer::RenderFrame()
 
 	for (auto& Instance : RenderingManager->GetSkeletalMeshInstances())
 	{
-		if (Instance.IsSlotOccupied && Instance.IsAlive)
+		if (Instance->IsSlotOccupied && Instance->IsAlive)
 		{
-			UploadAndDraw(Instance, ShaderPipeline_Skin);
+			UploadAndDraw(*Instance, ShaderPipeline_Skin);
 		}
 	}
 }

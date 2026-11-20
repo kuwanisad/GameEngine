@@ -395,9 +395,6 @@
     <ClInclude Include="Source\Public\Animation\AnimGraphRegistry.h">
       <Filter>소스 파일\Source\Public\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Public\Asset\InstanceHandle.h">
-      <Filter>소스 파일\Source\Public\Asset</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Public\Animation\AnimGraph.h">
       <Filter>소스 파일\Source\Public\Animation</Filter>
     </ClInclude>

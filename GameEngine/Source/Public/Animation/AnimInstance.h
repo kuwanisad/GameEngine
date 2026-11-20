@@ -1,7 +1,7 @@
 #pragma once
 #include "AnimSnapshotBase.h"
 #include "AnimGraphRegistry.h"
-#include "../Asset/InstanceHandle.h"
+#include "../Asset/AssetHandle.h"
 
 class AActor;
 

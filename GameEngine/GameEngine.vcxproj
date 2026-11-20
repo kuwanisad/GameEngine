@@ -75,7 +75,6 @@
     <ClInclude Include="Source\Public\Asset\AssetHandle.h" />
     <ClInclude Include="Source\Public\Asset\AssetManager.h" />
     <ClInclude Include="Source\Public\Asset\FbxImporter.h" />
-    <ClInclude Include="Source\Public\Asset\InstanceHandle.h" />
     <ClInclude Include="Source\Public\Asset\SkeletalMesh.h" />
     <ClInclude Include="Source\Public\Asset\SkeletalMeshInstance.h" />
     <ClInclude Include="Source\Public\Asset\Skeleton.h" />
@@ -228,13 +227,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\external\SDL\include;..\external\GLEW\include;..\external\rapidjson\include;..\AutodeskFBX\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\SDL\include;..\external\GLEW\include;..\external\rapidjson\include;$(ProjectDir)..\external\AutodeskFBX\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\external\SDL\lib\x64;..\external\GLEW\lib\Release\x64;..\external\AutodeskFBX\lib\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\external\SDL\lib\x64;..\external\GLEW\lib\Release\x64;$(ProjectDir)..\external\AutodeskFBX\lib\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;glew32.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>

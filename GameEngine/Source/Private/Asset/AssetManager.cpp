@@ -18,7 +18,7 @@
 #include <SDL_log.h>
 
 UAssetManager* UAssetManager::AssetManager = nullptr;
-FAssetHandle UAssetManager::InValidHandle = 0;
+FAssetHandle UAssetManager::InvalidHandle = 0;
 
 
 FAssetHandle UAssetManager::GetNewAssetHandle()
@@ -342,14 +342,14 @@ FAssetHandle UAssetManager::LoadSkeleton(const FString& FileName)
 
 	if (FbxImporter->ImportFromFile(FileName) == false)
 	{
-		return;
+		return InvalidHandle;
 	}
 
 	USkeleton* OutSkeleton = new USkeleton();
 
-	if (FbxImporter->ImportSkeleton(OutSkeleton->GetReferenceSkeleton()) == false)
+	if (FbxImporter->ImportSkeleton((UReferenceSkeleton&)OutSkeleton->GetReferenceSkeleton()) == false)
 	{
-		return;
+		return InvalidHandle;
 	}
 
 	FAssetHandle Handle = GetNewAssetHandle();
@@ -364,14 +364,14 @@ FAssetHandle UAssetManager::LoadAnimSequence(const FString& FileName, const URef
 
 	if (FbxImporter->ImportFromFile(FileName) == false)
 	{
-		return;
+		return InvalidHandle;
 	}
 
 	auto* OutSequence = new UAnimSequence();
 
 	if (FbxImporter->ImportAnimation(TargetSkeleton, *OutSequence) == false)
 	{
-		return;
+		return InvalidHandle;
 	}
 
 	FAssetHandle Handle = GetNewAssetHandle();
@@ -403,15 +403,14 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	if (Importer->ImportFromFile(FileName) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to open '%s'", FileName.c_str());
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	auto* NewSkeleton = new USkeleton();
-	if (Importer->ImportSkeleton(NewSkeleton->GetReferenceSkeleton()) == false)
+	if (Importer->ImportSkeleton((UReferenceSkeleton&)NewSkeleton->GetReferenceSkeleton()) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import skeleton");
-		Unload();
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	TArray<FBoneInfluence> Influences;
@@ -419,14 +418,14 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	if (Importer->ImportSkinWeights(NewSkeleton->GetReferenceSkeleton(), Influences, VertexCount) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import skin weights");
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	FSkeletalMeshImportData ImportData;
 	if (Importer->ImportGeometry(ImportData) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import geometry");
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	FSkeletalMeshLODModel LODModel;
@@ -434,13 +433,13 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 		Influences, ImportData.Wedges, ImportData.Faces, ImportData.Points) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - BuildSkeletalMesh failed");
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	if (LODModel.Sections.empty())
 	{
 		SDL_Log("USkeletalMesh::Load - no sections produced");
-		return InValidHandle;
+		return InvalidHandle;
 	}
 
 	const FSkelMeshSection& Section = LODModel.Sections[0];
