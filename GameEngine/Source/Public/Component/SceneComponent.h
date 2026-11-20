@@ -22,7 +22,7 @@ protected:
 	FString AttachSocketName;
 
 public:
-	USceneComponent(AActor* _Owner);
+	USceneComponent(AActor* _Owner, ETickingGroup _TickGroup = ETickingGroup::TG_DuringPhysics_ComponentTick);
 
 	const FVector3& GetRelativeLocation() const { return RelativeLocation; }
 	void SetRelativeLocation(const FVector3& pos) { RelativeLocation = pos; ShouldRecomputeWorldTransform = true; ComputeWorldTransform(); OnUpdateWorldTransform(); }

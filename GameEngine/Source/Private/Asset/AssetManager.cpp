@@ -469,6 +469,13 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	return NewHandle;
 }
 
+FAssetHandle UAssetManager::RegisterAnimSequence(UAnimSequence* Sequence)
+{
+	auto NewHandle = GetNewAssetHandle();
+	AnimSequences[NewHandle] = Sequence;
+	return NewHandle;
+}
+
 const USkeleton* UAssetManager::GetSkeleton(FAssetHandle Handle) const
 {
 	auto it = Skeletons.find(Handle);

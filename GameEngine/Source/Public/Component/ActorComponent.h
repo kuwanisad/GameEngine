@@ -13,7 +13,7 @@ protected:
 	EComponentType Type = EComponentType::None;
 
 public:
-	UActorComponent(AActor* _Owner);
+	UActorComponent(AActor* _Owner, ETickingGroup _TickGroup = ETickingGroup::TG_DuringPhysics_ComponentTick);
 	virtual ~UActorComponent();
 
 	virtual void Init() override;

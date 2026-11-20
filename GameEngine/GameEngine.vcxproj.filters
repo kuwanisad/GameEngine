@@ -103,6 +103,15 @@
     <Filter Include="소스 파일\Source\Public\Utilities">
       <UniqueIdentifier>{3100ca9d-5a42-4ef2-b46c-d78341569a71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Private\Utilities">
+      <UniqueIdentifier>{58d578e1-fa26-408c-960c-7124ccf3ad48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Private\Camera">
+      <UniqueIdentifier>{67494d46-e305-4215-a5be-dc161c1d369b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Source\Public\Camera">
+      <UniqueIdentifier>{da1a309d-015d-4ee6-9239-0c04bdcd43cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -218,6 +227,27 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Asset\SkeletalMeshInstance.cpp">
       <Filter>소스 파일\Source\Private\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Utilities\DelaunayTriangulation2D.cpp">
+      <Filter>소스 파일\Source\Private\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Utilities\BlendSpaceManifest.cpp">
+      <Filter>소스 파일\Source\Private\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Utilities\AnimSequenceCache.cpp">
+      <Filter>소스 파일\Source\Private\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\BoxComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Component\MovementComponent.cpp">
+      <Filter>소스 파일\Source\Private\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Camera\CameraComponent.cpp">
+      <Filter>소스 파일\Source\Private\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Camera\FPSCamera.cpp">
+      <Filter>소스 파일\Source\Private\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -430,6 +460,27 @@
     </ClInclude>
     <ClInclude Include="Source\Public\Utilities\TPointerSlotArray.h">
       <Filter>소스 파일\Source\Public\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Utilities\DelaunayTriangulation2D.h">
+      <Filter>소스 파일\Source\Public\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Utilities\BlendSpaceManifest.h">
+      <Filter>소스 파일\Source\Public\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Utilities\AnimSequenceCache.h">
+      <Filter>소스 파일\Source\Public\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\BoxComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Component\MovementComponent.h">
+      <Filter>소스 파일\Source\Public\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Camera\CameraComponent.h">
+      <Filter>소스 파일\Source\Public\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Camera\FPSCamera.h">
+      <Filter>소스 파일\Source\Public\Camera</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

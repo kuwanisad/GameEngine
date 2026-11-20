@@ -1,7 +1,7 @@
 #include "../../Public/Component/SceneComponent.h"
 #include "../../Public/Actor/Actor.h"
 
-USceneComponent::USceneComponent(AActor* _Owner) : UActorComponent(_Owner),
+USceneComponent::USceneComponent(AActor* _Owner, ETickingGroup _TickGroup = ETickingGroup::TG_DuringPhysics_ComponentTick) : UActorComponent(_Owner, _TickGroup),
 	ShouldRecomputeWorldTransform(true)
 {
 }

@@ -28,9 +28,13 @@
     <ClCompile Include="Source\Private\Asset\SkeletalMesh.cpp" />
     <ClCompile Include="Source\Private\Asset\SkeletalMeshInstance.cpp" />
     <ClCompile Include="Source\Private\Asset\Skeleton.cpp" />
+    <ClCompile Include="Source\Private\Camera\CameraComponent.cpp" />
+    <ClCompile Include="Source\Private\Camera\FPSCamera.cpp" />
     <ClCompile Include="Source\Private\Collision\BVH.cpp" />
     <ClCompile Include="Source\Private\Collision\Collision.cpp" />
     <ClCompile Include="Source\Private\Collision\GJKStatics.cpp" />
+    <ClCompile Include="Source\Private\Component\BoxComponent.cpp" />
+    <ClCompile Include="Source\Private\Component\MovementComponent.cpp" />
     <ClCompile Include="Source\Private\Component\ShapeComponent.cpp" />
     <ClCompile Include="Source\Private\Component\AttachmentTransformRules.cpp" />
     <ClCompile Include="Source\Private\Component\PrimitiveComponent.cpp" />
@@ -57,6 +61,9 @@
     <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\TickManager.cpp" />
+    <ClCompile Include="Source\Private\Utilities\AnimSequenceCache.cpp" />
+    <ClCompile Include="Source\Private\Utilities\BlendSpaceManifest.cpp" />
+    <ClCompile Include="Source\Private\Utilities\DelaunayTriangulation2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Public\Actor\Actor.h" />
@@ -78,6 +85,8 @@
     <ClInclude Include="Source\Public\Asset\SkeletalMesh.h" />
     <ClInclude Include="Source\Public\Asset\SkeletalMeshInstance.h" />
     <ClInclude Include="Source\Public\Asset\Skeleton.h" />
+    <ClInclude Include="Source\Public\Camera\CameraComponent.h" />
+    <ClInclude Include="Source\Public\Camera\FPSCamera.h" />
     <ClInclude Include="Source\Public\Collision\BVH.h" />
     <ClInclude Include="Source\Public\Collision\Collision.h" />
     <ClInclude Include="Source\Public\Collision\GJKStatics.h" />
@@ -85,12 +94,14 @@
     <ClInclude Include="Source\Public\Component\ActorComponent.h" />
     <ClInclude Include="Source\Public\Component\ComponentType.h" />
     <ClInclude Include="Source\Public\Component\AttachmentTransformRules.h" />
+    <ClInclude Include="Source\Public\Component\MovementComponent.h" />
     <ClInclude Include="Source\Public\Component\SceneComponent.h" />
     <ClInclude Include="Source\Public\Component\ShapeComponent.h" />
     <ClInclude Include="Source\Public\Component\PrimitiveComponent.h" />
     <ClInclude Include="Source\Public\Component\SkeletalMeshComponent.h" />
     <ClInclude Include="Source\Public\Component\SpriteComponent.h" />
     <ClInclude Include="Source\Public\Component\StaticMeshComponent.h" />
+    <ClInclude Include="Source\Public\Component\BoxComponent.h" />
     <ClInclude Include="Source\Public\Core\CoreMinimal.h" />
     <ClInclude Include="Source\Public\Core\Engine.h" />
     <ClInclude Include="Source\Public\Core\Math.h" />
@@ -127,6 +138,9 @@
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickGroup.h" />
     <ClInclude Include="Source\Public\Tick\TickManager.h" />
+    <ClInclude Include="Source\Public\Utilities\AnimSequenceCache.h" />
+    <ClInclude Include="Source\Public\Utilities\BlendSpaceManifest.h" />
+    <ClInclude Include="Source\Public\Utilities\DelaunayTriangulation2D.h" />
     <ClInclude Include="Source\Public\Utilities\TPointerSlotArray.h" />
     <ClInclude Include="Source\Public\Utilities\TSlotArray.h" />
   </ItemGroup>

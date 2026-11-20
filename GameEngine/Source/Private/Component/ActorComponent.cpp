@@ -4,17 +4,16 @@
 #include "../../Public/Core/Engine.h"
 
 
-UActorComponent::UActorComponent(AActor* _Owner) : Owner(_Owner)
+UActorComponent::UActorComponent(AActor* _Owner, ETickingGroup _TickGroup = ETickingGroup::TG_DuringPhysics_ComponentTick) : Owner(_Owner)
 {
 	PrimaryComponentTick.Target = this;
-
-	//This is Child's responsibility.
-	//PrimaryComponentTick.TickGroup = 
+	PrimaryComponentTick.TickGroup = _TickGroup;
 }
 
 UActorComponent::~UActorComponent()
 {
 	UEngine::GetEngine()->GetTickManager()->UnregisterTickFunction(&PrimaryComponentTick);
+	Owner->RemoveComponent(this);
 }
 
 void UActorComponent::Init()
