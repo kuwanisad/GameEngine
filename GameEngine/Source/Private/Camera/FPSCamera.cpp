@@ -1,7 +1,7 @@
 #include "../../Public/Camera/FPSCamera.h"
 #include "../../Public/Actor/Actor.h"
 
-UFPSCamera::UFPSCamera(AActor* _Owner) :
+AFPSCamera::AFPSCamera(AActor* _Owner) :
 	UCameraComponent(_Owner),
 	PitchSpeed(0),
 	MaxPitch(Math::Pi / 3.0f),
@@ -9,7 +9,7 @@ UFPSCamera::UFPSCamera(AActor* _Owner) :
 {
 }
 
-void UFPSCamera::Tick(float DeltaTime)
+void AFPSCamera::Tick(float DeltaTime)
 {
 	UCameraComponent::Tick(DeltaTime);
 

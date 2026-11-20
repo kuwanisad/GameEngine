@@ -4,7 +4,7 @@
 #include "../../Public/Core/Engine.h"
 
 
-UActorComponent::UActorComponent(AActor* _Owner, ETickingGroup _TickGroup = ETickingGroup::TG_DuringPhysics_ComponentTick) : Owner(_Owner)
+UActorComponent::UActorComponent(AActor* _Owner, ETickingGroup _TickGroup) : Owner(_Owner)
 {
 	PrimaryComponentTick.Target = this;
 	PrimaryComponentTick.TickGroup = _TickGroup;

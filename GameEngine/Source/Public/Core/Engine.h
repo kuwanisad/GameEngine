@@ -52,6 +52,14 @@ public:
 	template<ActorChildClass T>
 	T* SpawnActor(const FVector3& Location, const FQuaternion& Rotation, const FVector3& Scale);
 
+	template<typename T, typename... Args>
+	T* SpawnActor(Args&&... args)
+	{
+		T* actor = new T(std::forward<Args>(args)...);
+		actor->Init();
+		return actor;
+	}
+
 	static UEngine* GetEngine();
 
 	void AddActor(AActor* InActor);

@@ -16,6 +16,7 @@ protected:
 	FString ShaderName;
 	float Specular;
 	FString Name;
+	FAABB Box;
 
 public:
 	UMesh();
@@ -32,4 +33,7 @@ public:
 	FVertexContainer* GetVertexContainer() { return VertexContainer; } const
 	FString GetShaderName() const { return ShaderName; }
 	float GetSpecular() const { return Specular; }
+
+	const FAABB& GetBox() { return Box; }
+	void SetBox(const FAABB& InBox) { Box = InBox; }
 };

@@ -57,8 +57,8 @@ public:
 
 	FAssetHandle LoadSkeleton(const FString& FileName);
 	FAssetHandle LoadAnimSequence(const FString& FileName, const UReferenceSkeleton& TargetSkeleton, float SampleRate);
-	FAssetHandle LoadSkeletalMesh(const FString& FileName);
 	FAssetHandle RegisterAnimSequence(UAnimSequence* Sequence);
+	bool LoadSkeletalMesh(const FString& FileName, FAssetHandle& OutMeshHandle, FAssetHandle& OutSkelHandle);
 
 	const USkeleton* GetSkeleton(FAssetHandle Handle) const;
 	UAnimSequence* GetAnimSequence(FAssetHandle Handle) const;

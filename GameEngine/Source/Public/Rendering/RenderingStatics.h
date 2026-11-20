@@ -164,5 +164,5 @@ public:
 	static void NormalizeAndPackInfluences(const TArray<FBoneInfluence>& Influences, int32 VertexCount, TArray<FPackedSkinWeights>& OutPackedWeights);
 
 	// UE의 FMeshUtilities::BuildSkeletalMesh로 Faces, Wedges, Points, Influences를 섹션 1개 최종 정점, 인덱스 버퍼로 조립함
-	static bool BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points);
+	static bool BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points);
 };

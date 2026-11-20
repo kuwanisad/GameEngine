@@ -187,6 +187,8 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 	std::vector<float> vertices;
 	vertices.reserve(vert_json.Size() * vertex_size);
 
+	FAABB Box;
+
 	for (rapidjson::SizeType i = 0; i < vert_json.Size(); i++)
 	{
 		// For now, just assume we have 8 elements
@@ -196,6 +198,9 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 			SDL_Log("Unexpected vertex format for %s", FileName.c_str());
 			return nullptr;
 		}
+
+		FVector3 pos(vert[0].GetDouble(), vert[1].GetDouble(), vert[2].GetDouble());
+		Box.UpdateMinMax(pos);
 
 		// Add the floats
 		for (rapidjson::SizeType i = 0; i < vert.Size(); i++)
@@ -233,6 +238,7 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 	UMesh* new_mesh = new UMesh();
 	new_mesh->SetName(new_mesh_name);
 	new_mesh->SetVertexContainer(new_vert_container);
+	new_mesh->SetBox(Box);
 
 	Meshes.emplace(new_mesh_name, new_mesh);
 
@@ -374,8 +380,13 @@ FAssetHandle UAssetManager::LoadAnimSequence(const FString& FileName, const URef
 		return InvalidHandle;
 	}
 
+	return RegisterAnimSequence(OutSequence);
+}
+
+FAssetHandle UAssetManager::RegisterAnimSequence(UAnimSequence* Sequence)
+{
 	FAssetHandle Handle = GetNewAssetHandle();
-	AnimSequences[Handle] = OutSequence;
+	AnimSequences[Handle] = Sequence;
 	return Handle;
 }
 
@@ -396,21 +407,24 @@ void UAssetManager::PackSkeletonVertexBuffer(const TArray<FSoftSkinVertex>& Soft
 	}
 }
 
-FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
+bool UAssetManager::LoadSkeletalMesh(const FString& FileName, FAssetHandle& OutMeshHandle, FAssetHandle& OutSkelHandle)
 {
+	OutMeshHandle = InvalidHandle;
+	OutSkelHandle = InvalidHandle;
+
 	auto Importer = UFbxImporter::Get();
 
 	if (Importer->ImportFromFile(FileName) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to open '%s'", FileName.c_str());
-		return InvalidHandle;
+		return false;
 	}
 
 	auto* NewSkeleton = new USkeleton();
 	if (Importer->ImportSkeleton((UReferenceSkeleton&)NewSkeleton->GetReferenceSkeleton()) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import skeleton");
-		return InvalidHandle;
+		return false;
 	}
 
 	TArray<FBoneInfluence> Influences;
@@ -418,28 +432,28 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	if (Importer->ImportSkinWeights(NewSkeleton->GetReferenceSkeleton(), Influences, VertexCount) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import skin weights");
-		return InvalidHandle;
+		return false;
 	}
 
 	FSkeletalMeshImportData ImportData;
 	if (Importer->ImportGeometry(ImportData) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - failed to import geometry");
-		return InvalidHandle;
+		return false;
 	}
 
 	FSkeletalMeshLODModel LODModel;
-	if (URenderingStatics::BuildSkeletalMesh(LODModel, (const UReferenceSkeleton*)&NewSkeleton->GetReferenceSkeleton(),
+	if (URenderingStatics::BuildSkeletalMesh(LODModel,
 		Influences, ImportData.Wedges, ImportData.Faces, ImportData.Points) == false)
 	{
 		SDL_Log("USkeletalMesh::Load - BuildSkeletalMesh failed");
-		return InvalidHandle;
+		return false;
 	}
 
 	if (LODModel.Sections.empty())
 	{
 		SDL_Log("USkeletalMesh::Load - no sections produced");
-		return InvalidHandle;
+		return false;
 	}
 
 	const FSkelMeshSection& Section = LODModel.Sections[0];
@@ -459,21 +473,19 @@ FAssetHandle UAssetManager::LoadSkeletalMesh(const FString& FileName)
 	NewSM->SetTexture(NewTexture);
 
 	FAssetHandle NewHandle = GetNewAssetHandle();
+	FAssetHandle NewHandle2 = GetNewAssetHandle();
 
 	SkeletalMeshes[NewHandle] = NewSM;
+	Skeletons[NewHandle2] = (USkeleton*)NewSM->GetSkeleton();
 
 	SDL_Log("USkeletalMesh::Load - loaded '%s': %d bones, %d vertices, %d triangles",
 		FileName.c_str(), NewSkeleton->GetReferenceSkeleton().GetBoneCount(),
 		static_cast<int32>(Section.SoftVertices.size()), Section.TriangleCount);
 
-	return NewHandle;
-}
+	OutMeshHandle = NewHandle;
+	OutSkelHandle = NewHandle2;
 
-FAssetHandle UAssetManager::RegisterAnimSequence(UAnimSequence* Sequence)
-{
-	auto NewHandle = GetNewAssetHandle();
-	AnimSequences[NewHandle] = Sequence;
-	return NewHandle;
+	return true;
 }
 
 const USkeleton* UAssetManager::GetSkeleton(FAssetHandle Handle) const

@@ -43,9 +43,11 @@
     <ClCompile Include="Source\Private\Component\SkeletalMeshComponent.cpp" />
     <ClCompile Include="Source\Private\Component\SpriteComponent.cpp" />
     <ClCompile Include="Source\Private\Component\StaticMeshComponent.cpp" />
+    <ClCompile Include="Source\Private\Core\DebugManager.cpp" />
     <ClCompile Include="Source\Private\Core\Engine.cpp" />
     <ClCompile Include="Source\Private\Core\Main.cpp" />
     <ClCompile Include="Source\Private\Core\Math.cpp" />
+    <ClCompile Include="Source\Private\Core\TestManager.cpp" />
     <ClCompile Include="Source\Private\Debugging\DebugManager.cpp" />
     <ClCompile Include="Source\Private\Input\EnhancedInputComponent.cpp" />
     <ClCompile Include="Source\Private\Input\InputSubsystem.cpp" />
@@ -58,6 +60,11 @@
     <ClCompile Include="Source\Private\Rendering\Shader.cpp" />
     <ClCompile Include="Source\Private\Rendering\Texture.cpp" />
     <ClCompile Include="Source\Private\Rendering\VertexContainer.cpp" />
+    <ClCompile Include="Source\Private\Test\FPSActor.cpp" />
+    <ClCompile Include="Source\Private\Test\FPSCharacterAnimInstance.cpp" />
+    <ClCompile Include="Source\Private\Test\PhysicsTestBox.cpp" />
+    <ClCompile Include="Source\Private\Test\PlaneActor.cpp" />
+    <ClCompile Include="Source\Private\Test\ThirdPersonCharacter.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorComponentTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\ActorTickFunction.cpp" />
     <ClCompile Include="Source\Private\Tick\TickManager.cpp" />
@@ -73,12 +80,17 @@
     <ClInclude Include="Source\Public\Animation\AnimGraphRegistry.h" />
     <ClInclude Include="Source\Public\Animation\AnimInstance.h" />
     <ClInclude Include="Source\Public\Animation\AnimNode_Base.h" />
+    <ClInclude Include="Source\Public\Animation\AnimNode_BlendSpace2D.h" />
     <ClInclude Include="Source\Public\Animation\AnimNode_SaveCachedPose.h" />
+    <ClInclude Include="Source\Public\Animation\AnimNode_SequencePlayer.h" />
+    <ClInclude Include="Source\Public\Animation\AnimNode_StateMachine.h" />
+    <ClInclude Include="Source\Public\Animation\AnimNode_UseCachedPose.h" />
     <ClInclude Include="Source\Public\Animation\AnimSequence.h" />
     <ClInclude Include="Source\Public\Animation\AnimSnapshotBase.h" />
     <ClInclude Include="Source\Public\Animation\AnimTaskFence.h" />
     <ClInclude Include="Source\Public\Animation\AnimTrack.h" />
     <ClInclude Include="Source\Public\Animation\BoneTransform.h" />
+    <ClInclude Include="Source\Public\Animation\GENERATED_AnimInstance.h" />
     <ClInclude Include="Source\Public\Asset\AssetHandle.h" />
     <ClInclude Include="Source\Public\Asset\AssetManager.h" />
     <ClInclude Include="Source\Public\Asset\FbxImporter.h" />
@@ -103,8 +115,10 @@
     <ClInclude Include="Source\Public\Component\StaticMeshComponent.h" />
     <ClInclude Include="Source\Public\Component\BoxComponent.h" />
     <ClInclude Include="Source\Public\Core\CoreMinimal.h" />
+    <ClInclude Include="Source\Public\Core\DebugManager.h" />
     <ClInclude Include="Source\Public\Core\Engine.h" />
     <ClInclude Include="Source\Public\Core\Math.h" />
+    <ClInclude Include="Source\Public\Core\TestManager.h" />
     <ClInclude Include="Source\Public\Debugging\DebugManager.h" />
     <ClInclude Include="Source\Public\Input\EnhancedActionKeyMapping.h" />
     <ClInclude Include="Source\Public\Input\EnhancedInputComponent.h" />
@@ -132,7 +146,12 @@
     <ClInclude Include="Source\Public\Rendering\Texture.h" />
     <ClInclude Include="Source\Public\Rendering\VertexContainer.h" />
     <ClInclude Include="Source\Public\stb_image\stb_image.h" />
+    <ClInclude Include="Source\Public\Test\FPSActor.h" />
+    <ClInclude Include="Source\Public\Test\FPSCharacterAnimInstance.h" />
     <ClInclude Include="Source\Public\Test\GameplayInputActions.h" />
+    <ClInclude Include="Source\Public\Test\PhysicsTestBox.h" />
+    <ClInclude Include="Source\Public\Test\PlaneActor.h" />
+    <ClInclude Include="Source\Public\Test\ThirdPersonCharacter.h" />
     <ClInclude Include="Source\Public\Tick\ActorComponentTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\ActorTickFunction.h" />
     <ClInclude Include="Source\Public\Tick\TickFunction.h" />
@@ -143,6 +162,19 @@
     <ClInclude Include="Source\Public\Utilities\DelaunayTriangulation2D.h" />
     <ClInclude Include="Source\Public\Utilities\TPointerSlotArray.h" />
     <ClInclude Include="Source\Public\Utilities\TSlotArray.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Basic.frag" />
+    <None Include="Shaders\Basic.vert" />
+    <None Include="Shaders\BasicMesh.frag" />
+    <None Include="Shaders\BasicMesh.vert" />
+    <None Include="Shaders\Phong.frag" />
+    <None Include="Shaders\Phong.vert" />
+    <None Include="Shaders\Skinned.vert" />
+    <None Include="Shaders\Sprite.frag" />
+    <None Include="Shaders\Sprite.vert" />
+    <None Include="Shaders\Transform.vert" />
+    <None Include="Source\Public\Animation\AnimNode_SequencePlayer.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

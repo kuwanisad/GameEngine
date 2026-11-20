@@ -113,7 +113,7 @@ void URenderingStatics::NormalizeAndPackInfluences(const TArray<FBoneInfluence>&
 	}
 }
 
-bool URenderingStatics::BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const UReferenceSkeleton* Skeleton, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points)
+bool URenderingStatics::BuildSkeletalMesh(FSkeletalMeshLODModel& OutLODModel, const TArray<FBoneInfluence>& Influences, const TArray<FVertex>& Wedges, const TArray<FTriangle>& Faces, const TArray<FVector3>& Points)
 {
 	if (Points.empty() || Wedges.empty() || Faces.empty())
 	{

@@ -15,7 +15,7 @@ protected:
 	int32 Height;
 
 public:
-	USpriteComponent(AActor* InOwner, int InRenderingOrder);
+	USpriteComponent(AActor* InOwner, int InRenderingOrder = 100);
 	virtual ~USpriteComponent();
 
 	virtual void Init() override;

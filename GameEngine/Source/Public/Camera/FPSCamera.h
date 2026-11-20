@@ -1,10 +1,10 @@
 #pragma once
 #include "CameraComponent.h"
 
-class UFPSCamera : public UCameraComponent
+class AFPSCamera : public UCameraComponent
 {
 public:
-	UFPSCamera(class AActor* _Owner);
+	AFPSCamera(class AActor* _Owner);
 
 	void Tick(float DeltaTime) override;
 

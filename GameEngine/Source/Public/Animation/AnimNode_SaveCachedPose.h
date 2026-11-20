@@ -33,7 +33,7 @@ public:
 			{
 				Input->Evaluate(CachedPose, Snapshot);
 			}
-			bEvaluatedThisFrame = true;
+			IsEvaluatedThisFrame = true;
 		}
 		OutPose = CachedPose;
 	}

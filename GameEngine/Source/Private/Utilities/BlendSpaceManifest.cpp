@@ -5,7 +5,7 @@
 #include "../../Public/Rendering/RenderingManager.h"
 #include "../../Public/Core/Engine.h"
 #include "../../Public/Asset/AssetManager.h"
-#include "FAnimSequenceCache.h"
+#include "../../Public/Utilities/AnimSequenceCache.h"
 
 #include <fstream>
 #include <sstream>

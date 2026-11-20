@@ -112,6 +112,12 @@
     <Filter Include="소스 파일\Source\Public\Camera">
       <UniqueIdentifier>{da1a309d-015d-4ee6-9239-0c04bdcd43cf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Source\Private\Test">
+      <UniqueIdentifier>{3e9832af-fc07-49d8-bb03-1a89eeeb06d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{841f76b3-5afd-4fac-9772-b902ebee47c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Private\Core\Main.cpp">
@@ -248,6 +254,27 @@
     </ClCompile>
     <ClCompile Include="Source\Private\Camera\FPSCamera.cpp">
       <Filter>소스 파일\Source\Private\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Test\ThirdPersonCharacter.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Core\TestManager.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Core\DebugManager.cpp">
+      <Filter>소스 파일\Source\Private\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Test\FPSActor.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Test\PlaneActor.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Test\PhysicsTestBox.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Private\Test\FPSCharacterAnimInstance.cpp">
+      <Filter>소스 파일\Source\Private\Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -482,5 +509,76 @@
     <ClInclude Include="Source\Public\Camera\FPSCamera.h">
       <Filter>소스 파일\Source\Public\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimNode_BlendSpace2D.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimNode_SequencePlayer.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimNode_StateMachine.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\AnimNode_UseCachedPose.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Animation\GENERATED_AnimInstance.h">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\FPSCharacterAnimInstance.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\ThirdPersonCharacter.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Core\TestManager.h">
+      <Filter>소스 파일\Source\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Core\DebugManager.h">
+      <Filter>소스 파일\Source\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\FPSActor.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\PlaneActor.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Public\Test\PhysicsTestBox.h">
+      <Filter>소스 파일\Source\Public\Test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Public\Animation\AnimNode_SequencePlayer.inl">
+      <Filter>소스 파일\Source\Public\Animation</Filter>
+    </None>
+    <None Include="Shaders\Basic.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Basic.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BasicMesh.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BasicMesh.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Phong.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Phong.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Skinned.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Sprite.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Sprite.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Transform.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

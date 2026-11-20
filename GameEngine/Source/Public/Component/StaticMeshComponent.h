@@ -23,7 +23,7 @@ public:
 
 	virtual void SetMesh(UMesh* InMesh) { Mesh = InMesh; }
 	
-	bool SetVisible(bool _Visible) { Visible = _Visible; }
+	void SetVisible(bool _Visible) { Visible = _Visible; }
 	bool GetVisible() const { return Visible; }
 	
 	void SetTextureIndex(int32 _Index) { TextureIndex = _Index; }

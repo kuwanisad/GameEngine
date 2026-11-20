@@ -10,6 +10,7 @@ namespace Math
 {
 	const float Pi = 3.1415926535f;
 	const float Tau = Pi * 2.f;
+	const float PiOver2 = Pi * 0.5f;
 	const float Infinity = std::numeric_limits<float>::infinity();
 	const float NegInfinity = -std::numeric_limits<float>::infinity();
 
