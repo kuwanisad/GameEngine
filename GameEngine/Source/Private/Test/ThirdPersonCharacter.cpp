@@ -24,17 +24,21 @@
 
 AThirdPersonCharacter::AThirdPersonCharacter(const FString& SkeletalMeshPath) : AActor()
 {
-	MoveComp = new UMovementComponent(this);
+	// [수정] new XComponent(this) 직접 생성은 Init()이 안 불려서 Owner->Components
+	// 등록/틱 등록/(BoxComp의 경우) 콜리전 생성이 전부 빠짐 - UEngine::CreateComponent<T>()
+	// 로 교체해서 생성과 Init() 호출을 하나로 묶음. AFPSCamera는 이름이 "A" 접두사라
+	// 액터처럼 보이지만 실제로는 UCameraComponent를 상속하는 컴포넌트라 동일하게 적용.
+	MoveComp = UEngine::GetEngine()->CreateComponent<UMovementComponent>(this);
 	MoveComp->SetUseCCD(true);
 
 	// [FPSActor와 동일한 이유] 이 액터의 Tick()이 MoveComp가 이번 프레임에 이미
 	// 적용한 요(회전)를 읽어야 함 - MoveComp가 먼저 끝나야 함을 명시적으로 걸어둠.
 	PrimaryActorTick.AddPrerequisite(&MoveComp->PrimaryComponentTick);
 
-	CameraComp = new AFPSCamera(this);
+	CameraComp = UEngine::GetEngine()->CreateComponent<AFPSCamera>(this);
 
 	// [FPSActor와 동일] 일반적인 사람 크기로 임의로 잡음.
-	BoxComp = new UBoxComponent(this);
+	BoxComp = UEngine::GetEngine()->CreateComponent<UBoxComponent>(this);
 	BoxComp->SetObjectBox(FAABB(FVector3(-25.0f, -25.0f, -44.0f), FVector3(25.0f, 25.0f, 44.0f)));
 
 	// [부착 계층] 콜리전 박스를 루트로 삼음(FPSActor와 동일). 스켈레탈 메시는
@@ -58,7 +62,7 @@ AThirdPersonCharacter::AThirdPersonCharacter(const FString& SkeletalMeshPath) : 
 		auto Skel = UAssetManager::Get()->GetSkeleton(SkelHandle);
 		FAnimGraphHandle GraphHandle = UTestManager::RegisterCharacterAnimGraph(SkelHandle, Skel);
 
-		SkelMeshComp = new USkeletalMeshComponent(this);
+		SkelMeshComp = UEngine::GetEngine()->CreateComponent<USkeletalMeshComponent>(this);
 		SkelMeshComp->SetupAttachment(BoxComp);
 		// [수정됨 - 도->라디안 변환 누락] Quaternion(axis, angle)은 라디안을 받는데
 		// 90.f(도 단위 그대로)를 넣었던 게 원인이었음 - 90라디안(약 14.32바퀴)만큼
@@ -66,7 +70,7 @@ AThirdPersonCharacter::AThirdPersonCharacter(const FString& SkeletalMeshPath) : 
 		SkelMeshComp->SetRelativeRotation(FQuaternion(FVector3::UnitZ, 90.0f * Math::Pi / 180.0f));
 
 		UFPSCharacterAnimInstance* AnimInst = new UFPSCharacterAnimInstance();
-		AnimInst->SkeletonHandle = MeshHandle;
+		AnimInst->SkeletonHandle = SkelHandle;
 		AnimInst->SkeletalMeshHandle = MeshHandle;
 		AnimInst->AnimGraphHandle = GraphHandle;
 		SkelMeshComp->SetAnimInstance(AnimInst);
@@ -74,7 +78,7 @@ AThirdPersonCharacter::AThirdPersonCharacter(const FString& SkeletalMeshPath) : 
 #endif
 
 	// [입력 시스템] FPSActor와 완전히 동일한 구성 - Move/Turn/LookUp/Jump.
-	InputComp = new UEnhancedInputComponent(this);
+	InputComp = UEngine::GetEngine()->CreateComponent<UEnhancedInputComponent>(this);
 	MappingContext = new UInputMappingContext();
 	MappingContext->AddKeyMapping(EKeys::W, &GameplayInputActions::Move(),
 		{ new UInputModifierSwizzleAxis(EInputAxisSwizzle::YXZ) });

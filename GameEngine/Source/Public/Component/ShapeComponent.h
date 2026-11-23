@@ -3,7 +3,7 @@
 
 struct FCollision;
 
-//unlike UE, this component has only collision.
+//UE와 달리 이 컴포넌트는 콜리전만 가짐.
 class UShapeComponent : public UPrimitiveComponent
 {
 protected:

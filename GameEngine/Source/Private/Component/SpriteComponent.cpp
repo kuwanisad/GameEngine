@@ -21,6 +21,12 @@ USpriteComponent::~USpriteComponent()
 
 void USpriteComponent::Init()
 {
+	// [체이닝 필수 - BoxComponent/StaticMeshComponent와 동일한 버그] 베이스를 안 부르면
+	// Owner->AddComponent(this)가 빠져서 AActor 소멸자가 이 컴포넌트를 절대 못 지움 -
+	// 액터가 죽을 때 OnDestroy()(RenderingManager::UnregisterSpriteComp)가 안 불려서
+	// RenderingManager에 댕글링 포인터가 남게 됨.
+	UActorComponent::Init();
+
 	UEngine::GetEngine()->GetRenderingManager()->RegisterSpriteComp(this);
 }
 

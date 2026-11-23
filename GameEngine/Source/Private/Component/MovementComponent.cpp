@@ -11,7 +11,9 @@ UMovementComponent::UMovementComponent(class AActor* owner)
 	, ForwardSpeed(0.0f)
 	, StrafeSpeed(0.0f)
 {
-
+	// PrimaryComponentTick.CanEverTick 기본값은 false(실제 UE와 동일) - 이동 로직이
+	// Tick() 안에 있으니 이 컴포넌트는 직접 켜줘야 함.
+	PrimaryComponentTick.CanEverTick = true;
 }
 
 void UMovementComponent::Tick(float deltaTime)
@@ -72,7 +74,7 @@ void UMovementComponent::Tick(float deltaTime)
 				float t;
 				FHitResult hit;
 
-				if (UEngine::GetEngine()->GetPhysScene()->SweepQuery(Owner, fromPos, fromPos + remaining, t, hit))
+				if (!UEngine::GetEngine()->GetPhysScene()->SweepQuery(Owner, fromPos, fromPos + remaining, t, hit))
 				{
 					fromPos = fromPos + remaining;
 					remaining = FVector3::Zero;

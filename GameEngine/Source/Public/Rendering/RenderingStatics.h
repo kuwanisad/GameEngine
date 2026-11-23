@@ -129,6 +129,7 @@ public:
 
 	static FString Shader_uViewProj;
 	static FString Shader_uWorldTransform;
+	static FString Shader_uMatrixPalette;
 
 	static FString Shader_uSpecPower;
 

@@ -213,7 +213,7 @@ public:
 		return v - 2.0f * FVector2::Dot(v, n) * n;
 	}
 
-	// return: vec * mat
+	// 반환값: vec * mat
 	static FVector2 Transform(const FVector2& vec, const struct FMatrix3x3& mat, float w = 1.0f);
 
 	static const FVector2 Zero;
@@ -377,7 +377,7 @@ public:
 		return v - 2.0f * FVector3::Dot(v, n) * n;
 	}
 
-	//return: vec * mat
+	//반환값: vec * mat
 	static FVector3 Transform(const FVector3& vec, const struct FMatrix4x4& mat, float w = 1.0f);
 
 	static FVector3 TransformWithPerspDiv(const FVector3& vec, const struct FMatrix4x4& mat, float w = 1.0f);
@@ -420,7 +420,7 @@ public:
 	{
 		FMatrix3x3 retVal;
 
-		// row 0
+		// 0행
 		retVal.mat[0][0] =
 			left.mat[0][0] * right.mat[0][0] +
 			left.mat[0][1] * right.mat[1][0] +
@@ -436,7 +436,7 @@ public:
 			left.mat[0][1] * right.mat[1][2] +
 			left.mat[0][2] * right.mat[2][2];
 
-		// row 1
+		// 1행
 		retVal.mat[1][0] =
 			left.mat[1][0] * right.mat[0][0] +
 			left.mat[1][1] * right.mat[1][0] +
@@ -452,7 +452,7 @@ public:
 			left.mat[1][1] * right.mat[1][2] +
 			left.mat[1][2] * right.mat[2][2];
 
-		// row 2
+		// 2행
 		retVal.mat[2][0] =
 			left.mat[2][0] * right.mat[0][0] +
 			left.mat[2][1] * right.mat[1][0] +
@@ -528,17 +528,17 @@ public:
 		memcpy(mat, inMat, 16 * sizeof(float));
 	}
 
-	// Cast to a const float pointer
+	// const float 포인터로 캐스트
 	const float* GetAsFloatPtr() const
 	{
 		return reinterpret_cast<const float*>(&mat[0][0]);
 	}
 
-	// Matrix multiplication (a * b)
+	// 행렬 곱 (a * b)
 	friend FMatrix4x4 operator*(const FMatrix4x4& a, const FMatrix4x4& b)
 	{
 		FMatrix4x4 retVal;
-		// row 0
+		// 0행
 		retVal.mat[0][0] =
 			a.mat[0][0] * b.mat[0][0] +
 			a.mat[0][1] * b.mat[1][0] +
@@ -563,7 +563,7 @@ public:
 			a.mat[0][2] * b.mat[2][3] +
 			a.mat[0][3] * b.mat[3][3];
 
-		// row 1
+		// 1행
 		retVal.mat[1][0] =
 			a.mat[1][0] * b.mat[0][0] +
 			a.mat[1][1] * b.mat[1][0] +
@@ -588,7 +588,7 @@ public:
 			a.mat[1][2] * b.mat[2][3] +
 			a.mat[1][3] * b.mat[3][3];
 
-		// row 2
+		// 2행
 		retVal.mat[2][0] =
 			a.mat[2][0] * b.mat[0][0] +
 			a.mat[2][1] * b.mat[1][0] +
@@ -613,7 +613,7 @@ public:
 			a.mat[2][2] * b.mat[2][3] +
 			a.mat[2][3] * b.mat[3][3];
 
-		// row 3
+		// 3행
 		retVal.mat[3][0] =
 			a.mat[3][0] * b.mat[0][0] +
 			a.mat[3][1] * b.mat[1][0] +
@@ -654,19 +654,19 @@ public:
 		return FVector3(mat[3][0], mat[3][1], mat[3][2]);
 	}
 
-	//forward
+	//정면
 	FVector3 GetXAxis() const
 	{
 		return FVector3::Normalize(FVector3(mat[0][0], mat[0][1], mat[0][2]));
 	}
 
-	//left
+	//왼쪽
 	FVector3 GetYAxis() const
 	{
 		return FVector3::Normalize(FVector3(mat[1][0], mat[1][1], mat[1][2]));
 	}
 
-	//up
+	//위쪽
 	FVector3 GetZAxis() const
 	{
 		return FVector3::Normalize(FVector3(mat[2][0], mat[2][1], mat[2][2]));
@@ -834,8 +834,8 @@ public:
 		*this = FQuaternion::Identity;
 	}
 
-	// This directly sets the quaternion components --
-	// don't use for axis/angle
+	// 쿼터니언 성분을 직접 세팅함 --
+	// 축/각도 방식이 아니니 그 용도로는 쓰지 말 것
 	explicit FQuaternion(float inX, float inY, float inZ, float inW)
 	{
 		Set(inX, inY, inZ, inW);
@@ -888,7 +888,7 @@ public:
 		w /= length;
 	}
 
-	// Normalize the provided quaternion
+	// 전달된 쿼터니언을 정규화함
 	static FQuaternion Normalize(const FQuaternion& q)
 	{
 		FQuaternion retVal = q;
@@ -896,7 +896,7 @@ public:
 		return retVal;
 	}
 
-	// Linear interpolation
+	// 선형 보간
 	static FQuaternion Lerp(const FQuaternion& a, const FQuaternion& b, float f)
 	{
 		FQuaternion retVal;
@@ -920,7 +920,7 @@ public:
 	*/
 	static FQuaternion Slerp(const FQuaternion& a, const FQuaternion& b, float f)
 	{
-		//Angle between a and b
+		//a와 b 사이의 각도
 		float tempCosAngle = FQuaternion::Dot(a, b);
 
 		float cosAngle = tempCosAngle >0 ? tempCosAngle  : -tempCosAngle;
@@ -936,7 +936,7 @@ public:
 		}
 		else
 		{
-			//if the quaternions are collinear
+			//두 쿼터니언이 평행(collinear)인 경우
 			scale0 = 1.0f - f;
 			scale1 = f;
 		}
@@ -975,7 +975,7 @@ public:
 	static const FQuaternion Identity;
 };
 
-// UE FTransform
+// UE의 FTransform에 대응
 struct FTransform
 {
 public:

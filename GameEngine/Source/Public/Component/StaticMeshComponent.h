@@ -22,6 +22,7 @@ public:
 	virtual void Draw(FShaderPipeline* Pipeline);
 
 	virtual void SetMesh(UMesh* InMesh) { Mesh = InMesh; }
+	UMesh* GetMesh() const { return Mesh; }
 	
 	void SetVisible(bool _Visible) { Visible = _Visible; }
 	bool GetVisible() const { return Visible; }

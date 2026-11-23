@@ -75,7 +75,7 @@ FVector3 FVector3::TransformWithPerspDiv(const FVector3& vec, const FMatrix4x4& 
 
 FVector3 FVector3::Transform(const FVector3& v, const FQuaternion& q)
 {
-	//Rodrigues' Formula
+	//로드리게스 공식(Rodrigues' Formula)
 	// v + 2.0*cross(q.xyz, cross(q.xyz,v) + q.w*v);
 	FVector3 qv(q.x, q.y, q.z);
 	FVector3 retVal = v;
@@ -85,39 +85,39 @@ FVector3 FVector3::Transform(const FVector3& v, const FQuaternion& q)
 
 void FMatrix4x4::Invert()
 {
-	//Referenced Game Programming in C++
+	//참고: Game Programming in C++
 
 	float tmp[12];
 	float src[16];
 	float dst[16];
 	float det;
 
-	// Transpose matrix
-	// row 1 to col 1
+	// 행렬 전치
+	// 1행을 1열로
 	src[0] = mat[0][0];
 	src[4] = mat[0][1];
 	src[8] = mat[0][2];
 	src[12] = mat[0][3];
 
-	// row 2 to col 2
+	// 2행을 2열로
 	src[1] = mat[1][0];
 	src[5] = mat[1][1];
 	src[9] = mat[1][2];
 	src[13] = mat[1][3];
 
-	// row 3 to col 3
+	// 3행을 3열로
 	src[2] = mat[2][0];
 	src[6] = mat[2][1];
 	src[10] = mat[2][2];
 	src[14] = mat[2][3];
 
-	// row 4 to col 4
+	// 4행을 4열로
 	src[3] = mat[3][0];
 	src[7] = mat[3][1];
 	src[11] = mat[3][2];
 	src[15] = mat[3][3];
 
-	// Calculate cofactors
+	// 여인수(cofactor) 계산
 	tmp[0] = src[10] * src[15];
 	tmp[1] = src[11] * src[14];
 	tmp[2] = src[9] * src[15];
@@ -178,17 +178,17 @@ void FMatrix4x4::Invert()
 	dst[15] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
 	dst[15] -= tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8];
 
-	// Calculate determinant
+	// 행렬식 계산
 	det = src[0] * dst[0] + src[1] * dst[1] + src[2] * dst[2] + src[3] * dst[3];
 
-	// Inverse of matrix is divided by determinant
+	// 역행렬은 행렬식으로 나눠서 구함
 	det = 1 / det;
 	for (int j = 0; j < 16; j++)
 	{
 		dst[j] *= det;
 	}
 
-	// Set it back
+	// 결과 반영
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -227,7 +227,7 @@ FMatrix4x4 FMatrix4x4::TransformQuaternionToMatrix(const FQuaternion& q)
 
 FMatrix4x4 FTransform::ToMatrix() const
 {
-	//return: vec * scale * rotation * translation
+	//반환값: vec * scale * rotation * translation
 	return FMatrix4x4::TransformScaleToMatrix(Scale3D) * FMatrix4x4::TransformQuaternionToMatrix(Rotation) * FMatrix4x4::TransformTranslationToMatrix(Translation);
 }
 

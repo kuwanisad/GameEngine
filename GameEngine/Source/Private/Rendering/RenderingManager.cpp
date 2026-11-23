@@ -43,7 +43,7 @@ void URenderingManager::ProcessInstances()
     {
         auto& CurrentInstance = Instances[i];
 
-        if (CurrentInstance->IsSlotOccupied && CurrentInstance->IsAlive)
+        if (CurrentInstance->IsSlotOccupied && !CurrentInstance->IsAlive)
         {
             if (CurrentInstance->RenderFence.IsFenceComplete())
             {
@@ -138,6 +138,20 @@ void URenderingManager::FlushAndDispatch()
         {
             continue;
         }
+        if (Instance->IsHasPendingSwap)
+        {
+            Instance->ReadIndex = (Instance->ReadIndex + 1) % URenderingStatics::PaletteBufferCount;
+            Instance->IsHasPendingSwap = false;
+        }
+    }
+
+    for (uint32 i = 0; i < GetSkeletalMeshInstances().size(); ++i)
+    {
+        std::shared_ptr<FSkeletalMeshInstance>& Instance = SkeletalMeshInstances[i];
+        if (Instance->IsSlotOccupied == false || !Instance->IsAlive)
+        {
+            continue;
+        }
         FAnimSnapshotBase* NewSnapshot = Instance->OwningAnimInstance->GetSnapshot();
         Renderer->DispatchToWorker(*Instance, NewSnapshot, AccumulatedDeltaSeconds);
     }
@@ -181,6 +195,19 @@ FInstanceHandle URenderingManager::RegisterInstance(UAnimInstance* OwningAnimIns
     }
 
     std::shared_ptr<FSkeletalMeshInstance>& NewInstance = SkeletalMeshInstances[Index];
+
+    // [치명적 버그] 새 인덱스는 위에서 SkeletalMeshInstances.resize(Index+1)로 늘어난 자리라,
+    // vector<shared_ptr<T>>의 기본 생성 규칙상 그 shared_ptr은 그냥 null임 - 실제
+    // FSkeletalMeshInstance 객체를 한 번도 만든 적이 없었음. 그 상태에서 바로
+    // NewInstance->SelfIndex = Index;로 null shared_ptr을 역참조해서 죽었던 것(스택이 가리킨
+    // 바로 그 지점). EmptyIndices_SkeletalMeshInstances에서 재사용하는 인덱스는 이미 유효한
+    // 객체를 갖고 있으니(ProcessInstances가 슬롯만 비우고 shared_ptr 자체는 안 지움) 그대로
+    // 재사용하고, 처음 쓰는 인덱스일 때만 새로 만들어줌.
+    if (NewInstance == nullptr)
+    {
+        NewInstance = std::make_shared<FSkeletalMeshInstance>();
+    }
+
     NewInstance->SelfIndex = Index;
     NewInstance->IsAlive = true;
     NewInstance->IsSlotOccupied = true;

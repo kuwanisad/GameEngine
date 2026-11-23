@@ -11,7 +11,7 @@ protected:
 	FVector3 RelativeLocation = FVector3::Zero;
 	FVector3 RelativeScale3D = FVector3::One;
 	FQuaternion RelativeRotation = FQuaternion::Identity;
-	bool ShouldRecomputeWorldTransform : true;
+	bool ShouldRecomputeWorldTransform : 1;
 
 	FVector3 WorldLocation = FVector3::Zero;
 	FQuaternion WorldRotation = FQuaternion::Identity;
@@ -40,14 +40,14 @@ public:
 
 	bool IsAttachedTo(USceneComponent* TestComp) const;
 
-	//Only Constructor
+	//생성 시에만 호출 가능
 	void SetupAttachment(USceneComponent* InParent, const FString& InSocketName = "");
 
 	USceneComponent* GetAttachParent() const { return AttachParent; }
 	const TArray<USceneComponent*>& GetAttachChildren() const { return AttachChildren; }
 	const FString& GetAttachSocketName() const { return AttachSocketName; }
 
-	//Recursively calls the function on its children
+	//자식들에 대해서도 재귀적으로 호출함
 	void ComputeWorldTransform();
 	const FMatrix4x4& GetComponentTransform() const { return ComponentToWorld; }
 

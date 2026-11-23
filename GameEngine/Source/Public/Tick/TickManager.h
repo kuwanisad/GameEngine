@@ -14,7 +14,7 @@ public:
 	void RegisterTickFunction(FTickFunction* TickFunction);
 	void UnregisterTickFunction(FTickFunction* TickFunction);
 
-	//Call once per frame. this is start of frame.
+	//매 프레임 한 번 호출됨. 프레임 시작 지점.
 	void BeginFrame();
 
 	void RunTickGroup(ETickingGroup Group, float DeltaTime);
@@ -25,6 +25,6 @@ private:
 
 	std::vector<FTickFunction*> TickFunctionsByGroup[NumTickingGroups];
 
-	// Tick Prerequisite
+	// 틱 선행 조건(Prerequisite)
 	std::vector<FTickFunction*> Deferred;
 };

@@ -7,6 +7,9 @@
 UCameraComponent::UCameraComponent(AActor* _Owner) :
 	USceneComponent(_Owner, ETickingGroup::TG_PostUpdateWork)
 {
+	// PrimaryComponentTick.CanEverTick 기본값은 false(실제 UE와 동일) - FPSCamera 등
+	// 파생 클래스의 Tick()이 실제로 뷰 행렬을 갱신하므로 여기서 켜줘야 함.
+	PrimaryComponentTick.CanEverTick = true;
 }
 
 void UCameraComponent::Tick(float DeltaTime)

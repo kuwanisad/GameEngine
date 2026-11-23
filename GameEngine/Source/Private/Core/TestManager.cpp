@@ -13,6 +13,7 @@
 #include "../../Public/Test/PlaneActor.h"
 #include "../../Public/Rendering/Renderer.h"
 #include "../../Public/Component/SpriteComponent.h"
+#include "../../Public/Component/SceneComponent.h"
 #include "../../Public/Component/StaticMeshComponent.h"
 #include "../../Public/Asset/SkeletalMesh.h"
 #include "../../Public/Asset/Skeleton.h"
@@ -44,9 +45,9 @@ bool UTestManager::bUseStateMachine = false;
 void UTestManager::LoadTestLevel()
 {
 	UEngine* engine = UEngine::GetEngine();
-	// Create actors
+	// 액터 생성
 	AActor* a = engine->SpawnActor<AActor>();
-	UStaticMeshComponent* mc = new UStaticMeshComponent(a);
+	UStaticMeshComponent* mc = engine->CreateComponent<UStaticMeshComponent>(a);
 	mc->SetMesh(UAssetManager::Get()->LoadMesh("Assets/Cube.gpmesh"));
 	// [부착 계층] 콜리전 없이 메시 하나뿐이라, 그 메시 자체를 루트로 삼음.
 	// [순서 중요] 아래 SetActorLocation/Scale/Rotation보다 반드시 먼저 와야 함 - 늦게
@@ -59,13 +60,13 @@ void UTestManager::LoadTestLevel()
 	a->SetActorRotation(q);
 
 	a = engine->SpawnActor<AActor>();
-	mc = new UStaticMeshComponent(a);
+	mc = engine->CreateComponent<UStaticMeshComponent>(a);
 	mc->SetMesh(UAssetManager::Get()->LoadMesh("Assets/Sphere.gpmesh"));
 	a->SetRootComponent(mc);
 	a->SetActorLocation(FVector3(200.0f, -75.0f, 0.0f));
 	a->SetActorScale(FVector3::One * 3.0f);
 
-	// Setup floor
+	// 바닥 세팅
 	const float start = -1250.0f;
 	const float size = 250.0f;
 
@@ -80,7 +81,6 @@ void UTestManager::LoadTestLevel()
 		}
 	}
 
-	// Left/right walls (렌더링용)
 	q = FQuaternion(FVector3::UnitX, Math::PiOver2);
 	for (int i = 0; i < 10; i++)
 	{
@@ -94,7 +94,6 @@ void UTestManager::LoadTestLevel()
 	}
 
 	q = FQuaternion::Concatenate(q, FQuaternion(FVector3::UnitZ, Math::PiOver2));
-	// Forward/back walls (렌더링용)
 	for (int i = 0; i < 10; i++)
 	{
 		a = engine->SpawnActor<APlaneActor>(10.0f, true, false);
@@ -164,7 +163,7 @@ void UTestManager::LoadTestLevel()
 		DebugManager::Watch(fallBox);
 	}
 
-	// Setup lights
+	// 조명 세팅
 	auto AmbientLight = FVector3(0.2f, 0.2f, 0.2f);
 	auto renderer = engine->GetRenderingManager()->GetRenderer();
 
@@ -174,22 +173,33 @@ void UTestManager::LoadTestLevel()
 	dir.DiffuseColor = FVector3(0.78f, 0.88f, 1.0f);
 	dir.SpecColor = FVector3(0.8f, 0.8f, 0.8f);
 
-	// UI elements
+	// UI 요소
+	// [재수정] 바로 전 수정에서 SetActorLocation만 빼면 되는 줄 알았는데, 틀렸음 -
+	// USpriteComponent::Draw()가 Owner->GetActorTransform()(=GetRootComponent()->
+	// GetComponentTransform())을 "렌더링마다" 직접 호출함. 즉 SetActorLocation을
+	// 안 불러도 Draw()가 알아서 또 RootComponent를 역참조하므로, 루트 자체가 없으면
+	// 어차피 거기서 터짐(이번에 실제로 터진 지점). USpriteComponent는 USceneComponent가
+	// 아니라서 자기 자신은 루트가 못 되니, 대신 빈 USceneComponent를 하나 만들어서
+	// 루트로 세워주고 위치 지정도 그걸 통해 정상적으로 복구함.
 	a = engine->SpawnActor<AActor>();
+	USceneComponent* UIRoot = engine->CreateComponent<USceneComponent>(a);
+	a->SetRootComponent(UIRoot);
 	a->SetActorLocation(FVector3(-350.0f, -350.0f, 0.0f));
-	USpriteComponent* sc = new USpriteComponent(a);
+	USpriteComponent* sc = engine->CreateComponent<USpriteComponent>(a);
 	sc->SetTexture(UAssetManager::Get()->LoadTexture("Assets/HealthBar.png"));
 
 	a = engine->SpawnActor<AActor>();
+	UIRoot = engine->CreateComponent<USceneComponent>(a);
+	a->SetRootComponent(UIRoot);
 	a->SetActorLocation(FVector3(375.0f, -275.0f, 0.0f));
 	a->SetActorScale(FVector3::One * 0.75f);
-	sc = new USpriteComponent(a);
+	sc = engine->CreateComponent<USpriteComponent>(a);
 	sc->SetTexture(UAssetManager::Get()->LoadTexture("Assets/Radar.png"));
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_GetRelativeMouseState(nullptr, nullptr);
 
-	// Camera actor
+	// 카메라 액터
 	//Player = new CameraActor(game);
 
 	// --loadskm으로 경로가 설정됐으면 스켈레탈 메시 액터를 스폰.
@@ -256,7 +266,7 @@ void UTestManager::LoadTestLevel()
 			}
 
 			AActor* SkelActor = engine->SpawnActor<AActor>();
-			USkeletalMeshComponent* smc = new USkeletalMeshComponent(SkelActor);
+			USkeletalMeshComponent* smc = engine->CreateComponent<USkeletalMeshComponent>(SkelActor);
 
 			UAnimInstance* AnimInst = nullptr;
 			if (bUseBlendSpace)

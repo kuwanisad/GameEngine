@@ -108,12 +108,23 @@ int main(int argc, char** argv)
 	}
 #endif
 
-	UEngine game;
-	bool success = game.Initialize();
+	// [근본 원인] 예전엔 여기서 "UEngine game;"으로 스택에 독립된 인스턴스를 만들고 그
+	// 위에서 바로 Initialize()/RunLoop()/Shutdown()을 불렀는데, 코드 전체(Actor::Init,
+	// UActorComponent::Init, TestManager 등)는 전부 UEngine::GetEngine()을 통해 별도로
+	// (최초 호출 시점에) new로 만들어지는 "진짜 싱글턴" 인스턴스를 씀. 즉 Initialize()가
+	// 호출된 객체와 나머지 코드 전체가 실제로 쓰는 객체가 서로 다른 두 개였음.
+	// 이전엔 각 Getter(GetTickManager 등)가 "null이면 새로 만든다" 폴백을 갖고 있어서
+	// GetEngine() 쪽 인스턴스가 초기화 안 됐어도 얼렁뚱땅 새 객체를 만들어내 숨겨졌을 뿐,
+	// 그마저도 RenderingManager/PhysScene은 진짜 초기화된(여기 game) 것과 완전히 다른
+	// 별개 객체였음 - 폴백을 걷어내고 나서야 TickManager == nullptr로 터지며 드러난 것.
+	// 고치는 법: 둘로 나누지 말고 GetEngine()이 반환하는 그 "하나"의 인스턴스에 대해
+	// Initialize()/RunLoop()/Shutdown()을 호출함.
+	UEngine* engine = UEngine::GetEngine();
+	bool success = engine->Initialize();
 	if (success)
 	{
-		game.RunLoop();
+		engine->RunLoop();
 	}
-	game.Shutdown();
+	engine->Shutdown();
 	return 0;
 }

@@ -22,6 +22,7 @@ void AFPSCamera::Tick(float DeltaTime)
 	FVector3 ViewDirection = FVector3::Transform(GetForwardVector(), q);
 	FVector3 TargetVector = CameraPos + ViewDirection * 100.f;
 	FVector3 UpVector = FVector3::Transform(FVector3::UnitZ, q);
+
 	FMatrix4x4 ViewMatrix = FMatrix4x4::CreateLookAt(CameraPos, TargetVector, UpVector);
 	SetViewMatrix(ViewMatrix);
 }

@@ -162,19 +162,19 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 
 	float spec = static_cast<float>(doc["specularPower"].GetDouble());
 
-	bool is_default_loaded = false;
+	TArray<UTexture*> loaded_textures;
 
 	for (rapidjson::SizeType i = 0; i < textures.Size(); i++)
 	{
 		FString texture_name = textures[i].GetString();
 		auto current_texture = LoadTexture(texture_name);
 
-		//기본값
-		if (current_texture == nullptr && is_default_loaded == false)
+		if (current_texture == nullptr)
 		{
-			is_default_loaded = true;
-			LoadTexture("Assets/Default.png");
+			current_texture = LoadTexture("Assets/Default.png");
 		}
+
+		loaded_textures.emplace_back(current_texture);
 	}
 
 	const rapidjson::Value& vert_json = doc["vertices"];
@@ -191,7 +191,7 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 
 	for (rapidjson::SizeType i = 0; i < vert_json.Size(); i++)
 	{
-		// For now, just assume we have 8 elements
+		// 일단 8개 요소라고 가정함
 		const rapidjson::Value& vert = vert_json[i];
 		if (!vert.IsArray() || vert.Size() != 8)
 		{
@@ -202,7 +202,7 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 		FVector3 pos(vert[0].GetDouble(), vert[1].GetDouble(), vert[2].GetDouble());
 		Box.UpdateMinMax(pos);
 
-		// Add the floats
+		// float들을 추가함
 		for (rapidjson::SizeType i = 0; i < vert.Size(); i++)
 		{
 			vertices.emplace_back(static_cast<float>(vert[i].GetDouble()));
@@ -239,6 +239,12 @@ UMesh* UAssetManager::LoadMesh(const FString& FileName)
 	new_mesh->SetName(new_mesh_name);
 	new_mesh->SetVertexContainer(new_vert_container);
 	new_mesh->SetBox(Box);
+	new_mesh->SetSpecular(spec);
+
+	for (auto tex : loaded_textures)
+	{
+		new_mesh->AddTexture(tex);
+	}
 
 	Meshes.emplace(new_mesh_name, new_mesh);
 

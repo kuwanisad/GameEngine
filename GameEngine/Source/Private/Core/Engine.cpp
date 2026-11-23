@@ -46,9 +46,17 @@ bool UEngine::Initialize()
 		return false;
 	}
 
-	// AActor/UActorComponent들의 생성자가 GetPhysicsScene()를 바로 쓰기 때문에
-	// (예: UBoxComponent가 생성 시점에 AddBox를 호출함), LoadData()보다 먼저 만들어야 함.
+	// AActor/UActorComponent들의 생성자/Init()이 GetPhysScene()/GetTickManager()/
+	// GetInputSubsystem()을 바로 쓰기 때문에(예: UBoxComponent::Init()의 AddCollision,
+	// UActorComponent::Init()의 RegisterTickFunction), LoadData()보다 먼저 전부 만들어야 함.
+	// [수정] 전엔 PhysScene만 여기서 만들고 TickManager/InputSubsystem은 각 getter의
+	// "null이면 새로 만든다" 지연 생성에 전적으로 의존했는데, UpdateGame()이 getter를
+	// 안 거치고 TickManager 멤버를 직접 쓰는 지점(TickManager->BeginFrame() 등)이 있어서
+	// 그 지연 생성이 우연히 먼저 안 일어나면 널 포인터 역참조로 죽을 수 있었음 - 전부
+	// 여기서 명시적으로 만들어서 그 의존을 없앰.
 	PhysScene = new FPhysScene();
+	TickManager = new UTickManager();
+	InputSubsystem = new UInputSubsystem();
 
 	LoadData();
 
@@ -253,6 +261,25 @@ void UEngine::RunLoop()
 
 void UEngine::Shutdown()
 {
+	UnloadData();   // 모든 Actor delete (내부에서 PhysScene/TickManager unregister 호출함)
+
+	delete PhysScene;
+	PhysScene = nullptr;
+
+	delete TickManager;
+	TickManager = nullptr;
+
+	if (RenderingManager != nullptr)
+	{
+		RenderingManager->Shutdown();
+		delete RenderingManager;
+		RenderingManager = nullptr;
+	}
+
+	delete InputSubsystem;
+	InputSubsystem = nullptr;
+
+	SDL_Quit();
 }
 
 UEngine* UEngine::GetEngine()
@@ -265,43 +292,27 @@ UEngine* UEngine::GetEngine()
 	return Instance;
 }
 
+// [수정] Initialize()에서 PhysScene/TickManager/InputSubsystem/RenderingManager를
+// 전부 명시적으로 생성하므로, 여기서의 "null이면 새로 만든다" 지연 생성 분기는
+// 더 이상 필요 없음(오히려 Initialize()가 한 번에 구성한다는 전제를 깨는 숨은 경로였음).
+// 단순 접근자로 정리함.
 FPhysScene* UEngine::GetPhysScene()
 {
-	if (PhysScene == nullptr)
-	{
-		PhysScene = new FPhysScene();
-	}
-
 	return PhysScene;
 }
 
 UTickManager* UEngine::GetTickManager()
 {
-	if (TickManager == nullptr)
-	{
-		TickManager = new UTickManager();
-	}
-
 	return TickManager;
 }
 
 UInputSubsystem* UEngine::GetInputSubsystem()
 {
-	if (InputSubsystem == nullptr)
-	{
-		InputSubsystem = new UInputSubsystem();
-	}
-
 	return InputSubsystem;
 }
 
 URenderingManager* UEngine::GetRenderingManager()
 {
-	if (RenderingManager == nullptr)
-	{
-		RenderingManager = new URenderingManager();
-	}
-
 	return RenderingManager;
 }
 

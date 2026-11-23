@@ -10,7 +10,7 @@ using FCompleteCounter = uint32;
 struct FAnimTaskFence
 {
 private:
-	std::atomic<FCompleteCounter>* Counter;
+	std::atomic<FCompleteCounter>* Counter = nullptr;
 	FCompleteCounter TargetValue = 0;
 
 public:

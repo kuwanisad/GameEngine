@@ -166,9 +166,9 @@ bool FPhysScene::SweepQuery(AActor* mover, const FVector3& fromPos, const FVecto
 		return false;
 	}
 
-	//fromPos may differ from mover's actual (stored) position
-	//(when sweeping again from a "virtual intermediate position" duringrepeated sliding). 
-	//Move the shape by that offset first, then start the sweep.
+	//fromPos는 mover의 실제(저장된) 위치와 다를 수 있음
+	//(반복되는 슬라이딩 도중 "가상의 중간 위치"에서 다시 스윕할 때 그럼).
+	//먼저 그 오프셋만큼 도형을 옮긴 다음 스윕을 시작함.
 
 	FVector3 base_offset = fromPos - mover->GetActorLocation();
 	FVector3 displacement = toPos - fromPos;
@@ -202,7 +202,13 @@ bool FPhysScene::SweepQuery(AActor* mover, const FVector3& fromPos, const FVecto
 		}
 	}
 
-	return false;
+	if (found)
+	{
+		outT = bestT;
+		outHit = bestHit;
+	}
+
+	return found;
 }
 
 void FPhysScene::Step(float DeltaTime)

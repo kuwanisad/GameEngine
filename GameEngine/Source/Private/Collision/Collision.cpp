@@ -582,7 +582,7 @@ FAABB::FAABB() :
 FAABB::FAABB(const FVector3& _Min, const FVector3& _Max)
 {
 	Center = (_Min + _Max) * 0.5f;
-	Extent = (_Min - _Max) * 0.5f;
+	Extent = (_Max - _Min) * 0.5f;
 }
 
 void FAABB::UpdateMinMax(const FVector3& _point)
@@ -608,7 +608,7 @@ void FAABB::Rotate(const FQuaternion& q)
 	FVector3 axisY = FVector3::Transform(FVector3::UnitY, q);
 	FVector3 axisZ = FVector3::Transform(FVector3::UnitZ, q);
 
-	//Extent must not negative.
+	//Extent는 음수가 되면 안 됨.
 	axisX.x = Math::Abs(axisX.x);
 	axisX.y = Math::Abs(axisX.y);
 	axisX.z = Math::Abs(axisX.z);
@@ -643,7 +643,7 @@ float FAABB::MinDistSq(const FVector3& point) const
 {
 	FVector3 diff = point - Extent;
 
-	//The expansion is equal on both sides of the center.
+	//중심 기준 양쪽으로 똑같이 확장됨.
 	float x = Math::Max(Math::Abs(diff.x - Extent.x), 0.f);
 	float y = Math::Max(Math::Abs(diff.y - Extent.y), 0.f);
 	float z = Math::Max(Math::Abs(diff.z - Extent.z), 0.f);
@@ -687,10 +687,10 @@ FVector3 FAABB::GetExtent() const
 
 float FAABB::GetSurfaceArea() const
 {
-	//Extent is half
+	//Extent는 반(half)값임
 	FVector3 e = Extent * 2.0f;
 
-	return 2.0f * //Because of hexahedron
+	return 2.0f * //육면체라서 2를 곱함
 		(e.x * e.y + e.y * e.z + e.z * e.x);
 }
 
@@ -890,7 +890,7 @@ bool CollisionStatics::Intersect(const FAABB& a, const FAABB& b, FHitResult& Out
 	}
 
 	FVector3 overlapMin(Math::Max(a_min.x, b_min.x), Math::Max(a_min.y, b_min.y), Math::Max(a_min.z, b_min.z));
-	FVector3 overlapMax(Math::Min(a_max.x, b_max.x), Math::Min(a_max.y, b_min.y), Math::Min(a_max.z, b_max.z));
+	FVector3 overlapMax(Math::Min(a_max.x, b_max.x), Math::Min(a_max.y, b_max.y), Math::Min(a_max.z, b_max.z));
 	FVector3 overlap = overlapMax - overlapMin;
 
 	FVector3 dir = GetNormalDirection(a.GetCenter(), b.GetCenter());
@@ -925,7 +925,7 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& Out
 {
 	OutResult.BlockingHit = false;
 
-	//SAT(Separating Axis Theorem)
+	//SAT(분리축 정리, Separating Axis Theorem)
 
 	FVector3 O1_world_axis[3]{
 		FVector3::Transform(FVector3::UnitX, O1.GetRotation()),
@@ -1022,8 +1022,8 @@ bool CollisionStatics::Intersect(const FOBB& O1, const FOBB& O2, FHitResult& Out
 	FVector3 SurfaceOnO1 = O1.GetCenter() - O1_radius_last * axis_min;
 	FVector3 SurfaceOnO2 = O2.GetCenter() + O2_radius_last * axis_min;
 
-	//This choice was inevitable...
-	//TODO: must use more precise solution.
+	//이렇게 할 수밖에 없었음...
+	//TODO: 더 정밀한 해법을 써야 함.
 	OutResult.ImpactPoint = (SurfaceOnO1 + SurfaceOnO2) * 0.5f;
 
 	OutResult.PenetrationDepth = overlap_min;
@@ -1684,7 +1684,7 @@ bool CollisionStatics::Intersect(const FCapsule& c, const FAABB& box, FHitResult
 {
 	OutResult.BlockingHit = false;
 
-	//It is equal to FCapsule vs FOBB.
+	//FCapsule vs FOBB와 동일함.
 
 	FVector3 center = box.GetCenter();
 	FVector3 extent = box.GetExtent();
@@ -2353,7 +2353,7 @@ bool CollisionStatics::Intersect(const FSphere& s, const FCapsule& c, FHitResult
 
 	if (Math::NearZero(diff_distSq))
 	{
-		//It's a perfect overlap, so the normal direction is ambiguous...
+		//완전히 겹친 경우라 normal 방향을 정할 수 없음...
 		OutResult.Normal = FVector3::Zero;
 		OutResult.PenetrationDepth = s.GetRadius() + c_r;
 	}

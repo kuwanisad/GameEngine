@@ -18,7 +18,9 @@
 
 AFPSActor::AFPSActor() : AActor()
 {
-	MoveComp = new UMovementComponent(this);
+	// [수정] new XComponent(owner) 직접 생성은 Init()이 안 불려서 등록/틱 등록/
+	// (BoxComp의 경우) 콜리전 생성이 전부 빠짐 - UEngine::CreateComponent<T>()로 교체.
+	MoveComp = UEngine::GetEngine()->CreateComponent<UMovementComponent>(this);
 	// [버그 수정] bUseCCD 기본값이 false인데 여기서 켜준 적이 없어서, UMovementComponent::
 	// Update()의 스윕(연속 충돌 감지) 블록 전체가 항상 스킵되고 있었음 - 그러면 desiredPos가
 	// 경로 중간 검사 없이 그냥 한 프레임 치 이동량만큼 계산되고, 만약 그 이동이 장애물을
@@ -35,7 +37,7 @@ AFPSActor::AFPSActor() : AActor()
 	PrimaryActorTick.AddPrerequisite(&MoveComp->PrimaryComponentTick);
 
 	LastFootstep = 0.f;
-	CameraComp = new AFPSCamera(this);
+	CameraComp = UEngine::GetEngine()->CreateComponent<AFPSCamera>(this);
 
 	// [버그 수정] BoxComp가 지금까지 생성자에서 한 번도 할당된 적이 없어서(선언만 되고
 	// nullptr조차 아닌 미초기화 포인터였음), 플레이어가 FPhysScene에 콜리전으로 전혀
@@ -43,13 +45,13 @@ AFPSActor::AFPSActor() : AActor()
 	// 충돌 검사 대상에서 통째로 빠져 있던 상태. 참조할 몸체 메시가 따로 없어서(FPSModel은
 	// 총 모델일 뿐), 크기는 일반적인 사람 크기로 임의로 잡아둠 - 실제 게임 스케일에 맞게
 	// 조정 필요함.
-	BoxComp = new UBoxComponent(this);
+	BoxComp = UEngine::GetEngine()->CreateComponent<UBoxComponent>(this);
 	BoxComp->SetObjectBox(FAABB(FVector3(-25.0f, -25.0f, -44.0f), FVector3(25.0f, 25.0f, 44.0f)));
 
 	FPSModel = UEngine::GetEngine()->SpawnActor<AActor>();
 	FPSModel->SetActorScale(FVector3::One * 0.75f);
 
-	MeshComp = new UStaticMeshComponent(FPSModel);
+	MeshComp = UEngine::GetEngine()->CreateComponent<UStaticMeshComponent>(FPSModel);
 	MeshComp->SetMesh(UAssetManager::Get()->LoadMesh("Assets/Rifle.gpmesh"));
 	FPSModel->SetRootComponent(MeshComp);
 
@@ -71,7 +73,7 @@ AFPSActor::AFPSActor() : AActor()
 	// [수정] W/A/S/D 네 키를 하나의 Move(Axis2D) 액션으로 합침 - UE 실제 방식
 	// (UInputModifierSwizzleAxis 확인) 그대로: W/S는 SwizzleAxis(YXZ)로 Y축에 배치,
 	// A/D는 원래 X축 그대로 두고 부호만 조정.
-	InputComp = new UEnhancedInputComponent(this);
+	InputComp = UEngine::GetEngine()->CreateComponent<UEnhancedInputComponent>(this);
 	MappingContext = new UInputMappingContext();
 	MappingContext->AddKeyMapping(EKeys::W, &GameplayInputActions::Move(),
 		{ new UInputModifierSwizzleAxis(EInputAxisSwizzle::YXZ) });

@@ -17,10 +17,14 @@ APhysicsTestBox::APhysicsTestBox(const FVector3& InLocation, float InScale, floa
 	// 적용됐던 게 폭주의 원인이었음(과거 세션 참고).
 	const FAABB boxShape(FVector3(-0.5f, -0.5f, -0.5f), FVector3(0.5f, 0.5f, 0.5f));
 
-	MeshComp = new UStaticMeshComponent(this);
+	// [수정] new XComponent(this)로 직접 만들면 Init()이 안 불려서 Owner->Components에도
+	// 안 들어가고(누수) BoxComp 쪽은 GetCollision()이 계속 null로 남아 OnUpdateWorldTransform
+	// 에서 바로 널 포인터 역참조로 죽음 - UEngine::CreateComponent<T>()로 바꿔서 생성과
+	// 동시에 Init()이 실제로 불리게 함.
+	MeshComp = UEngine::GetEngine()->CreateComponent<UStaticMeshComponent>(this);
 	MeshComp->SetMesh(UAssetManager::Get()->LoadMesh("Assets/Cube.gpmesh"));
 
-	BoxComp = new UBoxComponent(this);
+	BoxComp = UEngine::GetEngine()->CreateComponent<UBoxComponent>(this);
 	BoxComp->SetObjectBox(boxShape);
 	BoxComp->SetShouldRotate(true);
 

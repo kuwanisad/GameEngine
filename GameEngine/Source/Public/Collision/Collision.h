@@ -1,5 +1,5 @@
 #pragma once
-//Referenced Game Programming in C++
+//참고: Game Programming in C++
 
 #include "../Core/Math.h"
 #include "../Core/CoreMinimal.h"
@@ -27,7 +27,7 @@ public:
 	FAABB();
 	FAABB(const FVector3& _Min, const FVector3& _Max);
 
-	//Contains the vector.
+	//벡터를 포함하도록 갱신함
 	void UpdateMinMax(const FVector3& _point);
 	void Rotate(const FQuaternion& q);
 	bool Contains(const FVector3& _point) const;
@@ -35,13 +35,13 @@ public:
 
 	float GetSurfaceArea() const;
 
-	//based on the local coordinate system
+	//로컬 좌표계 기준
 	FVector3  GetMin() const;
-	//based on the local coordinate system
+	//로컬 좌표계 기준
 	FVector3  GetMax() const;
-	//based on the local coordinate system
+	//로컬 좌표계 기준
 	void SetMin(const FVector3& Value);
-	//based on the local coordinate system
+	//로컬 좌표계 기준
 	void SetMax(const FVector3& Value);
 	FVector3  GetCenter() const;
 	FVector3  GetExtent() const;
@@ -61,7 +61,7 @@ public:
 	ECollisionType GetType() const { return Type; }
 	virtual FAABB GetBoundingBox() const = 0;
 
-	//Global coordinate system
+	//월드(전역) 좌표계 기준
 	virtual FVector3 GetCenter() const = 0;
 	virtual void SetCenter(const FVector3& InCenter) = 0;
 
@@ -173,10 +173,10 @@ private:
 	static const int32 IterationCount;
 
 public:
-	//NOTE!!!
-	//The first parameter is the caller!
-	//Every normal lies on the second parameter's surface and is oriented toward the first parameter!
-	//Do not "normal = second - first", use GetNormalDirection.
+	//주의!!!
+	//첫 번째 인자가 호출자(caller)임!
+	//모든 normal은 두 번째 인자의 표면 위에 있고, 첫 번째 인자 쪽을 향함!
+	//"normal = second - first"로 하지 말고 GetNormalDirection을 쓸 것.
 	static FVector3 GetNormalDirection(const FVector3& Caller, const FVector3& Target);
 
 	//검토 필요가 붙은 것은 AI써서 찾았는데 결국 뾰족한 수가 없었음. 나중에 개선해야 함

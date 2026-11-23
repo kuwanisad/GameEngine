@@ -17,6 +17,13 @@ UBoxComponent::~UBoxComponent()
 
 void UBoxComponent::Init()
 {
+	// [체이닝 필수] Init()을 오버라이드하는 파생 클래스는 반드시 베이스를 먼저 호출해야 함 -
+	// 안 그러면 Owner->AddComponent(this)와 틱 등록이 둘 다 빠져서, 이 컴포넌트가
+	// Owner->Components에도 안 들어가고(소멸자에서 안 지워져 누수) OnUpdateWorldTransform도
+	// 틱 경로로는 안 불림(지금은 트랜스폼 세터가 직접 호출해주니 당장은 괜찮지만, 그래도
+	// 등록 자체는 돼 있어야 함).
+	UActorComponent::Init();
+
 	SetCollision(new FOBB(FVector3::Zero, FQuaternion::Identity, FVector3::Zero));
 	UEngine::GetEngine()->GetPhysScene()->AddCollision(GetCollision());
 }

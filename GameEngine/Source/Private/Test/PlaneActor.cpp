@@ -23,14 +23,16 @@ APlaneActor::APlaneActor(float InScale, bool bWithMesh, bool bWithCollision)
 	UStaticMeshComponent* mc = nullptr;
 	if (bWithMesh)
 	{
-		mc = new UStaticMeshComponent(this);
+		// [수정] new XComponent(this) 직접 생성은 Init()이 안 불려서 등록/콜리전 생성이
+		// 빠짐 - UEngine::CreateComponent<T>()로 교체.
+		mc = UEngine::GetEngine()->CreateComponent<UStaticMeshComponent>(this);
 		mc->SetMesh(mesh);
 	}
 
 	mBox = nullptr;
 	if (bWithCollision)
 	{
-		mBox = new UBoxComponent(this);
+		mBox = UEngine::GetEngine()->CreateComponent<UBoxComponent>(this);
 		mBox->SetObjectBox(mesh->GetBox());
 		// [버그 수정] 이게 없으면 콜리전 박스가 액터 회전(벽을 세우려고 90도 돌리는 것
 		// 포함)과 무관하게 항상 축 정렬 상태로 남아있음 - 벽은 시각적으로만 세워져

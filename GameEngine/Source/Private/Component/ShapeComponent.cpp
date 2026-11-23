@@ -32,5 +32,5 @@ void UShapeComponent::SetCollision(FCollision* InCollision)
 
 FCollision* UShapeComponent::GetCollision() const
 {
-    return nullptr;
+    return _Collision;
 }

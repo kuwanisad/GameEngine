@@ -26,5 +26,5 @@ FBoneTransform FAnimTrack::Sample(float TargetTime) const
 
 	float Interval = Times[UpperIndex] - Times[LowerIndex];
 	float Alpha = Math::NearZero(Interval) ? 0.f : (TargetTime - Times[LowerIndex]) / Interval;
-	return FBoneTransform::Interpolate(Values[UpperIndex], Values[LowerIndex], Alpha);
+	return FBoneTransform::Interpolate(Values[LowerIndex], Values[UpperIndex], Alpha);
 }

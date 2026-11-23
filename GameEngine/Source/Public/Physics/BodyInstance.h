@@ -29,7 +29,7 @@ struct FBodyInstance
 
 	FVector3 LinearVelocity = FVector3::Zero;
 
-	//Accumulated force during this frame.
+	//이번 프레임 동안 누적된 힘.
 	FVector3 AccumulatedForce = FVector3::Zero;
 
 	float GetMass() const { return MassInKg; }

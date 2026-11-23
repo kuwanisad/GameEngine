@@ -17,6 +17,7 @@ FString URenderingStatics::WhiteTextureName = "WhiteTexture";
 
 FString URenderingStatics::Shader_uViewProj = "uViewProj";
 FString URenderingStatics::Shader_uWorldTransform = "uWorldTransform";
+FString URenderingStatics::Shader_uMatrixPalette = "uMatrixPalette";
 
 FString URenderingStatics::Shader_uSpecPower = "uSpecPower";
 

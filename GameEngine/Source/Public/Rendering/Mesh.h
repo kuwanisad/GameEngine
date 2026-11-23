@@ -28,11 +28,13 @@ public:
 	void Unload();
 
 	UTexture* GetTexture(const int32 TextureIndex) const;
+	void AddTexture(UTexture* InTexture) { Textures.emplace_back(InTexture); }
 
 	void SetVertexContainer(FVertexContainer* InVertexContainer);
 	FVertexContainer* GetVertexContainer() { return VertexContainer; } const
 	FString GetShaderName() const { return ShaderName; }
 	float GetSpecular() const { return Specular; }
+	void SetSpecular(float InSpecular) { Specular = InSpecular; }
 
 	const FAABB& GetBox() { return Box; }
 	void SetBox(const FAABB& InBox) { Box = InBox; }

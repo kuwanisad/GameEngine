@@ -7,7 +7,15 @@
 
 UEnhancedInputComponent::UEnhancedInputComponent(AActor* _Owner) : UActorComponent(_Owner)
 {
-	UEngine::GetEngine()->GetInputSubsystem()->RegisterInputComponent(this);
+	// [중복 등록 제거] 생성자에서도 RegisterInputComponent를 부르고 Init()에서도
+	// 또 불러서, CreateComponent<T>()로 만들면(new 직후 바로 Init() 호출) 같은 컴포넌트가
+	// UInputSubsystem::RegisteredComponents에 두 번 들어갔음 - RegisterInputComponent가
+	// 중복 검사 없이 그냥 push_back이라 실제로 리스트에 두 개가 쌓임. 그러면 입력
+	// 콜백(BindAction)이 매 프레임 두 번씩 불려서(예: 점프 임펄스가 두 번 적용) 게임
+	// 로직이 미묘하게 틀어지고, UnregisterInputComponent는 처음 찾은 것 하나만 지우므로
+	// 액터가 죽은 뒤에도 나머지 하나가 댕글링 포인터로 리스트에 남아 다음 프레임
+	// 입력 처리에서 해제된 메모리를 참조하는 크래시로 이어질 수 있음. 등록은 Init()
+	// 한 곳에서만 하도록 여기선 제거.
 }
 
 UEnhancedInputComponent::~UEnhancedInputComponent()
@@ -23,6 +31,12 @@ UEnhancedInputComponent::~UEnhancedInputComponent()
 
 void UEnhancedInputComponent::Init()
 {
+	// [체이닝 필수 - 다른 컴포넌트들과 동일한 버그] 베이스를 안 부르면 Owner->AddComponent
+	// (this)가 빠져서 AActor 소멸자가 이 컴포넌트를 못 지움 - 그러면 소멸자의
+	// UnregisterInputComponent 호출도 영원히 안 일어나 위에서 설명한 댕글링 포인터
+	// 문제가 그대로 남음.
+	UActorComponent::Init();
+
 	UEngine::GetEngine()->GetInputSubsystem()->RegisterInputComponent(this);
 }
 
@@ -119,7 +133,7 @@ ETriggerEvent UEnhancedInputComponent::ComputeTriggerEvent(ETriggerState LastSta
 		}
 		else
 		{
-			return ETriggerEvent::Completed;
+			return ETriggerEvent::Triggered;
 		}
 		break;
 	case ETriggerState::None:

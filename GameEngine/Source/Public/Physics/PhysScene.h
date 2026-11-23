@@ -34,7 +34,7 @@ private:
 
 	std::unordered_set<FCollision*> Collisions;
 
-	//It is called by QueryOverlaps
+	//QueryOverlaps에서 호출됨
 	template<CollisionChildClass ShapeType>
 	void ProcessOverlapCandidates(const ShapeType& test_collision, AActor* mover, TArray<FHitResult>& outHits);
 
@@ -68,11 +68,11 @@ public:
 	void Step(float DeltaTime);
 	void Update();
 
-	// Only AActor::SetActorLocation
+	// AActor::SetActorLocation에서만 호출됨
 	void MoveActor(AActor* _Actor, const FVector3& DesiredPos, float margin = 0.0f);
 
 public:
-	//Investigation of variables was aided by Claude
+	//변수 조사는 Claude 도움을 받음
 
 	// Tuning constants used for iterative depenetration. Although they are used
 	// by the code that actually performs movement, such as Game::MoveActor,
@@ -159,8 +159,14 @@ inline void FPhysScene::ProcessOverlapCandidates(const ShapeType& test_collision
 			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FCapsule*>(candidate), hit);
 			break;
 		case ECollisionType::OBB:
-			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FSphere*>(candidate), hit);
+			hit_flag = CollisionStatics::Intersect(test_collision, *static_cast<FOBB*>(candidate), hit);
 			break;
+		}
+
+		if (hit_flag)
+		{
+			hit.CollidedTarget = candidate;
+			outHits.emplace_back(hit);
 		}
 	}
 }

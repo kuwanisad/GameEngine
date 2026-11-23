@@ -14,7 +14,7 @@ private:
 
 	TArray<UActorComponent*> Components;
 
-	//Registration with the Physics layer only happens once.
+	//Physics 레이어 등록은 한 번만 일어남.
 	bool IsRegisteredInPhysicsLayer = false;
 
 public:
@@ -24,7 +24,7 @@ public:
 	virtual void Init();
 	virtual void Tick(float DeltaTime);
 
-	bool SetIsPendingKill(bool _IsPendingKill) { IsPendingKill = _IsPendingKill; }
+	void SetIsPendingKill(bool _IsPendingKill) { IsPendingKill = _IsPendingKill; }
 	bool GetIsPendingKill() const { return IsPendingKill; }
 
 	FVector3 GetActorLocation() const;
@@ -36,7 +36,7 @@ public:
 	FQuaternion GetActorRotation() const;
 	void SetActorRotation(FQuaternion rotation);
 
-	//Call ComputeWorldTransform Function of RootComponent;
+	//RootComponent의 ComputeWorldTransform 함수를 호출함;
 	void ComputeWorldTransform();
 
 	FMatrix4x4 GetActorTransform() const;
@@ -53,8 +53,8 @@ public:
 	USceneComponent* GetRootComponent() const { return RootComponent; }
 	bool SetRootComponent(USceneComponent* NewRootComponent);
 
-	//Calls when Actor have any Collision.
-	//TODO: Consider collision deletion
+	//Actor가 Collision을 가지게 되면 호출됨.
+	//TODO: 콜리전 삭제도 고려할 것
 	void RegisterPhysicsBodyIfNeeded();
 
 	FActorTickFunction PrimaryActorTick;

@@ -3,6 +3,7 @@
 #include "../../Public/Actor/FActorSpawnParameters.h"
 
 class AActor;
+class UActorComponent;
 class SpriteComponent;
 class UInputSubsystem;
 class UTickManager;
@@ -11,6 +12,9 @@ struct FPhysScene;
 
 template <typename T>
 concept ActorChildClass = std::derived_from<T, AActor>;
+
+template <typename T>
+concept ActorComponentChildClass = std::derived_from<T, UActorComponent>;
 
 class UEngine
 {
@@ -58,6 +62,17 @@ public:
 		T* actor = new T(std::forward<Args>(args)...);
 		actor->Init();
 		return actor;
+	}
+
+	// SpawnActor와 같은 모양 - 컴포넌트를 생성(new)과 동시에 Init()까지 호출해줘서,
+	// Init() 안에 있는 "Owner->AddComponent(this) + 틱 등록"이 실제로 일어나게 함.
+	// 지금까지 흩어져 있던 new XComponent(owner) 호출들을 이걸로 바꿔줘야 함.
+	template<ActorComponentChildClass T, typename... Args>
+	T* CreateComponent(AActor* Owner, Args&&... args)
+	{
+		T* Comp = new T(Owner, std::forward<Args>(args)...);
+		Comp->Init();
+		return Comp;
 	}
 
 	static UEngine* GetEngine();

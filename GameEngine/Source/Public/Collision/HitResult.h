@@ -3,7 +3,7 @@
 
 struct FCollision;
 
-//UE FHitResult
+//UE의 FHitResult에 대응
 struct FHitResult
 {
 	FVector3 ImpactPoint;
@@ -11,6 +11,6 @@ struct FHitResult
 	bool BlockingHit;
 	FCollision* CollidedTarget = nullptr;
 
-	// If it penetrates this far, it should protrude by this amount in the normal direction.
+	// 이만큼 파고들었다면, normal 방향으로 이 값만큼 밀어내야 함.
 	float PenetrationDepth = 0.0f;
 };

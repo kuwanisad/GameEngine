@@ -11,6 +11,7 @@
 #include "../../Public/Asset/Skeleton.h"
 
 #include <GL/glew.h>
+#include <SDL_log.h>
 
 URenderer::URenderer() :
 	Context(nullptr),
@@ -35,21 +36,21 @@ bool URenderer::Init()
 		return false;
 	}
 
-	// Set OpenGL attributes
-	// Use the core OpenGL profile
+	// OpenGL 속성 설정
+	// 코어 OpenGL 프로파일 사용
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	// Specify version 3.3
+	// 버전 3.3 지정
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	// Request a color buffer with 8-bits per RGBA channel
+	// RGBA 채널당 8비트 컬러 버퍼 요청
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	// Enable double buffering
+	// 더블 버퍼링 활성화
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// Force OpenGL to use hardware acceleration
+	// 하드웨어 가속 사용 강제
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
 	Window = SDL_CreateWindow("Game Programming in C++ (Chapter 6)", 100, 100,
@@ -60,10 +61,10 @@ bool URenderer::Init()
 		return false;
 	}
 
-	// Create an OpenGL context
+	// OpenGL 컨텍스트 생성
 	Context = SDL_GL_CreateContext(Window);
 
-	// Initialize GLEW
+	// GLEW 초기화
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 	{
@@ -71,18 +72,18 @@ bool URenderer::Init()
 		return false;
 	}
 
-	// On some platforms, GLEW will emit a benign error code,
-	// so clear it
+	// 일부 플랫폼에서는 GLEW가 무해한 에러 코드를 뱉으므로,
+	// 그걸 지워줌
 	glGetError();
 
-	// Make sure we can create/compile shaders
+	// 셰이더를 생성/컴파일할 수 있는지 확인
 	if (LoadShaders() == false)
 	{
 		SDL_Log("Failed to load shaders.");
 		return false;
 	}
 
-	// Create quad for drawing sprites
+	// 스프라이트 그리기용 쿼드 생성
 	CreateSpriteVerts();
 
 	WorkerThread = std::thread(&URenderer::WorkerLoop, this);
@@ -105,47 +106,45 @@ void URenderer::DispatchToWorker(FSkeletalMeshInstance& Instance, FAnimSnapshotB
 	Instance.IsHasPendingSwap = true;
 	IAnimGraphBase* Graph = Instance.Graph;
 
+	std::shared_ptr<FAnimSnapshotBase> OwnedSnapshot(Snapshot);
+
 	PendingJobCount.fetch_add(1);
 
 	{
 		std::lock_guard<std::mutex> Lock(QueueMutex);
 
 		PendingCommands.emplace_back(
-			[this, Snapshot, &Instance, InstancePtr, WriteIndex, Graph, Skel, DeltaSeconds]() mutable
+			[this, OwnedSnapshot = std::move(OwnedSnapshot), InstancePtr, WriteIndex, Graph, Skel, DeltaSeconds]() mutable
 			{
 				TArray<FBoneTransform> LocalPose;
 
-				if (Graph == nullptr)
+				if (Graph != nullptr)
 				{
-					return;
+					Graph->Update(DeltaSeconds, *OwnedSnapshot);
+					Graph->Evaluate(LocalPose, *OwnedSnapshot);
 				}
 
-				Graph->Update(DeltaSeconds, *Snapshot);
-				Graph->Evaluate(LocalPose, *Snapshot);
-
-				if (Skel == nullptr)
+				if (Skel != nullptr)
 				{
-					return;
-				}
+					const UReferenceSkeleton& RefSkel = Skel->GetReferenceSkeleton();
+					int32 BoneCount = RefSkel.GetBoneCount();
 
-				const UReferenceSkeleton& RefSkel = Skel->GetReferenceSkeleton();
-				int32 BoneCount = RefSkel.GetBoneCount();
+					TArray<FMatrix4x4> ComponentSpace(BoneCount);
 
-				TArray<FMatrix4x4> ComponentSpace(BoneCount);
+					for (int32 i = 0; i < BoneCount; ++i)
+					{
+						FMatrix4x4 LocalMatrix = (i < static_cast<int32>(LocalPose.size())) ? LocalPose[i].ToMatrix() : FMatrix4x4::Identity;
+						int32 ParentIndex = RefSkel.GetParentIndex(i);
+						ComponentSpace[i] = (ParentIndex == INDEX_NONE) ? LocalMatrix : LocalMatrix * ComponentSpace[ParentIndex];
+					}
 
-				for (int32 i = 0; i < BoneCount; ++i)
-				{
-					FMatrix4x4 LocalMatrix = (i < static_cast<int32>(LocalPose.size())) ? LocalPose[i].ToMatrix() : FMatrix4x4::Identity;
-					int32 ParentIndex = RefSkel.GetParentIndex(i);
-					ComponentSpace[i] = (ParentIndex == INDEX_NONE) ? LocalMatrix : LocalMatrix * ComponentSpace[ParentIndex];
-				}
+					const TArray<FMatrix4x4>& InverseBindPose = Skel->GetInverseBindPoseComponentSpace();
+					InstancePtr->RenderingPalette[WriteIndex].resize(BoneCount);
 
-				const TArray<FMatrix4x4>& InverseBindPose = Skel->GetInverseBindPoseComponentSpace();
-				InstancePtr->RenderingPalette[WriteIndex].resize(BoneCount);
-
-				for (int32 i = 0; i < BoneCount; ++i)
-				{
-					InstancePtr->RenderingPalette[WriteIndex][i] = InverseBindPose[i] * ComponentSpace[i];
+					for (int32 i = 0; i < BoneCount; ++i)
+					{
+						InstancePtr->RenderingPalette[WriteIndex][i] = InverseBindPose[i] * ComponentSpace[i];
+					}
 				}
 
 				InstancePtr->CompletedCount.fetch_add(1);
@@ -203,11 +202,13 @@ void URenderer::UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* 
 		return;
 	}
 
-	FMatrix4x4 WorldTransform = FMatrix4x4::TransformScaleToMatrix(Instance.DrawWorldScale) * 
+	FMatrix4x4 WorldTransform = FMatrix4x4::TransformScaleToMatrix(Instance.DrawWorldScale) *
 		FMatrix4x4::TransformQuaternionToMatrix(Instance.DrawWorldRotation) *
 		FMatrix4x4::TransformTranslationToMatrix(Instance.DrawWorldPosition);
 
-	TArray<FMatrix4x4>& Palette = Instance.RenderingPalette[Instance.ReadIndex];
+	SkinnedShader->SetMatrix(URenderingStatics::Shader_uWorldTransform.c_str(), WorldTransform);
+
+	TArray<FMatrix4x4> Palette = Instance.RenderingPalette[Instance.ReadIndex];
 
 	if (Palette.empty())
 	{
@@ -217,6 +218,8 @@ void URenderer::UploadAndDraw(FSkeletalMeshInstance& Instance, FShaderPipeline* 
 	{
 		Palette.resize(URenderingStatics::MaxBoneMatrixCount);
 	}
+
+	SkinnedShader->SetMatrices(URenderingStatics::Shader_uMatrixPalette.c_str(), Palette.data(), static_cast<uint32>(Palette.size()));
 
 	UTexture* Tex = Mesh->GetTexture();
 
@@ -306,13 +309,13 @@ void URenderer::UnloadData()
 
 void URenderer::BeginFrame()
 {	
-	// Set the clear color to light grey
+	// 클리어 컬러를 밝은 회색으로 설정
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	// Clear the color buffer
+	// 컬러 버퍼 클리어
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Draw mesh components
-	// Enable depth buffering/disable alpha blend
+	// 메시 컴포넌트 그리기
+	// 깊이 버퍼링 활성화/알파 블렌드 비활성화
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
@@ -350,10 +353,10 @@ void URenderer::EndFrame()
 {
 	//스프라이트는 UI로만 쓸 예정
 
-	// Draw all sprite components
-	// Disable depth buffering
+	// 모든 스프라이트 컴포넌트 그리기
+	// 깊이 버퍼링 비활성화
 	glDisable(GL_DEPTH_TEST);
-	// Enable alpha blending on the color buffer
+	// 컬러 버퍼에 알파 블렌딩 활성화
 	glEnable(GL_BLEND);
 	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
@@ -368,7 +371,7 @@ void URenderer::EndFrame()
 		}
 	}
 
-	// Swap the buffers
+	// 버퍼 스왑
 	SDL_GL_SwapWindow(Window);
 }
 

@@ -65,7 +65,7 @@ bool UTickManager::TryExecute(FTickFunction* TickFunction, float DeltaTime)
 {
 	if (TickFunction == nullptr)
 	{
-		//If condition is empty... Maybe.. it is approved!
+		//조건이 비어있으면... 아마도.. 통과시킴!
 		return true;
 	}
 

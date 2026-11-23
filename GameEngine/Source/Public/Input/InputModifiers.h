@@ -30,7 +30,7 @@ private:
 	float Scalar;
 };
 
-//clamp
+//클램프
 class UInputModifierDeadZone : public UInputModifier
 {
 private:
